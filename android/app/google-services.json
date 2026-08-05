@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "728732933030",
+    "firebase_url": "https://tangzo-apps-default-rtdb.firebaseio.com",
+    "project_id": "tangzo-apps",
+    "storage_bucket": "tangzo-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728732933030:android:97dd85c18005f5ad418d67",
+        "android_client_info": {
+          "package_name": "com.foodies.customer.customer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKEpbC7OxzWyFSkwAjT6Ue8RqisTN4WR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "728732933030-cqj9hjpranv2ho1id074sllc45k4lriu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tangzo.driver"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728732933030:android:414b367763282585418d67",
+        "android_client_info": {
+          "package_name": "com.foodies.driver.driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKEpbC7OxzWyFSkwAjT6Ue8RqisTN4WR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "728732933030-cqj9hjpranv2ho1id074sllc45k4lriu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tangzo.driver"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
