@@ -98,7 +98,17 @@ class Constant {
   static String localisationType = "Deepl"; // AI/ML or Deepl
   static String apiKeyOfDeepl = ""; // AI/ML or Deepl
 
-  static CurrencyModel? currencyModel;
+  static CurrencyModel inrCurrency = CurrencyModel(
+    id: "",
+    code: "INR",
+    decimalDigits: 2,
+    isActive: true,
+    name: "Indian Rupee",
+    symbol: "₹",
+    symbolAtRight: false,
+  );
+
+  static CurrencyModel? currencyModel = inrCurrency;
   static PlatformFeeModel? platformFeeModel;
   static AdminCommission? adminCommission;
   static List<VendorModel>? restaurantList = [];
@@ -178,7 +188,7 @@ class Constant {
   static String amountShow({required String? amount}) {
     final value = (amount == null || amount == "null" || amount.isEmpty) ? 0.0 : double.parse(amount);
     final formatted = value.toStringAsFixed(currencyModel?.decimalDigits ?? 0);
-    final symbol = currencyModel?.symbol ?? '';
+    final symbol = currencyModel?.symbol ?? '₹';
 
     return currencyModel?.symbolAtRight == true ? '$formatted $symbol' : '$symbol $formatted';
   }

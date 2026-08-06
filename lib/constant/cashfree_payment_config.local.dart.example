@@ -1,0 +1,5 @@
+/// Copy this file to `cashfree_payment_config.local.dart` (gitignored)
+/// and replace the placeholders with your Cashfree credentials.
+const String cashfreeAppId = 'YOUR_CASHFREE_APP_ID';
+const String cashfreeSecretKey = 'YOUR_CASHFREE_SECRET_KEY';
+const bool cashfreeIsSandbox = true;

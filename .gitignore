@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local payment gateway secrets (never commit)
+lib/constant/cashfree_payment_config.local.dart

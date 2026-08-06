@@ -1359,63 +1359,8 @@ class CartScreen extends StatelessWidget {
                                       }
                                       controller.isOrderPlaced.value = true;
                                       await controller.getCashback();
-                                      if (controller.selectedPaymentMethod.value == PaymentGateway.stripe.name) {
-                                        controller.stripeMakePayment(amount: controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.paypal.name) {
-                                        controller.paypalPaymentSheet(controller.totalAmount.value.toString(), context);
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.payStack.name) {
-                                        controller.payStackPayment(controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.mercadoPago.name) {
-                                        controller.mercadoPagoMakePayment(context: context, amount: controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.flutterWave.name) {
-                                        controller.flutterWaveInitiatePayment(context: context, amount: controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.payFast.name) {
-                                        controller.payFastPayment(context: context, amount: controller.totalAmount.value.toStringAsFixed(2));
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.paytm.name) {
-                                        controller.getPaytmCheckSum(context, amount: double.parse(controller.totalAmount.value.toString()));
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.cod.name) {
-                                        controller.placeOrder();
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.wallet.name) {
-                                        controller.placeOrder();
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.midTrans.name) {
-                                        controller.midtransMakePayment(context: context, amount: controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.orangeMoney.name) {
-                                        controller.orangeMakePayment(context: context, amount: controller.totalAmount.value.toStringAsFixed(2));
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
-                                        controller.xenditPayment(context, controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                                        ShowToastDialog.showLoader("Please wait");
-                                        RazorPayController()
-                                            .createOrderRazorPay(amount: double.parse(controller.totalAmount.value.toString()), razorpayModel: controller.razorPayModel.value)
-                                            .then((value) {
-                                          if (value == null) {
-                                            ShowToastDialog.showToast("Something went wrong, please contact admin.");
-                                          } else {
-                                            CreateRazorPayOrderModel result = value;
-                                            controller.openCheckout(amount: controller.totalAmount.value.toString(), orderId: result.id);
-                                          }
-                                        });
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.mtnMomoModel.value.name?.toLowerCase()) {
-                                        await controller.mtnMomoMakePayment(amount: controller.totalAmount.value.toString());
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.phonePeModel.value.name?.toLowerCase()) {
-                                        PhonePePaymentService.phonePe = controller.phonePeModel.value;
-                                        await PhonePePaymentService.payNow(amountInPaise: (controller.totalAmount.value * 100).round());
-                                        if (PhonePePaymentService.isSucess) {
-                                          controller.placeOrder();
-                                        }
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.cashfreeModel.value.name?.toLowerCase()) {
-                                        controller.cashFreeMakePayment(context: context, amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.instamojoModel.value.name?.toLowerCase()) {
-                                        controller.makeInstamojoPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.foloosiModel.value.name?.toLowerCase()) {
-                                        controller.makeFoloosiPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
-                                      } else if (controller.selectedPaymentMethod.value.toLowerCase() == controller.payMongoModel.value.name?.toLowerCase()) {
-                                        controller.makePayMongoPayment(amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
-                                      } else {
-                                        controller.isOrderPlaced.value = false;
-                                        ShowToastDialog.showToast("Please select payment method");
-                                        ShowToastDialog.closeLoader();
-                                      }
+                                      controller.cashFreeMakePayment(context: context, amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
+                                      // Other payment gateways disabled — Cashfree only
                                       controller.isOrderPlaced.value = false;
                                     }
                                   },

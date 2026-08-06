@@ -5,6 +5,7 @@ import 'dart:math' as maths;
 import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/cart_screen/oder_placing_screens.dart';
 import 'package:customer/app/wallet_screen/wallet_screen.dart';
+import 'package:customer/constant/cashfree_payment_config.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/send_notification.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
@@ -803,82 +804,9 @@ class CartController extends GetxController {
   RxBool isLoading = true.obs;
 
   Future<void> getPaymentSettings() async {
-    await FireStoreUtils.getPaymentSettingsData().then(
-      (value) async {
-        isLoading.value = false;
-        stripeModel.value = StripeModel.fromJson(jsonDecode(Preferences.getString(Preferences.stripeSettings)));
-        payPalModel.value = PayPalModel.fromJson(jsonDecode(Preferences.getString(Preferences.paypalSettings)));
-        payStackModel.value = PayStackModel.fromJson(jsonDecode(Preferences.getString(Preferences.payStack)));
-        mercadoPagoModel.value = MercadoPagoModel.fromJson(jsonDecode(Preferences.getString(Preferences.mercadoPago)));
-        flutterWaveModel.value = FlutterWaveModel.fromJson(jsonDecode(Preferences.getString(Preferences.flutterWave)));
-        paytmModel.value = PaytmModel.fromJson(jsonDecode(Preferences.getString(Preferences.paytmSettings)));
-        payFastModel.value = PayFastModel.fromJson(jsonDecode(Preferences.getString(Preferences.payFastSettings)));
-        razorPayModel.value = RazorPayModel.fromJson(jsonDecode(Preferences.getString(Preferences.razorpaySettings)));
-        midTransModel.value = MidTrans.fromJson(jsonDecode(Preferences.getString(Preferences.midTransSettings)));
-        orangeMoneyModel.value = OrangeMoney.fromJson(jsonDecode(Preferences.getString(Preferences.orangeMoneySettings)));
-        xenditModel.value = Xendit.fromJson(jsonDecode(Preferences.getString(Preferences.xenditSettings)));
-        mtnMomoModel.value = MtnMomo.fromJson(jsonDecode(Preferences.getString(Preferences.mtnMomoSettings)));
-        phonePeModel.value = PhonePe.fromJson(jsonDecode(Preferences.getString(Preferences.phonePaySettings)));
-        instamojoModel.value = Instamojo.fromJson(jsonDecode(Preferences.getString(Preferences.instamojoSettings)));
-        foloosiModel.value = Foloosi.fromJson(jsonDecode(Preferences.getString(Preferences.foloosiSettings)));
-        payMongoModel.value = PayMongo.fromJson(jsonDecode(Preferences.getString(Preferences.payMongoSettings)));
-        cashfreeModel.value = Cashfree.fromJson(jsonDecode(Preferences.getString(Preferences.cashFreeSettings)));
-        walletSettingModel.value = WalletSettingModel.fromJson(jsonDecode(Preferences.getString(Preferences.walletSettings)));
-        cashOnDeliverySettingModel.value = CodSettingModel.fromJson(jsonDecode(Preferences.getString(Preferences.codSettings)));
-
-        if (walletSettingModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.wallet.name;
-        } else if (cashOnDeliverySettingModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.cod.name;
-        } else if (stripeModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.stripe.name;
-        } else if (payPalModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.paypal.name;
-        } else if (payStackModel.value.isEnable == true) {
-          selectedPaymentMethod.value = PaymentGateway.payStack.name;
-        } else if (mercadoPagoModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.mercadoPago.name;
-        } else if (flutterWaveModel.value.isEnable == true) {
-          selectedPaymentMethod.value = PaymentGateway.flutterWave.name;
-        } else if (paytmModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.paytm.name;
-        } else if (payFastModel.value.isEnable == true) {
-          selectedPaymentMethod.value = PaymentGateway.payFast.name;
-        } else if (razorPayModel.value.isEnabled == true) {
-          selectedPaymentMethod.value = PaymentGateway.razorpay.name;
-        } else if (midTransModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.midTrans.name;
-        } else if (orangeMoneyModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.orangeMoney.name;
-        } else if (xenditModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.xendit.name;
-        } else if (mtnMomoModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.phonePe.name;
-        } else if (xenditModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.xendit.name;
-        } else if (mtnMomoModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.mtnMomo.name;
-        } else if (phonePeModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.phonePe.name;
-        } else if (instamojoModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.instamojo.name;
-        } else if (foloosiModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.foloosi.name;
-        } else if (payMongoModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.payMongo.name;
-        } else if (cashfreeModel.value.enable == true) {
-          selectedPaymentMethod.value = PaymentGateway.cashfree.name;
-        }
-        Stripe.publishableKey = stripeModel.value.clientpublishableKey.toString();
-        Stripe.merchantIdentifier = 'Foodie Customer';
-        Stripe.instance.applySettings();
-        setRef();
-
-        razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
-        razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWaller);
-        razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
-      },
-    );
+    cashfreeModel.value = CashfreePaymentConfig.model;
+    selectedPaymentMethod.value = PaymentGateway.cashfree.name;
+    isLoading.value = false;
   }
 
   // Strip

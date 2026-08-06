@@ -69,54 +69,6 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        if (controller.walletSettingModel.value.isEnabled == true)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                decoration: ShapeDecoration(
-                                  color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  shadows: const [
-                                    BoxShadow(
-                                      color: Color(0x07000000),
-                                      blurRadius: 20,
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
-                                    )
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      Visibility(
-                                        visible: controller.walletSettingModel.value.isEnabled == true,
-                                        child: cardDecoration(controller, PaymentGateway.wallet, themeChange, "assets/images/ic_wallet.png"),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TranslatedText(
-                                "Other Payment Options",
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontFamily: AppThemeData.semiBold,
-                                  fontSize: 16,
-                                  color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          ),
                         Container(
                           decoration: ShapeDecoration(
                             color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
@@ -136,74 +88,9 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                Visibility(
-                                  visible: controller.flutterWaveModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.stripe, themeChange, "assets/images/stripe.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.paytmModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.paypal, themeChange, "assets/images/paypal.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payStackModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payStack, themeChange, "assets/images/paystack.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.mercadoPagoModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.mercadoPago, themeChange, "assets/images/mercado-pago.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.flutterWaveModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.flutterWave, themeChange, "assets/images/flutterwave_logo.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payFastModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payFast, themeChange, "assets/images/payfast.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.paytmModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.paytm, themeChange, "assets/images/paytm.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.razorPayModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.midTransModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.midTrans, themeChange, "assets/images/midtrans.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.orangeMoneyModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.orangeMoney, themeChange, "assets/images/orange_money.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.xenditModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.mtnMomoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/mtnmom.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.phonePeModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.phonePe, themeChange, "assets/images/phonepe.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.cashfreeModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.instamojoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.instamojo, themeChange, "assets/images/instamojo.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.foloosiModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.foloosi, themeChange, "assets/images/foloosi.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payMongoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payMongo, themeChange, "assets/images/payMongo.png"),
-                                ),
+                                cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
+                                // Wallet and other gateways disabled — Cashfree only
+                                // if (controller.walletSettingModel.value.isEnabled == true) cardDecoration(controller, PaymentGateway.wallet, ...),
                               ],
                             ),
                           ),
@@ -225,58 +112,8 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                 textColor: AppThemeData.grey50,
                 fontSizes: 16,
                 onPress: () async {
-                  if (controller.selectedPaymentMethod.value == PaymentGateway.stripe.name) {
-                    controller.stripeMakePayment(amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.paypal.name) {
-                    controller.paypalPaymentSheet(controller.amountController.value.text, context);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.payStack.name) {
-                    controller.payStackPayment(controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.mercadoPago.name) {
-                    controller.mercadoPagoMakePayment(context: context, amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.flutterWave.name) {
-                    controller.flutterWaveInitiatePayment(context: context, amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.payFast.name) {
-                    controller.payFastPayment(context: context, amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.paytm.name) {
-                    controller.getPaytmCheckSum(context, amount: double.parse(controller.amountController.value.text));
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.midTrans.name) {
-                    controller.midtransMakePayment(context: context, amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.orangeMoney.name) {
-                    controller.orangeMakePayment(context: context, amount: controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
-                    controller.xenditPayment(context, controller.amountController.value.text);
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.mtnMomo.name.toLowerCase()) {
-                    await controller.mtnMomoMakePayment(amount: controller.amountController.value.text.toString());
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.phonePe.name.toLowerCase()) {
-                    PhonePePaymentService.phonePe = controller.phonePeModel.value;
-                    await PhonePePaymentService.payNow(amountInPaise: (double.parse(controller.amountController.value.text.toString()) * 100).round());
-                    if (PhonePePaymentService.isSucess) {
-                      controller.placeOrder();
-                    }
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.cashfree.name.toLowerCase()) {
-                    controller.cashFreeMakePayment(context: context, amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.instamojo.name.toLowerCase()) {
-                    controller.makeInstamojoPayment(amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.foloosi.name.toLowerCase()) {
-                    controller.makeFoloosiPayment(amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.payMongo.name.toLowerCase()) {
-                    controller.makePayMongoPayment(amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
-                  } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.wallet.name) {
-                    controller.placeOrder();
-                  } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                    ShowToastDialog.showLoader("Please wait");
-                    RazorPayController().createOrderRazorPay(amount: double.parse(controller.amountController.value.text), razorpayModel: controller.razorPayModel.value).then((value) {
-                      if (value == null) {
-                        ShowToastDialog.showToast("Something went wrong, please contact admin.");
-                      } else {
-                        CreateRazorPayOrderModel result = value;
-                        controller.openCheckout(amount: controller.amountController.value.text, orderId: result.id);
-                      }
-                    });
-                  } else {
-                    ShowToastDialog.showToast("Please select payment method");
-                    ShowToastDialog.closeLoader();
-                  }
+                  controller.cashFreeMakePayment(context: context, amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
+                  // Other payment gateways disabled — Cashfree only
                 },
               ),
             ),

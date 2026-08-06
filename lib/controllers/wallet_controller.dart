@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:math' as maths;
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
+import 'package:customer/app/wallet_screen/wallet_screen.dart';
+import 'package:customer/constant/cashfree_payment_config.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/cashfree_service_controller.dart';
@@ -93,36 +95,9 @@ class WalletController extends GetxController {
   Rx<Cashfree> cashfreeModel = Cashfree().obs;
 
   Future<void> getPaymentSettings() async {
-    await FireStoreUtils.getPaymentSettingsData().then(
-      (value) {
-        payFastModel.value = PayFastModel.fromJson(jsonDecode(Preferences.getString(Preferences.payFastSettings)));
-        mercadoPagoModel.value = MercadoPagoModel.fromJson(jsonDecode(Preferences.getString(Preferences.mercadoPago)));
-        payPalModel.value = PayPalModel.fromJson(jsonDecode(Preferences.getString(Preferences.paypalSettings)));
-        stripeModel.value = StripeModel.fromJson(jsonDecode(Preferences.getString(Preferences.stripeSettings)));
-        flutterWaveModel.value = FlutterWaveModel.fromJson(jsonDecode(Preferences.getString(Preferences.flutterWave)));
-        payStackModel.value = PayStackModel.fromJson(jsonDecode(Preferences.getString(Preferences.payStack)));
-        paytmModel.value = PaytmModel.fromJson(jsonDecode(Preferences.getString(Preferences.paytmSettings)));
-        razorPayModel.value = RazorPayModel.fromJson(jsonDecode(Preferences.getString(Preferences.razorpaySettings)));
-        midTransModel.value = MidTrans.fromJson(jsonDecode(Preferences.getString(Preferences.midTransSettings)));
-        orangeMoneyModel.value = OrangeMoney.fromJson(json.decode(Preferences.getString(Preferences.orangeMoneySettings)));
-        xenditModel.value = Xendit.fromJson(jsonDecode(Preferences.getString(Preferences.xenditSettings)));
-        mtnMomoModel.value = MtnMomo.fromJson(jsonDecode(Preferences.getString(Preferences.mtnMomoSettings)));
-        phonePeModel.value = PhonePe.fromJson(jsonDecode(Preferences.getString(Preferences.phonePaySettings)));
-        instamojoModel.value = Instamojo.fromJson(jsonDecode(Preferences.getString(Preferences.instamojoSettings)));
-        foloosiModel.value = Foloosi.fromJson(jsonDecode(Preferences.getString(Preferences.foloosiSettings)));
-        payMongoModel.value = PayMongo.fromJson(jsonDecode(Preferences.getString(Preferences.payMongoSettings)));
-        cashfreeModel.value = Cashfree.fromJson(jsonDecode(Preferences.getString(Preferences.cashFreeSettings)));
-        isLoadingPayment.value = false;
-        Stripe.publishableKey = stripeModel.value.clientpublishableKey.toString();
-        Stripe.merchantIdentifier = 'Foodie';
-        Stripe.instance.applySettings();
-        setRef();
-
-        razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
-        razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWaller);
-        razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
-      },
-    );
+    cashfreeModel.value = CashfreePaymentConfig.model;
+    selectedPaymentMethod.value = PaymentGateway.cashfree.name;
+    isLoadingPayment.value = false;
   }
 
   Future<void> getWalletTransaction() async {

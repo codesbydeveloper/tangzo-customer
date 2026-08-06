@@ -97,74 +97,24 @@ class PaymentListScreen extends StatelessWidget {
                             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50),
                             child: Column(
                               children: [
-                                Visibility(
-                                  visible: controller.stripeModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.stripe, themeChange, "assets/images/stripe.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.paytmModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.paypal, themeChange, "assets/images/paypal.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payStackModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payStack, themeChange, "assets/images/paystack.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.mercadoPagoModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.mercadoPago, themeChange, "assets/images/mercado-pago.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.flutterWaveModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.flutterWave, themeChange, "assets/images/flutterwave_logo.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payFastModel.value.isEnable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payFast, themeChange, "assets/images/payfast.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.paytmModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.paytm, themeChange, "assets/images/paytm.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.razorPayModel.value.isEnabled == true,
-                                  child: cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.midTransModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.midTrans, themeChange, "assets/images/midtrans.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.orangeMoneyModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.orangeMoney, themeChange, "assets/images/orange_money.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.xenditModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.mtnMomoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/mtnmom.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.phonePeModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.phonePe, themeChange, "assets/images/phonepe.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.cashfreeModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.instamojoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.instamojo, themeChange, "assets/images/instamojo.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.foloosiModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.foloosi, themeChange, "assets/images/foloosi.png"),
-                                ),
-                                Visibility(
-                                  visible: controller.payMongoModel.value.enable == true,
-                                  child: cardDecoration(controller, PaymentGateway.payMongo, themeChange, "assets/images/payMongo.png"),
-                                ),
+                                cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
+                                // Other payment gateways disabled — Cashfree only
+                                // Visibility(visible: controller.stripeModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.stripe, themeChange, "assets/images/stripe.png")),
+                                // Visibility(visible: controller.paytmModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.paypal, themeChange, "assets/images/paypal.png")),
+                                // Visibility(visible: controller.payStackModel.value.isEnable == true, child: cardDecoration(controller, PaymentGateway.payStack, themeChange, "assets/images/paystack.png")),
+                                // Visibility(visible: controller.mercadoPagoModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.mercadoPago, themeChange, "assets/images/mercado-pago.png")),
+                                // Visibility(visible: controller.flutterWaveModel.value.isEnable == true, child: cardDecoration(controller, PaymentGateway.flutterWave, themeChange, "assets/images/flutterwave_logo.png")),
+                                // Visibility(visible: controller.payFastModel.value.isEnable == true, child: cardDecoration(controller, PaymentGateway.payFast, themeChange, "assets/images/payfast.png")),
+                                // Visibility(visible: controller.paytmModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.paytm, themeChange, "assets/images/paytm.png")),
+                                // Visibility(visible: controller.razorPayModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png")),
+                                // Visibility(visible: controller.midTransModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.midTrans, themeChange, "assets/images/midtrans.png")),
+                                // Visibility(visible: controller.orangeMoneyModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.orangeMoney, themeChange, "assets/images/orange_money.png")),
+                                // Visibility(visible: controller.xenditModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png")),
+                                // Visibility(visible: controller.mtnMomoModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/mtnmom.png")),
+                                // Visibility(visible: controller.phonePeModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.phonePe, themeChange, "assets/images/phonepe.png")),
+                                // Visibility(visible: controller.instamojoModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.instamojo, themeChange, "assets/images/instamojo.png")),
+                                // Visibility(visible: controller.foloosiModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.foloosi, themeChange, "assets/images/foloosi.png")),
+                                // Visibility(visible: controller.payMongoModel.value.enable == true, child: cardDecoration(controller, PaymentGateway.payMongo, themeChange, "assets/images/payMongo.png")),
                               ],
                             ),
                           ),
@@ -189,55 +139,9 @@ class PaymentListScreen extends StatelessWidget {
                     } else {
                       log("controller.selectedPaymentMethod.value :: ${controller.selectedPaymentMethod.value} ");
                       if (double.parse(controller.topUpAmountController.value.text) >= double.parse(Constant.minimumAmountToDeposit.toString())) {
-                        if (controller.selectedPaymentMethod.value == PaymentGateway.stripe.name) {
-                          controller.stripeMakePayment(amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.paypal.name) {
-                          controller.paypalPaymentSheet(controller.topUpAmountController.value.text, context);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.payStack.name) {
-                          controller.payStackPayment(controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.mercadoPago.name) {
-                          controller.mercadoPagoMakePayment(context: context, amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.flutterWave.name) {
-                          controller.flutterWaveInitiatePayment(context: context, amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.payFast.name) {
-                          controller.payFastPayment(context: context, amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.paytm.name) {
-                          controller.getPaytmCheckSum(context, amount: double.parse(controller.topUpAmountController.value.text));
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.midTrans.name) {
-                          controller.midtransMakePayment(context: context, amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.orangeMoney.name) {
-                          controller.orangeMakePayment(context: context, amount: controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.xendit.name) {
-                          controller.xenditPayment(context, controller.topUpAmountController.value.text);
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.mtnMomo.name.toLowerCase()) {
-                          await controller.mtnMomoMakePayment(amount: controller.topUpAmountController.value.text.toString());
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.phonePe.name.toLowerCase()) {
-                          PhonePePaymentService.phonePe = controller.phonePeModel.value;
-                          await PhonePePaymentService.payNow(amountInPaise: (double.parse(controller.topUpAmountController.value.text.toString()) * 100).round());
-                          if (PhonePePaymentService.isSucess) {
-                            controller.walletTopUp();
-                          }
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.cashfree.name.toLowerCase()) {
-                          controller.cashFreeMakePayment(context: context, amount: controller.topUpAmountController.value.text.toString(), paymentDesc: "Top-Up Payment");
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.instamojo.name.toLowerCase()) {
-                          controller.makeInstamojoPayment(amount: controller.topUpAmountController.value.text.toString(), paymentDesc: "Top-Up Payment");
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.foloosi.name.toLowerCase()) {
-                          controller.makeFoloosiPayment(amount: controller.topUpAmountController.value.text.toString(), paymentDesc: "Top-Up Payment");
-                        } else if (controller.selectedPaymentMethod.value.toLowerCase() == PaymentGateway.payMongo.name.toLowerCase()) {
-                          controller.makePayMongoPayment(amount: controller.topUpAmountController.value.text.toString(), paymentDesc: "Top-Up Payment");
-                        } else if (controller.selectedPaymentMethod.value == PaymentGateway.razorpay.name) {
-                          ShowToastDialog.showLoader("Please wait");
-                          RazorPayController().createOrderRazorPay(amount: double.parse(controller.topUpAmountController.value.text), razorpayModel: controller.razorPayModel.value).then((value) {
-                            if (value == null) {
-                              ShowToastDialog.showToast("Something went wrong, please contact admin.");
-                            } else {
-                              CreateRazorPayOrderModel result = value;
-                              controller.openCheckout(amount: controller.topUpAmountController.value.text, orderId: result.id);
-                            }
-                          });
-                        } else {
-                          ShowToastDialog.showToast("Please select payment method");
-                        }
+                        controller.cashFreeMakePayment(context: context, amount: controller.topUpAmountController.value.text.toString(), paymentDesc: "Top-Up Payment");
+                        // Other payment gateways disabled — Cashfree only
+                        // if (controller.selectedPaymentMethod.value == PaymentGateway.stripe.name) { ... }
                       } else {
                         ShowToastDialog.closeLoader();
                         ShowToastDialog.showToast("${'Please Enter minimum amount of'} ${Constant.amountShow(amount: Constant.minimumAmountToDeposit)}");

@@ -255,11 +255,15 @@ class FireStoreUtils {
           Constant.localisationType = event.data()?["localisationType"] ?? '';
         }
       });
-      await FireStoreUtils.fireStore.collection(CollectionName.currencies).where("isActive", isEqualTo: true).get().then((value) async {
+      await FireStoreUtils.fireStore.collection(CollectionName.currencies).where("code", isEqualTo: "INR").limit(1).get().then((value) async {
         if (value.docs.isNotEmpty) {
           Constant.currencyModel = CurrencyModel.fromJson(value.docs.first.data());
+          Constant.currencyModel!.symbol = "₹";
+          Constant.currencyModel!.code = "INR";
+          Constant.currencyModel!.name = "Indian Rupee";
+          Constant.currencyModel!.symbolAtRight = false;
         } else {
-          Constant.currencyModel = CurrencyModel(id: "", code: "USD", decimalDigits: 2, isActive: true, name: "US Dollar", symbol: "\$", symbolAtRight: false);
+          Constant.currencyModel = Constant.inrCurrency;
         }
       });
 
