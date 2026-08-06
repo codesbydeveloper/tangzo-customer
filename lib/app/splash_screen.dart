@@ -23,13 +23,13 @@ class SplashScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
-                  "assets/images/ic_logo.png",
+                  "assets/icons/ic_back_logo.png",
                 ),
                 const SizedBox(
                   height: 10,
                 ),
                 TranslatedText(
-                  "Welcome to Foodie",
+                  "Welcome to Tangzo",
                   style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey50, fontSize: 28, fontFamily: AppThemeData.bold),
                 ),
                 TranslatedText(

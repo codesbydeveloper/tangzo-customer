@@ -23,13 +23,16 @@ const Map<String, String> enUS = {
   'Gallery': 'Gallery',
   'Camera': 'Camera',
   "Please select Location": "Please select Location",
-  "Please Enter Flat / House / Flore / Building": "Please Enter Flat / House / Flore / Building",
-  "Please Enter Area / Sector / locality": "Please Enter Area / Sector / locality",
+  "Please Enter Flat / House / Flore / Building":
+      "Please Enter Flat / House / Flore / Building",
+  "Please Enter Area / Sector / locality":
+      "Please Enter Area / Sector / locality",
   'Highlights for you': 'Highlights for you',
   'Highlights for you not found.': 'Highlights for you not found.',
   "Skip": "Skip",
   "Welcome Back! 👋": "Welcome Back! 👋",
-  "Log in to continue enjoying delicious food delivered to your doorstep.": "Log in to continue enjoying delicious food delivered to your doorstep.",
+  "Log in to continue enjoying delicious food delivered to your doorstep.":
+      "Log in to continue enjoying delicious food delivered to your doorstep.",
   "Email Address": "Email Address",
   'Phone Number': 'Phone Number',
   'Enter Phone Number': 'Enter Phone Number',
@@ -54,7 +57,8 @@ const Map<String, String> enUS = {
   "Didn’t have an account": "Didn’t have an account",
   "Sign up": "Sign up",
   "Verify Your Number 📱": "Verify Your Number 📱",
-  "Enter the OTP sent to your mobile number.": "Enter the OTP sent to your mobile number.",
+  "Enter the OTP sent to your mobile number.":
+      "Enter the OTP sent to your mobile number.",
   "Verify & Next": "Verify & Next",
   "Verify otp": "Verify otp",
   "Invalid Code": "Invalid Code",
@@ -62,7 +66,8 @@ const Map<String, String> enUS = {
   "Did’t receive any code? ": "Did’t receive any code? ",
   "Send Again": "Send Again",
   "Create an Account 🚀": "Create an Account 🚀",
-  "Sign up to start your food adventure with Foodie": "Sign up to start your food adventure with Foodie",
+  "Sign up to start your food adventure with Foodie":
+      "Sign up to start your food adventure with Foodie",
   "First Name": "First Name",
   "Enter First Name": "Enter First Name",
   "Last Name": "Last Name",
@@ -74,8 +79,10 @@ const Map<String, String> enUS = {
   "Signup": "Signup",
   "Please enter first name": "Please enter first name",
   "Please enter last name": "Please enter last name",
-  "Password and Confirm password doesn't match": "Password and Confirm password doesn't match",
-  "Please enter minimum 6 characters password": "Please enter minimum 6 characters password",
+  "Password and Confirm password doesn't match":
+      "Password and Confirm password doesn't match",
+  "Please enter minimum 6 characters password":
+      "Please enter minimum 6 characters password",
   "Please enter password": "Please enter password",
   "Please enter Confirm password": "Please enter Confirm password",
   "Item Not available": "Item Not available",
@@ -123,10 +130,12 @@ const Map<String, String> enUS = {
   'Off': 'Off',
   "Fix Price": "Fix Price",
   "Tap To Apply": "Tap To Apply",
-  "Your delicious meal is on its way! Sit tight and we’ll handle the rest.": "Your delicious meal is on its way! Sit tight and we’ll handle the rest.",
+  "Your delicious meal is on its way! Sit tight and we’ll handle the rest.":
+      "Your delicious meal is on its way! Sit tight and we’ll handle the rest.",
   "Order ID": "Order ID",
   "Placing your order": "Placing your order",
-  "Review your items and proceed to checkout for a delicious experience.": "Review your items and proceed to checkout for a delicious experience.",
+  "Review your items and proceed to checkout for a delicious experience.":
+      "Review your items and proceed to checkout for a delicious experience.",
   "Delivery Address": "Delivery Address",
   "Order Summary": "Order Summary",
   "Track Order": "Track Order",
@@ -134,7 +143,8 @@ const Map<String, String> enUS = {
   "Preferred Payment": "Preferred Payment",
   "Other Payment Options": "Other Payment Options",
   "Change Language": "Change Language",
-  "Select your preferred language for a personalized app experience.": "Select your preferred language for a personalized app experience.",
+  "Select your preferred language for a personalized app experience.":
+      "Select your preferred language for a personalized app experience.",
   "Type message here....": "Type message here....",
   "text": "text",
   "Send Media": "Send Media",
@@ -177,7 +187,8 @@ const Map<String, String> enUS = {
   "When are you visiting?": "When are you visiting?",
   "Today": "Today",
   "Tomorrow": "Tomorrow",
-  "Select time slot and scroll to see offers": "Select time slot and scroll to see offers",
+  "Select time slot and scroll to see offers":
+      "Select time slot and scroll to see offers",
   "Special Occasion": "Special Occasion",
   "Clear": "Clear",
   "Is this your first visit?": "Is this your first visit?",
@@ -191,7 +202,8 @@ const Map<String, String> enUS = {
   "View Timings": "View Timings",
   "for two": "for two",
   "Also applicable on food delivery": "Also applicable on food delivery",
-  "Please log in to the application. You are not logged in.": "Please log in to the application. You are not logged in.",
+  "Please log in to the application. You are not logged in.":
+      "Please log in to the application. You are not logged in.",
   "Table Booking": "Table Booking",
   "Quick Conformations": "Quick Conformations",
   "Available food delivery": "Available food delivery",
@@ -204,7 +216,8 @@ const Map<String, String> enUS = {
   "Cost for Two": "Cost for Two",
   "Cuisines": "Cuisines",
   "Dine-In Reservations": "Dine-In Reservations",
-  "Book a table at your favorite restaurant and enjoy a delightful dining experience.": "Book a table at your favorite restaurant and enjoy a delightful dining experience.",
+  "Book a table at your favorite restaurant and enjoy a delightful dining experience.":
+      "Book a table at your favorite restaurant and enjoy a delightful dining experience.",
   "No Restaurants Found in Your Area": "No Restaurants Found in Your Area",
   "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.":
       "Currently, there are no available restaurants in your zone. Try changing your location to find nearby options.",
@@ -214,19 +227,22 @@ const Map<String, String> enUS = {
   "View all": "View all",
   "Popular Restaurants": "Popular Restaurants",
   "All Restaurants": "All Restaurants",
-  "Sorry, The Zone is not available in your area. change the other location first.": "Sorry, The Zone is not available in your area. change the other location first.",
+  "Sorry, The Zone is not available in your area. change the other location first.":
+      "Sorry, The Zone is not available in your area. change the other location first.",
   "Could not launch": "Could not launch",
   "Categories": "Categories",
   'Preferences': 'Preferences',
   "Profile Information": "Profile Information",
-  "View and update your personal details, contact information, and preferences.": "View and update your personal details, contact information, and preferences.",
+  "View and update your personal details, contact information, and preferences.":
+      "View and update your personal details, contact information, and preferences.",
   "Save Details": "Save Details",
   "please select": "please select",
   "camera": "camera",
   "gallery": "gallery",
   "Your Favourites, All in One Place": "Your Favourites, All in One Place",
   "Please Log In to Continue": "Please Log In to Continue",
-  "You’re not logged in. Please sign in to access your account and explore all features.": "You’re not logged in. Please sign in to access your account and explore all features.",
+  "You’re not logged in. Please sign in to access your account and explore all features.":
+      "You’re not logged in. Please sign in to access your account and explore all features.",
   "Log in": "Log in",
   "Favourite Restaurants": "Favourite Restaurants",
   'Favourite Foods not found.': 'Favourite Foods not found.',
@@ -238,7 +254,8 @@ const Map<String, String> enUS = {
   'Foods': 'Foods',
   'Veg': 'Veg',
   'Non Veg': 'Non Veg',
-  "No worries!! We’ll send you reset instructions": "No worries!! We’ll send you reset instructions",
+  "No worries!! We’ll send you reset instructions":
+      "No worries!! We’ll send you reset instructions",
   "Customize Gift Card": "Customize Gift Card",
   "Choose an amount": "Choose an amount",
   "Enter gift card amoun": "Enter gift card amoun",
@@ -248,13 +265,15 @@ const Map<String, String> enUS = {
   'Enter gift card amount': 'Enter gift card amount',
   'Amount': 'Amount',
   'Enter Amount': 'Enter Amount',
-  "Complete payment and share this e-gift card with loved ones using any app": "Complete payment and share this e-gift card with loved ones using any app",
+  "Complete payment and share this e-gift card with loved ones using any app":
+      "Complete payment and share this e-gift card with loved ones using any app",
   "Sub Total": "Sub Total",
   'Pay': 'Pay',
   'days after purchase': 'days after purchase',
   "Grand Total": "Grand Total",
   'Gift Card expire': 'Gift Card expire',
-  "Gift Card expire days after purchase": "Gift Card expire days after purchase",
+  "Gift Card expire days after purchase":
+      "Gift Card expire days after purchase",
   "Purchased Gift card not found": "Purchased Gift card not found",
   "Gift Code": "Gift Code",
   "Gift Pin": "Gift Pin",
@@ -262,7 +281,8 @@ const Map<String, String> enUS = {
   'Redeem': 'Redeem',
   "Not Redeem": "Not Redeem",
   "Redeem Gift Card": "Redeem Gift Card",
-  "Enter your gift card code to enjoy discounts and special offers on your orders.": "Enter your gift card code to enjoy discounts and special offers on your orders.",
+  "Enter your gift card code to enjoy discounts and special offers on your orders.":
+      "Enter your gift card code to enjoy discounts and special offers on your orders.",
   "Enter gift code": "Enter gift code",
   "Enter gift pin": "Enter gift pin",
   "Please Enter Gift Code": "Please Enter Gift Code",
@@ -274,9 +294,11 @@ const Map<String, String> enUS = {
   "Voucher redeem successfully": "Voucher redeem successfully",
   'Payment successfully': 'Payment successfully',
   "Invalid Gift Code": "Invalid Gift Code",
-  "Something went wrong, please contact admin.": "Something went wrong, please contact admin.",
+  "Something went wrong, please contact admin.":
+      "Something went wrong, please contact admin.",
   "No Restaurant found": "No Restaurant found",
-  "Search the dish, restaurant, food, meals": "Search the dish, restaurant, food, meals",
+  "Search the dish, restaurant, food, meals":
+      "Search the dish, restaurant, food, meals",
   "Our Categories": "Our Categories",
   "See all": "See all",
   "Best Servings Food": "Best Servings Food",
@@ -292,7 +314,8 @@ const Map<String, String> enUS = {
   'Payment UnSuccessful!!': 'Payment UnSuccessful!!',
   'Payment Successful!!': 'Payment Successful!!',
   "Best Restaurants": "Best Restaurants",
-  "Do you really want to change the delivery option? Your cart will be empty.": "Do you really want to change the delivery option? Your cart will be empty.",
+  "Do you really want to change the delivery option? Your cart will be empty.":
+      "Do you really want to change the delivery option? Your cart will be empty.",
   "Alert": "Alert",
   'Payment Processing!! via': 'Payment Processing!! via',
   "Upto": "Upto",
@@ -302,13 +325,15 @@ const Map<String, String> enUS = {
   "off": "off",
   "Error": "Error",
   "Enable Location Services 📍": "Enable Location Services 📍",
-  "To provide the best dining experience, allow Foodie to access your location.": "To provide the best dining experience, allow Foodie to access your location.",
+  "To provide the best dining experience, allow Foodie to access your location.":
+      "To provide the best dining experience, allow Foodie to access your location.",
   "Use Current Location": "Use Current Location",
   "Set From Map": "Set From Map",
   "Enter Manually location": "Enter Manually location",
   "Order Details": "Order Details",
   "Order Delivered.": "Order Delivered.",
-  "Your Order has been Preparing and assign to the driver": "Your Order has been Preparing and assign to the driver",
+  "Your Order has been Preparing and assign to the driver":
+      "Your Order has been Preparing and assign to the driver",
   "Your Order": "Your Order",
   'Preparation Time': 'Preparation Time',
   "Rate us": "Rate us",
@@ -319,7 +344,8 @@ const Map<String, String> enUS = {
   "Reorder": "Reorder",
   'Item Added In a cart': 'Item Added In a cart',
   "My Order": "My Order",
-  "Keep track your delivered, In Progress and Rejected food all in just one place.": "Keep track your delivered, In Progress and Rejected food all in just one place.",
+  "Keep track your delivered, In Progress and Rejected food all in just one place.":
+      "Keep track your delivered, In Progress and Rejected food all in just one place.",
   "All": "All",
   "In Progress": "In Progress",
   "Delivered": "Delivered",
@@ -327,14 +353,16 @@ const Map<String, String> enUS = {
   "Order Not Found": "Order Not Found",
   "View Details": "View Details",
   "My Profile": "My Profile",
-  "Manage your personal information, preferences, and settings all in one place.": "Manage your personal information, preferences, and settings all in one place.",
+  "Manage your personal information, preferences, and settings all in one place.":
+      "Manage your personal information, preferences, and settings all in one place.",
   "General Information": "General Information",
   "Bookings Information": "Bookings Information",
   "Social": "Social",
   "Refer a Friend": "Refer a Friend",
   "Rate the app": "Rate the app",
   "Communication": "Communication",
-  "Are you sure you want to log out? You will need to enter your credentials to log back in.": "Are you sure you want to log out? You will need to enter your credentials to log back in.",
+  "Are you sure you want to log out? You will need to enter your credentials to log back in.":
+      "Are you sure you want to log out? You will need to enter your credentials to log back in.",
   "Delete Account": "Delete Account",
   "Are you sure you want to delete your account? This action is irreversible and will permanently remove all your data.":
       "Are you sure you want to delete your account? This action is irreversible and will permanently remove all your data.",
@@ -355,14 +383,17 @@ const Map<String, String> enUS = {
   "Invite Friends & Businesses": "Invite Friends & Businesses",
   "Invite your friends to sign up with Foodie using your code, and you’ll earn after their Success the first order! 💸🍔":
       "Invite your friends to sign up with Foodie using your code, and you’ll earn after their Success the first order! 💸🍔",
-  'after their Success the first order! 💸🍔': 'after their Success the first order! 💸🍔',
+  'after their Success the first order! 💸🍔':
+      'after their Success the first order! 💸🍔',
   "Share Code": "Share Code",
-  'Invite your friends to sign up with Foodie using your code, and you’ll earn': 'Invite your friends to sign up with Foodie using your code, and you’ll earn',
+  'Invite your friends to sign up with Foodie using your code, and you’ll earn':
+      'Invite your friends to sign up with Foodie using your code, and you’ll earn',
   'Share': 'Share',
   "Timing is not added by restaurant": "Timing is not added by restaurant",
   "Also applicable on table booking": "Also applicable on table booking",
   "Additional Offers": "Additional Offers",
-  "Search the dish, food, meals and more...": "Search the dish, food, meals and more...",
+  "Search the dish, food, meals and more...":
+      "Search the dish, food, meals and more...",
   'when order completed': 'when order completed',
   "Info": "Info",
   "Food Information's": "Food Information's",
@@ -385,11 +416,12 @@ const Map<String, String> enUS = {
   "Top up Wallet": "Top up Wallet",
   "Select Top up Options": "Select Top up Options",
   "Top-up": "Top-up",
-  "Keep track of your balance, transactions, and payment methods all in one place.": "Keep track of your balance, transactions, and payment methods all in one place.",
+  "Keep track of your balance, transactions, and payment methods all in one place.":
+      "Keep track of your balance, transactions, and payment methods all in one place.",
   "Transaction not found": "Transaction not found",
   "Foodie": "Foodie",
   "Get Started": "Get Started",
-  "Welcome to Foodie": "Welcome to Foodie",
+  "Welcome to Tangzo": "Welcome to Tangzo",
   "Your Favorite Food Delivered Fast!": "Your Favorite Food Delivered Fast!",
   "Cancel Payment": "Cancel Payment",
   "Exit": "Exit",
@@ -403,7 +435,8 @@ const Map<String, String> enUS = {
   "Dine-In": "Dine-In",
   "Dine-In Booking": "Dine-In Booking",
   "Share app": "Share app",
-  'Check out Foodie, your ultimate food delivery application!': 'Check out Foodie, your ultimate food delivery application!',
+  'Check out Foodie, your ultimate food delivery application!':
+      'Check out Foodie, your ultimate food delivery application!',
   "Legal": "Legal",
   'App Store:': 'App Store:',
   'Google Play:': 'Google Play:',
@@ -419,15 +452,18 @@ const Map<String, String> enUS = {
   "You denied location permission forever. Please allow location permission from your app settings and receive more accurate delivery.":
       "You denied location permission forever. Please allow location permission from your app settings and receive more accurate delivery.",
   "Terms and Conditions": "Terms and Conditions",
-  "You don't have sufficient wallet balance to purchase gift card": "You don't have sufficient wallet balance to purchase gift card",
-  "Dine-In Request submitted successfully.": "Dine-In Request submitted successfully.",
+  "You don't have sufficient wallet balance to purchase gift card":
+      "You don't have sufficient wallet balance to purchase gift card",
+  "Dine-In Request submitted successfully.":
+      "Dine-In Request submitted successfully.",
   "The total price must be greater than or equal to the coupon discount value for the code to apply. Please review your cart total":
       "The total price must be greater than or equal to the coupon discount value for the code to apply. Please review your cart total",
   "The total price must be greater than or equal to the special discount value for the code to apply. Please review your cart total.":
       "The total price must be greater than or equal to the special discount value for the code to apply. Please review your cart total.",
   "Gift card purchase amount debited": "Gift card purchase amount debited",
   "Gift card Purchases successfully": "Gift card Purchases successfully",
-  "This user is disable please contact to administrator": "This user is disable please contact to administrator",
+  "This user is disable please contact to administrator":
+      "This user is disable please contact to administrator",
   "cancelPayment?": "Are you sure want to cancel payment?",
   'Reset Password link sent your': 'Reset Password link sent your',
   'email': 'email',
@@ -446,15 +482,18 @@ const Map<String, String> enUS = {
   'Account create successfully': 'Account create successfully',
   'The password provided is too weak.': 'The password provided is too weak.',
   'Enter email is Invalid': 'Enter email is Invalid',
-  'The account already exists for that email.': 'The account already exists for that email.',
+  'The account already exists for that email.':
+      'The account already exists for that email.',
   'Amount Top-up successfully': 'Amount Top-up successfully',
-  'Something want wrong please contact administrator': 'Something want wrong please contact administrator',
+  'Something want wrong please contact administrator':
+      'Something want wrong please contact administrator',
   'Search Places': 'Search Places',
   'Search your location here': 'Search your location here',
   'settings': 'settings',
   'close': 'close',
   'No user found': 'No user found',
-  'This user is not created in customer application.': 'This user is not created in customer application.',
+  'This user is not created in customer application.':
+      'This user is not created in customer application.',
   'Confirm Location': 'Confirm Location',
   'Picked Location:': 'Picked Location:',
   'No Location Picked': 'No Location Picked',
@@ -465,21 +504,25 @@ const Map<String, String> enUS = {
   'Valid till': 'Valid till',
   'Cashback Amount': 'Cashback Amount',
   'You will get': 'You will get',
-  'cashback after completing the order.': 'cashback after completing the order.',
+  'cashback after completing the order.':
+      'cashback after completing the order.',
   'Maximum cashback up to': 'Maximum cashback up to',
   'Cashback Offer': 'Cashback Offer',
   'Cashback Name :': 'Cashback Name :',
   'Help & Support': 'Help & Support',
   'Start typing with admin...': 'Start typing with admin...',
-  'You have successfully canceled your order.': 'You have successfully canceled your order.',
-  'Tap the mic to start voice recognition': 'Tap the mic to start voice recognition',
+  'You have successfully canceled your order.':
+      'You have successfully canceled your order.',
+  'Tap the mic to start voice recognition':
+      'Tap the mic to start voice recognition',
   'Speak now': 'Speak now',
   'Click to Back': 'Click to Back',
   'Listening...': 'Listening...',
   'Store Inbox': 'Store Inbox',
   'Discounts Stores': 'Discounts Stores',
   'Timing is not added by store': 'Timing is not added by store',
-  'Search the item, product and more...': 'Search the item, product and more...',
+  'Search the item, product and more...':
+      'Search the item, product and more...',
   'Your cart already contains items from another store. Would you like to replace them with items from this store instead?':
       'Your cart already contains items from another store. Would you like to replace them with items from this store instead?',
   'Image failed to load.': 'Image failed to load.',
@@ -491,10 +534,14 @@ const Map<String, String> enUS = {
   'No reviews found': 'No reviews found',
   'Continue with Google': 'Continue with Google',
   "Please enter a valid email.": "Please enter a valid email.",
-  'Please select a future time for your Dine-In request.': 'Please select a future time for your Dine-In request.',
-  'The restaurant is closed at the moment. Please try placing your order later.': 'The restaurant is closed at the moment. Please try placing your order later.',
-  'This email address is not registered with an email and password.': 'This email address is not registered with an email and password.',
-  'The selected product is not available at your delivery address.': 'The selected product is not available at your delivery address.',
+  'Please select a future time for your Dine-In request.':
+      'Please select a future time for your Dine-In request.',
+  'The restaurant is closed at the moment. Please try placing your order later.':
+      'The restaurant is closed at the moment. Please try placing your order later.',
+  'This email address is not registered with an email and password.':
+      'This email address is not registered with an email and password.',
+  'The selected product is not available at your delivery address.':
+      'The selected product is not available at your delivery address.',
   'Total Tax Amount': 'Total Tax Amount',
   'Tax on Platform Fee': 'Tax on Platform Fee',
   'Tax on Packaging Fee': 'Tax on Packaging Fee',
@@ -510,7 +557,8 @@ const Map<String, String> enUS = {
   'more for free delivery': 'more for free delivery',
   '(Change)': '(Change)',
   'Change Password': 'Change Password',
-  'Update your password to keep your account secure.': 'Update your password to keep your account secure.',
+  'Update your password to keep your account secure.':
+      'Update your password to keep your account secure.',
   'Enter your registered email address and we’ll send you a secure link to reset your password. Open the link in your inbox and follow the steps to create a new password.':
       'Enter your registered email address and we’ll send you a secure link to reset your password. Open the link in your inbox and follow the steps to create a new password.',
   'Enter Email Address': 'Enter Email Address',

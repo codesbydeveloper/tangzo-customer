@@ -1036,10 +1036,10 @@ packages:
     dependency: transitive
     description:
       name: http_auth
-      sha256: b7625acba2987fa69140d9600c679819f33227d665f525fbb2f394e08cf917d1
+      sha256: "77ba5ab7b61933084646b8f2aa029206c97c9cd66edaf5a025c32505be2493b3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   http_parser:
     dependency: transitive
     description:
