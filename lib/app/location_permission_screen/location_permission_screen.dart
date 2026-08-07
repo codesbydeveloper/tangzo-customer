@@ -44,7 +44,7 @@ class LocationPermissionScreen extends StatelessWidget {
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey900, fontSize: 22, fontFamily: AppThemeData.semiBold),
                   ),
                   TranslatedText(
-                    "To provide the best dining experience, allow Foodie to access your location.",
+                    "To provide the best dining experience, allow Tangzo to access your location.",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: themeChange.getThem() ? AppThemeData.grey200 : AppThemeData.grey900, fontSize: 16, fontFamily: AppThemeData.bold),
                   ),

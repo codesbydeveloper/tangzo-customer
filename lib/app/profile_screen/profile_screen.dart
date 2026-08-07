@@ -218,7 +218,7 @@ class ProfileScreen extends StatelessWidget {
                                           }),
                                     cardDecoration(themeChange, controller, "assets/icons/ic_share.svg", "Share app", () {
                                       Share.share(
-                                          '${'Check out Foodie, your ultimate food delivery application!'} \n\n${'Google Play:'} ${Constant.googlePlayLink} \n\n${'App Store:'} ${Constant.appStoreLink}',
+                                          '${'Check out Tangzo, your ultimate food delivery application!'} \n\n${'Google Play:'} ${Constant.googlePlayLink} \n\n${'App Store:'} ${Constant.appStoreLink}',
                                           subject: 'Look what I made!');
                                     }),
                                     cardDecoration(themeChange, controller, "assets/icons/ic_rate.svg", "Rate the app", () {

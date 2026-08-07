@@ -39,8 +39,8 @@ const Map<String, String> enUS = {
   'Send OTP': 'Send OTP',
   'Please enter mobile number': 'Please enter mobile number',
   'or': 'or',
-  'Hey there, thanks for choosing Foodie. Hope you love our product. If you do, share it with your friends using code':
-      'Hey there, thanks for choosing Foodie. Hope you love our product. If you do, share it with your friends using code',
+  'Hey there, thanks for choosing Tangzo. Hope you love our product. If you do, share it with your friends using code':
+      'Hey there, thanks for choosing Tangzo. Hope you love our product. If you do, share it with your friends using code',
   'and get': 'and get',
   'Continue with Email': 'Continue with Email',
   "Enter email address": "Enter email address",
@@ -66,8 +66,8 @@ const Map<String, String> enUS = {
   "Did’t receive any code? ": "Did’t receive any code? ",
   "Send Again": "Send Again",
   "Create an Account 🚀": "Create an Account 🚀",
-  "Sign up to start your food adventure with Foodie":
-      "Sign up to start your food adventure with Foodie",
+  "Sign up to start your food adventure with Tangzo":
+      "Sign up to start your food adventure with Tangzo",
   "First Name": "First Name",
   "Enter First Name": "Enter First Name",
   "Last Name": "Last Name",
@@ -325,8 +325,8 @@ const Map<String, String> enUS = {
   "off": "off",
   "Error": "Error",
   "Enable Location Services 📍": "Enable Location Services 📍",
-  "To provide the best dining experience, allow Foodie to access your location.":
-      "To provide the best dining experience, allow Foodie to access your location.",
+  "To provide the best dining experience, allow Tangzo to access your location.":
+  "To provide the best dining experience, allow Tangzo to access your location.",
   "Use Current Location": "Use Current Location",
   "Set From Map": "Set From Map",
   "Enter Manually location": "Enter Manually location",
@@ -381,13 +381,13 @@ const Map<String, String> enUS = {
   'Ok': 'Ok',
   'Copied': 'Copied',
   "Invite Friends & Businesses": "Invite Friends & Businesses",
-  "Invite your friends to sign up with Foodie using your code, and you’ll earn after their Success the first order! 💸🍔":
-      "Invite your friends to sign up with Foodie using your code, and you’ll earn after their Success the first order! 💸🍔",
+  "Invite your friends to sign up with Tangzo using your code, and you’ll earn after their Success the first order! 💸🍔":
+      "Invite your friends to sign up with Tangzo using your code, and you’ll earn after their Success the first order! 💸🍔",
   'after their Success the first order! 💸🍔':
       'after their Success the first order! 💸🍔',
   "Share Code": "Share Code",
-  'Invite your friends to sign up with Foodie using your code, and you’ll earn':
-      'Invite your friends to sign up with Foodie using your code, and you’ll earn',
+  'Invite your friends to sign up with Tangzo using your code, and you’ll earn':
+      'Invite your friends to sign up with Tangzo using your code, and you’ll earn',
   'Share': 'Share',
   "Timing is not added by restaurant": "Timing is not added by restaurant",
   "Also applicable on table booking": "Also applicable on table booking",
@@ -419,7 +419,7 @@ const Map<String, String> enUS = {
   "Keep track of your balance, transactions, and payment methods all in one place.":
       "Keep track of your balance, transactions, and payment methods all in one place.",
   "Transaction not found": "Transaction not found",
-  "Foodie": "Foodie",
+  "Tangzo": "Tangzo",
   "Get Started": "Get Started",
   "Welcome to Tangzo": "Welcome to Tangzo",
   "Your Favorite Food Delivered Fast!": "Your Favorite Food Delivered Fast!",
@@ -430,13 +430,13 @@ const Map<String, String> enUS = {
   'Please enter tips Amount': 'Please enter tips Amount',
   "Continue Payment": "Continue Payment",
   "we Enter In": "we Enter In",
-  "Foodie Customer": "Foodie Customer",
+  "Tangzo Customer": "Tangzo Customer",
   "Gift Card": "Gift Card",
   "Dine-In": "Dine-In",
   "Dine-In Booking": "Dine-In Booking",
   "Share app": "Share app",
-  'Check out Foodie, your ultimate food delivery application!':
-      'Check out Foodie, your ultimate food delivery application!',
+  'Check out Tangzo, your ultimate food delivery application!':
+      'Check out Tangzo, your ultimate food delivery application!',
   "Legal": "Legal",
   'App Store:': 'App Store:',
   'Google Play:': 'Google Play:',

@@ -38,8 +38,8 @@ const Map<String, String> lnAr = {
   "Send OTP": "إرسال رمز التحقق",
   "Please enter mobile number": "يرجى إدخال رقم الهاتف",
   "or": "أو",
-  "Hey there, thanks for choosing Foodie. Hope you love our product. If you do, share it with your friends using code":
-      "مرحبًا، شكرًا لاختيارك Foodie. نأمل أن يعجبك تطبيقنا. إذا أعجبك، شاركه مع أصدقائك باستخدام الكود",
+  "Hey there, thanks for choosing Tangzo. Hope you love our product. If you do, share it with your friends using code":
+      "مرحبًا، شكرًا لاختيارك Tangzo. نأمل أن يعجبك تطبيقنا. إذا أعجبك، شاركه مع أصدقائك باستخدام الكود",
   "and get": "واحصل على",
   "Continue with Email": "الاستمرار باستخدام البريد الإلكتروني",
   "Enter email address": "أدخل البريد الإلكتروني",
@@ -65,7 +65,7 @@ const Map<String, String> lnAr = {
   "Did’t receive any code? ": "لم تستلم رمزًا؟ ",
   "Send Again": "إعادة الإرسال",
   "Create an Account 🚀": "إنشاء حساب 🚀",
-  "Sign up to start your food adventure with Foodie":
+  "Sign up to start your food adventure with Tangzo":
       "سجّل لبدء مغامرتك الغذائية مع فودي",
   "First Name": "الاسم الأول",
   "Enter First Name": "أدخل الاسم الأول",
@@ -322,7 +322,7 @@ const Map<String, String> lnAr = {
   "off": "خصم",
   "Error": "خطأ",
   "Enable Location Services 📍": "فعّل خدمات الموقع 📍",
-  "To provide the best dining experience, allow Foodie to access your location.":
+  "To provide the best dining experience, allow Tangzo to access your location.":
       "لأفضل تجربة طعام، اسمح لتطبيق فودي بالوصول إلى موقعك.",
   "Use Current Location": "استخدام الموقع الحالي",
   "Set From Map": "تحديد من الخريطة",
@@ -378,11 +378,11 @@ const Map<String, String> lnAr = {
   'Ok': 'حسناً',
   'Copied': 'تم النسخ',
   "Invite Friends & Businesses": "دعوة الأصدقاء والشركات",
-  "Invite your friends to sign up with Foodie using your code, and you’ll earn after their Success the first order! 💸🍔":
+  "Invite your friends to sign up with Tangzo using your code, and you’ll earn after their Success the first order! 💸🍔":
       "ادعُ أصدقاءك للتسجيل في فودي باستخدام رمزك، وستربح بعد إتمام أول طلب لهم بنجاح! 💸🍔",
   'after their Success the first order! 💸🍔': 'بعد نجاح أول طلب لهم! 💸🍔',
   "Share Code": "مشاركة الرمز",
-  'Invite your friends to sign up with Foodie using your code, and you’ll earn':
+  'Invite your friends to sign up with Tangzo using your code, and you’ll earn':
       'ادعُ أصدقاءك للتسجيل في فودي باستخدام رمزك وستربح',
   'Share': 'مشاركة',
   "Timing is not added by restaurant": "المطعم لم يضف المواعيد",
@@ -415,9 +415,9 @@ const Map<String, String> lnAr = {
   "Keep track of your balance, transactions, and payment methods all in one place.":
       "تابع رصيدك والمعاملات وطرق الدفع كلها في مكان واحد.",
   "Transaction not found": "لم يتم العثور على معاملة",
-  "Foodie": "فودي",
+  "Tangzo": "Tangzo",
   "Get Started": "ابدأ",
-  "Welcome to Tangzo": "مرحبًا بك في فودي",
+  "Welcome to Tangzo": "مرحبًا بك في Tangzo",
   "Your Favorite Food Delivered Fast!": "طعامك المفضل يصل بسرعة!",
   "Cancel Payment": "إلغاء الدفع",
   "Exit": "خروج",
@@ -426,12 +426,12 @@ const Map<String, String> lnAr = {
   'Please enter tips Amount': 'يرجى إدخال مبلغ الإكرامية',
   "Continue Payment": "متابعة الدفع",
   "we Enter In": "ندخل في",
-  "Foodie Customer": "عميل فودي",
+  "Tangzo Customer": "عميل Tangzo",
   "Gift Card": "بطاقة هدايا",
   "Dine-In": "تناول في المطعم",
   "Dine-In Booking": "حجز تناول الطعام",
   "Share app": "مشاركة التطبيق",
-  'Check out Foodie, your ultimate food delivery application!':
+  'Check out Tangzo, your ultimate food delivery application!':
       'جرّب فودي، أفضل تطبيق لتوصيل الطعام!',
   "Legal": "قانوني",
   'App Store:': 'متجر التطبيقات:',

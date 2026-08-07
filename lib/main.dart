@@ -115,7 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: Consumer<DarkThemeProvider>(
         builder: (context, value, child) {
           return GetMaterialApp(
-            title: 'Foodie Customer',
+            title: 'Tangzo Customer',
             debugShowCheckedModeBanner: false,
             theme: Styles.themeData(
                 themeChangeProvider.darkTheme == 0

@@ -93,7 +93,7 @@ class ReferFriendScreen extends StatelessWidget {
                                   height: 8,
                                 ),
                                 TranslatedText(
-                                  "${'Invite your friends to sign up with Foodie using your code, and you’ll earn'} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order! 💸🍔'}",
+                                  "${'Invite your friends to sign up with Tangzo using your code, and you’ll earn'} ${Constant.amountShow(amount: Constant.referralAmount)} ${'after their Success the first order! 💸🍔'}",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 16,
@@ -192,7 +192,7 @@ class ReferFriendScreen extends StatelessWidget {
                                   textColor: AppThemeData.grey50,
                                   onPress: () async {
                                     await Share.share(
-                                      "${"Hey there, thanks for choosing Foodie. Hope you love our product. If you do, share it with your friends using code"} ${controller.referralModel.value.referralCode.toString()} ${"and get"}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed"}",
+                                      "${"Hey there, thanks for choosing Tangzo. Hope you love our product. If you do, share it with your friends using code"} ${controller.referralModel.value.referralCode.toString()} ${"and get"}${Constant.amountShow(amount: Constant.referralAmount.toString())} ${"when order completed"}",
                                     );
                                   },
                                 ),
