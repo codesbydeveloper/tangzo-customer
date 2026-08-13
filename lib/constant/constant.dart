@@ -48,16 +48,16 @@ class Constant {
 
   static ShippingAddress selectedLocation = ShippingAddress();
   static UserModel? userModel;
-  static const globalUrl = "https://foodie.siswebapp.com/";
+  static const globalUrl = "https://admin.tangzo.in/";
 
   static bool isZoneAvailable = false;
   static ZoneModel? selectedZone;
 
   static String theme = "theme_1";
-  static String mapAPIKey = "";
+  static String mapAPIKey = "AIzaSyCJpkzNIEmPoiOUTc76RB-AwhCk06GN2JU";
   static String placeHolderImage = "";
 
-  static String senderId = '347811382179';
+  static String senderId = '728732933030';
   static String jsonNotificationFileURL = '';
 
   static bool isCashbackActive = false;
