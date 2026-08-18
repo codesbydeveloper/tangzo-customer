@@ -185,7 +185,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     RoundedButtonFill(
-                      title: "Continue with Mobile Number",
+                      title: "Continue with WhatsApp",
                       textColor: themeChange.getThem() ? AppThemeData.grey100 : AppThemeData.grey900,
                       color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey100,
                       icon: SvgPicture.asset(

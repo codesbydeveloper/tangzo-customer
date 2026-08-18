@@ -1,5 +1,6 @@
+import 'dart:math';
 import 'package:customer/constant/show_toast_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:customer/services/msg91_whatsapp_service.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -9,8 +10,8 @@ class OtpController extends GetxController {
   RxString countryCode = "".obs;
   RxString countryISOCode = "".obs;
   RxString phoneNumber = "".obs;
-  RxString verificationId = "".obs;
-  RxInt resendToken = 0.obs;
+  RxString fullPhoneNumber = "".obs;
+  RxString expectedOtp = "".obs;
   RxBool isLoading = true.obs;
 
   @override
@@ -19,34 +20,41 @@ class OtpController extends GetxController {
     super.onInit();
   }
 
-  getArgument() async {
-    dynamic argumentData = Get.arguments;
-    if (argumentData != null) {
-      countryCode.value = argumentData['countryCode'];
-      countryISOCode.value = argumentData['countryISOCode'];
-      phoneNumber.value = argumentData['phoneNumber'];
-      verificationId.value = argumentData['verificationId'];
+  void getArgument() {
+    final dynamic args = Get.arguments;
+    if (args != null) {
+      countryCode.value = args['countryCode'] ?? '';
+      countryISOCode.value = args['countryISOCode'] ?? '';
+      phoneNumber.value = args['phoneNumber'] ?? '';
+      fullPhoneNumber.value = args['fullPhoneNumber'] ?? '';
+      expectedOtp.value = args['otp'] ?? '';
     }
     isLoading.value = false;
     update();
   }
 
-  Future<bool> sendOTP() async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: countryCode.value + phoneNumber.value,
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {},
-      codeSent: (String verificationId0, int? resendToken0) async {
-        verificationId.value = verificationId0;
-        resendToken.value = resendToken0!;
-        ShowToastDialog.showToast("OTP sent");
-      },
-      timeout: const Duration(seconds: 25),
-      forceResendingToken: resendToken.value,
-      codeAutoRetrievalTimeout: (String verificationId0) {
-        verificationId0 = verificationId.value;
-      },
+  // Returns true if entered OTP matches the one we generated and sent
+  bool verifyOtp(String entered) => entered.trim() == expectedOtp.value;
+
+  // Resend: generate new OTP and send again via MSG91
+  Future<void> sendOTP() async {
+    ShowToastDialog.showLoader("Sending OTP…");
+    final newOtp = _generateOtp();
+    final error = await Msg91WhatsappService.sendOtp(
+      phoneNumber: fullPhoneNumber.value,
+      otp: newOtp,
     );
-    return true;
+    ShowToastDialog.closeLoader();
+    if (error == null) {
+      expectedOtp.value = newOtp;
+      ShowToastDialog.showToast("OTP sent to your WhatsApp");
+    } else {
+      ShowToastDialog.showToast(error);
+    }
+  }
+
+  static String _generateOtp() {
+    final rng = Random.secure();
+    return (100000 + rng.nextInt(900000)).toString();
   }
 }

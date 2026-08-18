@@ -44,7 +44,7 @@ class SignupController extends GetxController {
     if (argumentData != null) {
       type.value = argumentData['type'];
       userModel.value = argumentData['userModel'];
-      if (type.value == "mobileNumber") {
+      if (type.value == "mobileNumber" || type.value == "whatsapp") {
         phoneNUmberEditingController.value.text = userModel.value.phoneNumber.toString();
         countryCodeEditingController.value.text = userModel.value.countryCode.toString();
         countryISOCodeEditingController.value.text = userModel.value.countryISOCode.toString();
@@ -129,7 +129,7 @@ class SignupController extends GetxController {
           userModel.value.countryISOCode = countryISOCodeEditingController.value.text;
           userModel.value.createdAt = Timestamp.now();
           userModel.value.appIdentifier = Platform.isAndroid ? 'android' : 'ios';
-          userModel.value.provider = 'email';
+          userModel.value.provider = type.value == "whatsapp" ? 'whatsapp' : 'email';
 
           await FireStoreUtils.getReferralUserByCode(referralCodeEditingController.value.text).then((value) async {
             if (value != null) {

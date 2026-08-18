@@ -111,7 +111,7 @@ class SignupScreen extends StatelessWidget {
                         title: 'Phone Number',
                         controller: controller.phoneNUmberEditingController.value,
                         hintText: 'Enter Phone Number',
-                        enable: controller.type.value == "mobileNumber" ? false : true,
+                        enable: controller.type.value == "mobileNumber" || controller.type.value == "whatsapp" ? false : true,
                         textInputType: const TextInputType.numberWithOptions(signed: true, decimal: true),
                         textInputAction: TextInputAction.done,
                         inputFormatters: [
@@ -126,7 +126,7 @@ class SignupScreen extends StatelessWidget {
                                   controller.countryCodeEditingController.value.text = value?.dialCode ?? Constant.defaultCountryCode;
                                   controller.countryISOCodeEditingController.value.text = value?.code ?? Constant.defaultCountryCode;
                                 },
-                                enabled: controller.type.value == "mobileNumber" ? false : true,
+                                enabled: controller.type.value == "mobileNumber" || controller.type.value == "whatsapp" ? false : true,
                                 onChanged: (value) {
                                   controller.countryCodeEditingController.value.text = value.dialCode.toString();
                                   controller.countryISOCodeEditingController.value.text = value.code.toString();

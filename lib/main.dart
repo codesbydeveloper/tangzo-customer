@@ -9,12 +9,11 @@ import 'package:customer/services/database_helper.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/themes/styles.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
-import 'package:customer/utils/dynamic_traslator.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
-import 'package:customer/utils/translation_notifier.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -36,9 +35,19 @@ void main() async {
 
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-    androidProvider: AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.appAttest,
+    androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+    appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
   );
+
+  if (kDebugMode) {
+    try {
+      final debugToken = await FirebaseAppCheck.instance.getToken(true);
+      debugPrint('APP CHECK DEBUG TOKEN (add in Firebase Console > App Check > Manage debug tokens):');
+      debugPrint(debugToken ?? 'null');
+    } catch (e) {
+      debugPrint('App Check debug token error: $e');
+    }
+  }
 
   DatabaseHelper.instance;
   await Preferences.initPref();
