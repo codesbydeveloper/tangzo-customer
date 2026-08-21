@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>728732933030-t6blti9in020oh1134tqeid45tnivm9a.apps.googleusercontent.com</string>
+	<string>728732933030-uqggdqdn74300ov6n6f48fi5hhrpqddt.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.728732933030-t6blti9in020oh1134tqeid45tnivm9a</string>
+	<string>com.googleusercontent.apps.728732933030-uqggdqdn74300ov6n6f48fi5hhrpqddt</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>728732933030-343nu08fi5kj3lldt9msrf84bldvchg3.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCx_Z27vjO3P36Bm2JFZYfo1dXwamIMMGg</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.foodies.customer.customer</string>
+	<string>com.tangzo.customer</string>
 	<key>PROJECT_ID</key>
 	<string>tangzo-apps</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:728732933030:ios:d5e97f382a7792f8418d67</string>
+	<string>1:728732933030:ios:fc05f6eff9494888418d67</string>
 	<key>DATABASE_URL</key>
 	<string>https://tangzo-apps-default-rtdb.firebaseio.com</string>
 </dict>

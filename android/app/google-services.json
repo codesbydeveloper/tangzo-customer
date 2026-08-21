@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "728732933030-ilhmhq3nkobn6d3t4q0tmtof0va7nbh6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.customer.customer",
+            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
+          }
+        },
+        {
+          "client_id": "728732933030-nrcs4bh19omd2bqe1ngqf0971a7fhii9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.customer.customer",
+            "certificate_hash": "a0871433fdb464482bb49d163c84afd68245ad92"
+          }
+        },
+        {
           "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -32,10 +48,10 @@
               "client_type": 3
             },
             {
-              "client_id": "728732933030-cqj9hjpranv2ho1id074sllc45k4lriu.apps.googleusercontent.com",
+              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.tangzo.driver"
+                "bundle_id": "com.foodies.restaurant.restaurant"
               }
             }
           ]
@@ -47,6 +63,110 @@
         "mobilesdk_app_id": "1:728732933030:android:414b367763282585418d67",
         "android_client_info": {
           "package_name": "com.foodies.driver.driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728732933030-343nu08fi5kj3lldt9msrf84bldvchg3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.driver.driver",
+            "certificate_hash": "a0871433fdb464482bb49d163c84afd68245ad92"
+          }
+        },
+        {
+          "client_id": "728732933030-t9hlc3ouj69k09o6qs8cl6q0j5lc4uhu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.driver.driver",
+            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
+          }
+        },
+        {
+          "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKEpbC7OxzWyFSkwAjT6Ue8RqisTN4WR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.foodies.restaurant.restaurant"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728732933030:android:cb981abba45ab96b418d67",
+        "android_client_info": {
+          "package_name": "com.foodies.restaurant.restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728732933030-8i8q31in65p3n4543i6rcljpcisshmjo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.restaurant.restaurant",
+            "certificate_hash": "a0871433fdb464482bb49d163c84afd68245ad92"
+          }
+        },
+        {
+          "client_id": "728732933030-av0ps7dbf0m57u2iv2hkr08mnip1h99o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodies.restaurant.restaurant",
+            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
+          }
+        },
+        {
+          "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKEpbC7OxzWyFSkwAjT6Ue8RqisTN4WR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.foodies.restaurant.restaurant"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728732933030:android:71833b0fb121d858418d67",
+        "android_client_info": {
+          "package_name": "com.tangzo.customer"
         }
       },
       "oauth_client": [
@@ -68,10 +188,10 @@
               "client_type": 3
             },
             {
-              "client_id": "728732933030-cqj9hjpranv2ho1id074sllc45k4lriu.apps.googleusercontent.com",
+              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.tangzo.driver"
+                "bundle_id": "com.foodies.restaurant.restaurant"
               }
             }
           ]
