@@ -30,7 +30,7 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.tangzo.customer"
     compileSdk = 36
-    ndkVersion = "29.0.14033849"
+    ndkVersion = "29.0.14206865"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11 // Use VERSION_17 for now
@@ -49,10 +49,24 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 2
+        versionCode = 3
         versionName = flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+        }
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
 
 
@@ -81,14 +95,8 @@ flutter {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
     implementation platform('com.google.firebase:firebase-bom:33.2.0')
-    implementation 'io.card:android-sdk:5.5.1'
-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.0'
     implementation 'com.google.android.gms:play-services-wallet:19.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.foloosi:FoloosiSDK:2.0.24'
     implementation 'com.google.code.gson:gson:2.10.1'
-}
-
-flutter {
-    source = "../.."
 }
