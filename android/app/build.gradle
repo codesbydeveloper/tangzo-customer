@@ -97,6 +97,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.2.0')
     implementation 'com.google.android.gms:play-services-wallet:19.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.foloosi:FoloosiSDK:2.0.24'
+    // implementation 'com.foloosi:FoloosiSDK:2.0.24'
     implementation 'com.google.code.gson:gson:2.10.1'
 }

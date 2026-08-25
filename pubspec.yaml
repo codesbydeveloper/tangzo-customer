@@ -103,7 +103,7 @@ dependencies:
   http: ^1.6.0
   flutter_google_places_hoc081098: ^2.0.0
   # google_mlkit_translation: ^0.13.1
-  foloosi_plugins: ^1.1.0
+  # foloosi_plugins: ^1.1.0
   phonepe_payment_sdk: ^3.0.2
   change_app_package_name: ^1.5.0
   

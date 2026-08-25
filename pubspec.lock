@@ -752,14 +752,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  foloosi_plugins:
-    dependency: "direct main"
-    description:
-      name: foloosi_plugins
-      sha256: "2e826d62c067c0f5262a7c0b90edd7e3dbd9cf8ff5a49de34dc08e6bc56d6ea5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   freezed_annotation:
     dependency: transitive
     description:
@@ -2182,5 +2174,5 @@ packages:
     source: hosted
     version: "1.1.4"
 sdks:
-  dart: ">=3.11.3 <4.0.0"
+  dart: ">=3.11.0 <4.0.0"
   flutter: ">=3.41.0"
