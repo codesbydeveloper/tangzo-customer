@@ -868,14 +868,14 @@ class PopularRestaurant extends StatelessWidget {
                             RestaurantImageView(
                               vendorModel: vendorModel,
                             ),
-                            Container(
-                              height: Responsive.height(20, context),
-                              width: Responsive.width(100, context),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: const Alignment(-0.00, -1.00),
-                                  end: const Alignment(0, 1),
-                                  colors: [Colors.black.withOpacity(0), const Color(0xFF111827)],
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: const Alignment(-0.00, -1.00),
+                                    end: const Alignment(0, 1),
+                                    colors: [Colors.black.withOpacity(0), const Color(0xFF111827)],
+                                  ),
                                 ),
                               ),
                             ),
@@ -1135,28 +1135,28 @@ class AllRestaurant extends StatelessWidget {
                                 vendorModel: vendorModel,
                               ),
                             ),
-                            Container(
-                              height: Responsive.height(20, context),
-                              width: Responsive.width(100, context),
-                              decoration: BoxDecoration(
-                                color: (isOpen) ? null : Colors.black38,
-                                gradient: (isOpen)
-                                    ? LinearGradient(
-                                        begin: const Alignment(-0.00, -1.00),
-                                        end: const Alignment(0, 1),
-                                        colors: [Colors.black.withOpacity(0), const Color(0xFF111827)],
-                                      )
-                                    : null,
-                              ),
-                              child: (isOpen)
-                                  ? SizedBox()
-                                  : Center(
-                                      child: Image.asset(
-                                        "assets/images/closed.PNG",
-                                        height: Responsive.height(16, context),
-                                        fit: BoxFit.fill,
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: (isOpen) ? null : Colors.black38,
+                                  gradient: (isOpen)
+                                      ? LinearGradient(
+                                          begin: const Alignment(-0.00, -1.00),
+                                          end: const Alignment(0, 1),
+                                          colors: [Colors.black.withOpacity(0), const Color(0xFF111827)],
+                                        )
+                                      : null,
+                                ),
+                                child: (isOpen)
+                                    ? const SizedBox()
+                                    : Center(
+                                        child: Image.asset(
+                                          "assets/images/closed.PNG",
+                                          height: 80,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                    ),
+                              ),
                             ),
                             Positioned(
                               right: 10,
@@ -1363,8 +1363,12 @@ class NewArrival extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth > 600 ? 220.0 : Responsive.width(55, context);
+    final sectionHeight = screenWidth > 600 ? 260.0 : Responsive.height(28, context);
+
     return SizedBox(
-      height: Responsive.height(24, context),
+      height: sectionHeight,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
@@ -1381,7 +1385,7 @@ class NewArrival extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: 10),
               child: SizedBox(
-                width: Responsive.width(55, context),
+                width: cardWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1389,12 +1393,13 @@ class NewArrival extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: const BorderRadius.all(Radius.circular(10)),
                         child: Stack(
+                          fit: StackFit.expand,
                           children: [
                             NetworkImageWidget(
                               imageUrl: vendorModel.photo.toString(),
                               fit: BoxFit.cover,
-                              height: Responsive.height(100, context),
-                              width: Responsive.width(100, context),
+                              height: double.infinity,
+                              width: double.infinity,
                             ),
                             Container(
                               decoration: BoxDecoration(
@@ -1947,7 +1952,7 @@ class BannerView extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 150,
+          height: MediaQuery.of(context).size.width > 600 ? 220 : 150,
           child: PageView.builder(
             physics: const BouncingScrollPhysics(),
             controller: controller.pageController.value,
@@ -1999,9 +2004,13 @@ class BannerView extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 14),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    child: NetworkImageWidget(
-                      imageUrl: bannerModel.photo.toString(),
-                      fit: BoxFit.cover,
+                    child: SizedBox.expand(
+                      child: NetworkImageWidget(
+                        imageUrl: bannerModel.photo.toString(),
+                        fit: BoxFit.cover,
+                        height: double.infinity,
+                        width: double.infinity,
+                      ),
                     ),
                   ),
                 ),
@@ -2100,9 +2109,13 @@ class BannerBottomView extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 14),
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    child: NetworkImageWidget(
-                      imageUrl: bannerModel.photo.toString(),
-                      fit: BoxFit.cover,
+                    child: SizedBox.expand(
+                      child: NetworkImageWidget(
+                        imageUrl: bannerModel.photo.toString(),
+                        fit: BoxFit.cover,
+                        height: double.infinity,
+                        width: double.infinity,
+                      ),
                     ),
                   ),
                 ),
@@ -2186,6 +2199,8 @@ class CategoryView extends StatelessWidget {
                           child: NetworkImageWidget(
                             imageUrl: vendorCategoryModel.photo.toString(),
                             fit: BoxFit.cover,
+                            height: 60,
+                            width: 60,
                           ),
                         ),
                       ),
@@ -2247,8 +2262,8 @@ class StoryView extends StatelessWidget {
                       NetworkImageWidget(
                         imageUrl: storyModel.videoThumbnail.toString(),
                         fit: BoxFit.cover,
-                        height: Responsive.height(100, context),
-                        width: Responsive.width(100, context),
+                        height: double.infinity,
+                        width: double.infinity,
                       ),
                       Container(
                         color: Colors.black.withOpacity(0.30),

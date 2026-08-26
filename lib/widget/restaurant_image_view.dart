@@ -16,47 +16,53 @@ class RestaurantImageView extends StatefulWidget {
 
 class _RestaurantImageViewState extends State<RestaurantImageView> {
   int currentPage = 0;
-
-  PageController pageController = PageController(initialPage: 1);
+  PageController pageController = PageController();
+  Timer? _timer;
 
   @override
   void initState() {
-    animateSlider();
     super.initState();
+    animateSlider();
   }
 
   void animateSlider() {
-    if (widget.vendorModel.photos != null && widget.vendorModel.photos!.isNotEmpty) {
-      if (widget.vendorModel.photos!.length > 1) {
-        Timer.periodic(const Duration(seconds: 2), (Timer timer) {
-          if (currentPage < widget.vendorModel.photos!.length - 1) {
-            currentPage++;
-          } else {
-            currentPage = 0;
-          }
+    final photos = widget.vendorModel.photos;
+    if (photos == null || photos.length <= 1) return;
 
-          if (pageController.hasClients) {
-            pageController.animateToPage(
-              currentPage,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeIn,
-            );
-          }
-        });
+    _timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+      if (!mounted || !pageController.hasClients) return;
+      if (currentPage < photos.length - 1) {
+        currentPage++;
+      } else {
+        currentPage = 0;
       }
-    }
+      pageController.animateToPage(
+        currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final imageHeight = Responsive.height(20, context).clamp(140.0, 220.0);
     return SizedBox(
-      height: Responsive.height(20, context),
+      height: imageHeight,
+      width: double.infinity,
       child: widget.vendorModel.photos == null || widget.vendorModel.photos!.isEmpty
           ? NetworkImageWidget(
               imageUrl: widget.vendorModel.photo.toString(),
               fit: BoxFit.cover,
-              height: Responsive.height(20, context),
-              width: Responsive.width(100, context),
+              height: imageHeight,
+              width: double.infinity,
             )
           : PageView.builder(
               physics: const BouncingScrollPhysics(),
@@ -71,8 +77,8 @@ class _RestaurantImageViewState extends State<RestaurantImageView> {
                 return NetworkImageWidget(
                   imageUrl: image.toString(),
                   fit: BoxFit.cover,
-                  height: Responsive.height(20, context),
-                  width: Responsive.width(100, context),
+                  height: imageHeight,
+                  width: double.infinity,
                 );
               },
             ),

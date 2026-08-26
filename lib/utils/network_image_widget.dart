@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer/constant/constant.dart';
-import 'package:customer/themes/responsive.dart';
 import 'package:flutter/material.dart';
-
 
 class NetworkImageWidget extends StatelessWidget {
   final String imageUrl;
@@ -26,26 +24,47 @@ class NetworkImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final url = imageUrl.trim();
+    final hasUrl = url.isNotEmpty && url != 'null';
+
+    Widget placeholder = Image.asset(
+      "assets/images/simmer_gif.gif",
+      height: height,
+      width: width,
+      fit: BoxFit.cover,
+    );
+
+    Widget fallback = errorWidget ??
+        (Constant.placeholderImage.isNotEmpty
+            ? Image.network(
+                Constant.placeholderImage,
+                fit: fit ?? BoxFit.cover,
+                height: height,
+                width: width,
+                errorBuilder: (_, __, ___) => Container(
+                  height: height,
+                  width: width,
+                  color: Colors.grey.shade300,
+                ),
+              )
+            : Container(
+                height: height,
+                width: width,
+                color: Colors.grey.shade300,
+              ));
+
+    if (!hasUrl) {
+      return SizedBox(height: height, width: width, child: fallback);
+    }
+
     return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: fit ?? BoxFit.fitWidth,
-      height: height ?? Responsive.height(8, context),
-      width: width ?? Responsive.width(15, context),
+      imageUrl: url,
+      fit: fit ?? BoxFit.cover,
+      height: height,
+      width: width,
       color: color,
-      progressIndicatorBuilder: (context, url, downloadProgress) => Image.asset(
-        "assets/images/simmer_gif.gif",
-        height: height,
-        width: width,
-        fit: BoxFit.fill,
-      ),
-      errorWidget: (context, url, error) =>
-          errorWidget ??
-          Image.network(
-            Constant.placeholderImage,
-            fit: fit ?? BoxFit.fitWidth,
-            height: height ?? Responsive.height(8, context),
-            width: width ?? Responsive.width(15, context),
-          ),
+      progressIndicatorBuilder: (context, url, downloadProgress) => placeholder,
+      errorWidget: (context, url, error) => fallback,
     );
   }
 }
