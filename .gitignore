@@ -46,3 +46,6 @@ app.*.map.json
 
 # Local payment gateway secrets (never commit)
 lib/constant/cashfree_payment_config.local.dart
+
+# iOS local build cache
+ios/build/
