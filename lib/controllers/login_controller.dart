@@ -17,6 +17,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginController extends GetxController {
+  static const String _googleWebClientId = '728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com';
+
   Rx<TextEditingController> emailEditingController = TextEditingController().obs;
   Rx<TextEditingController> passwordEditingController = TextEditingController().obs;
 
@@ -132,6 +134,8 @@ class LoginController extends GetxController {
             }
           });
         }
+      } else {
+        ShowToastDialog.showToast("Google sign-in failed. Please try again.");
       }
     });
   }
@@ -207,7 +211,9 @@ class LoginController extends GetxController {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
-      await googleSignIn.initialize();
+      await googleSignIn.initialize(
+        serverClientId: _googleWebClientId,
+      );
 
       final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
       if (googleUser.id.isEmpty) return null;
@@ -234,8 +240,13 @@ class LoginController extends GetxController {
       final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      debugPrint("Google Sign-In FirebaseAuthException: ${e.code} ${e.message}");
+      ShowToastDialog.showToast(e.message ?? "Google sign-in failed.");
+      return null;
     } catch (e) {
-      print("Google Sign-In Error: $e");
+      debugPrint("Google Sign-In Error: $e");
+      ShowToastDialog.showToast("Google sign-in failed. Please try again.");
       return null;
     }
   }
