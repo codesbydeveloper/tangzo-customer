@@ -47,20 +47,15 @@
 			<true />
 		</dict>
 		<key>NSCameraUsageDescription</key>
-		<string>This app needs access to camera permission</string>
-		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>This app needs access to location when open and in the background.</string>
-		<key>NSLocationAlwaysUsageDescription</key>
-		<string>This app needs access to location when in the background.</string>
+		<string>Tangzo uses your camera to take a profile photo and to send images to the restaurant or delivery partner in order chat.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>This app needs access to location when open.</string>
+		<string>Tangzo uses your location to show nearby restaurants, set your delivery address on the map, and display live order tracking to your door.</string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>Used to capture audio for image picker plugin</string>
+		<string>Tangzo uses the microphone when you record a video or use voice search to find restaurants and dishes.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
-		<string>This app uses speech recognition to convert your speech into text for searching
-			restaurants and products.</string>
+		<string>Tangzo uses speech recognition to turn your voice into text when you search for restaurants and food.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>This app needs access to your gallery photo.</string>
+		<string>Tangzo uses your photo library so you can choose a profile picture and attach photos in chat or order reviews.</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true />
 		<key>UIBackgroundModes</key>
