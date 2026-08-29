@@ -77,67 +77,62 @@ class LoginController extends GetxController {
   }
 
   Future<void> loginWithGoogle() async {
-    // Do not show a blocking loader before Google Sign-In — the EasyLoading mask cancels the account picker on Android.
     final value = await signInWithGoogle();
     if (value == null) {
       return;
     }
 
-    ShowToastDialog.showLoader("please wait...");
-    try {
-      if (value.additionalUserInfo!.isNewUser) {
-        UserModel userModel = UserModel();
-        userModel.id = value.user!.uid;
-        userModel.email = value.user!.email;
-        userModel.firstName = value.user!.displayName?.split(' ').first;
-        userModel.lastName = value.user!.displayName?.split(' ').last;
-        userModel.provider = 'google';
+    if (value.additionalUserInfo!.isNewUser) {
+      UserModel userModel = UserModel();
+      userModel.id = value.user!.uid;
+      userModel.email = value.user!.email;
+      userModel.firstName = value.user!.displayName?.split(' ').first;
+      userModel.lastName = value.user!.displayName?.split(' ').last;
+      userModel.provider = 'google';
 
-        Get.off(const SignupScreen(), arguments: {
-          "userModel": userModel,
-          "type": "google",
-        });
-      } else {
-        final userExit = await FireStoreUtils.userExistOrNot(value.user!.uid);
-        if (userExit == true) {
-          UserModel? userModel = await FireStoreUtils.getUserProfile(value.user!.uid);
-          if (userModel!.role == Constant.userRoleCustomer) {
-            if (userModel.active == true) {
-              userModel.fcmToken = await NotificationService.getToken();
-              await FireStoreUtils.updateUser(userModel);
-              if (userModel.shippingAddress != null && userModel.shippingAddress!.isNotEmpty) {
-                if (userModel.shippingAddress!.where((element) => element.isDefault == true).isNotEmpty) {
-                  Constant.selectedLocation = userModel.shippingAddress!.where((element) => element.isDefault == true).single;
-                } else {
-                  Constant.selectedLocation = userModel.shippingAddress!.first;
-                }
-                Get.offAll(const DashBoardScreen());
-              } else {
-                Get.offAll(const LocationPermissionScreen());
-              }
+      Get.off(const SignupScreen(), arguments: {
+        "userModel": userModel,
+        "type": "google",
+      });
+      return;
+    }
+
+    final userExit = await FireStoreUtils.userExistOrNot(value.user!.uid);
+    if (userExit == true) {
+      UserModel? userModel = await FireStoreUtils.getUserProfile(value.user!.uid);
+      if (userModel!.role == Constant.userRoleCustomer) {
+        if (userModel.active == true) {
+          userModel.fcmToken = await NotificationService.getToken();
+          await FireStoreUtils.updateUser(userModel);
+          if (userModel.shippingAddress != null && userModel.shippingAddress!.isNotEmpty) {
+            if (userModel.shippingAddress!.where((element) => element.isDefault == true).isNotEmpty) {
+              Constant.selectedLocation = userModel.shippingAddress!.where((element) => element.isDefault == true).single;
             } else {
-              await FirebaseAuth.instance.signOut();
-              ShowToastDialog.showToast("This user is disable please contact to administrator");
+              Constant.selectedLocation = userModel.shippingAddress!.first;
             }
+            Get.offAll(const DashBoardScreen());
           } else {
-            await FirebaseAuth.instance.signOut();
+            Get.offAll(const LocationPermissionScreen());
           }
         } else {
-          UserModel userModel = UserModel();
-          userModel.id = value.user!.uid;
-          userModel.email = value.user!.email;
-          userModel.firstName = value.user!.displayName?.split(' ').first;
-          userModel.lastName = value.user!.displayName?.split(' ').last;
-          userModel.provider = 'google';
-
-          Get.off(const SignupScreen(), arguments: {
-            "userModel": userModel,
-            "type": "google",
-          });
+          await FirebaseAuth.instance.signOut();
+          ShowToastDialog.showToast("This user is disable please contact to administrator");
         }
+      } else {
+        await FirebaseAuth.instance.signOut();
       }
-    } finally {
-      ShowToastDialog.closeLoader();
+    } else {
+      UserModel userModel = UserModel();
+      userModel.id = value.user!.uid;
+      userModel.email = value.user!.email;
+      userModel.firstName = value.user!.displayName?.split(' ').first;
+      userModel.lastName = value.user!.displayName?.split(' ').last;
+      userModel.provider = 'google';
+
+      Get.off(const SignupScreen(), arguments: {
+        "userModel": userModel,
+        "type": "google",
+      });
     }
   }
 
@@ -222,6 +217,9 @@ class LoginController extends GetxController {
     try {
       await _ensureGoogleSignInInitialized();
 
+      // Clear Credential Manager cache — avoids false "canceled" on Play Store builds.
+      await GoogleSignIn.instance.signOut();
+
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate(
         scopeHint: _googleScopes,
       );
@@ -236,7 +234,7 @@ class LoginController extends GetxController {
         return null;
       }
 
-      if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != "customer") {
+      if ((userModel?.provider == "google" || userModel?.provider == "apple") && userModel?.role != Constant.userRoleCustomer) {
         ShowToastDialog.showToast("The account already exists for that email.");
         return null;
       }
@@ -256,7 +254,14 @@ class LoginController extends GetxController {
       return userCredential;
     } on GoogleSignInException catch (e) {
       debugPrint("Google Sign-In Error: $e");
-      if (e.code != GoogleSignInExceptionCode.canceled) {
+      final message = e.toString();
+      if (message.contains('Account reauth failed') ||
+          message.contains('ApiException: 10') ||
+          message.contains('DEVELOPER_ERROR')) {
+        ShowToastDialog.showToast(
+          "Google sign-in config error: verify Play App signing SHA-1 is in Firebase, then upload a new build.",
+        );
+      } else if (e.code != GoogleSignInExceptionCode.canceled) {
         ShowToastDialog.showToast("Google sign-in failed. Please try again.");
       }
       return null;

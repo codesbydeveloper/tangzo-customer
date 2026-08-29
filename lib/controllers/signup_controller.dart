@@ -71,7 +71,10 @@ class SignupController extends GetxController {
   }
 
   Future<void> signUp() async {
-    ShowToastDialog.showLoader("Please wait");
+    final isSocialSignUp = type.value == "google" || type.value == "apple";
+    if (!isSocialSignUp) {
+      ShowToastDialog.showLoader("Please wait");
+    }
     if (type.value == "google" || type.value == "apple" || type.value == "mobileNumber") {
       userModel.value.firstName = firstNameEditingController.value.text.toString();
       userModel.value.lastName = lastNameEditingController.value.text.toString();
@@ -169,6 +172,8 @@ class SignupController extends GetxController {
       }
     }
 
-    ShowToastDialog.closeLoader();
+    if (!isSocialSignUp) {
+      ShowToastDialog.closeLoader();
+    }
   }
 }

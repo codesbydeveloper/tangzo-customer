@@ -15,19 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "728732933030-b53muk63k92egqh6pcputmuco474pq19.apps.googleusercontent.com",
+          "client_id": "728732933030-9bijghvccec3tdpqkgisu473v9ohh9v6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.tangzo.customer",
             "certificate_hash": "0f622c8d6f7becd9d1acc0f61f0224ac5898e652"
-          }
-        },
-        {
-          "client_id": "728732933030-rrsmmjvjclvgju1gc7vc4g7nd8q01j02.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tangzo.customer",
-            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
           }
         },
         {
@@ -48,10 +40,10 @@
               "client_type": 3
             },
             {
-              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
+              "client_id": "728732933030-c2p0hp23nateq0681jn8fes75k4k9pbt.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.foodies.restaurant.restaurant"
+                "bundle_id": "com.tangzo.customer"
               }
             }
           ]
@@ -67,15 +59,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "728732933030-5mfdqsovq2d33e3ph35rniag3185tkdc.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tangzo.driver",
-            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
-          }
-        },
-        {
-          "client_id": "728732933030-btefcualquvi5tqr6nrekb8kcikf6vcv.apps.googleusercontent.com",
+          "client_id": "728732933030-p2u3i31ti0orcp2jup0i46r5kmkhhqer.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.tangzo.driver",
@@ -100,10 +84,10 @@
               "client_type": 3
             },
             {
-              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
+              "client_id": "728732933030-c2p0hp23nateq0681jn8fes75k4k9pbt.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.foodies.restaurant.restaurant"
+                "bundle_id": "com.tangzo.customer"
               }
             }
           ]
@@ -119,19 +103,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "728732933030-6tk34c3u7mgume0g9abml7208qpqbo3u.apps.googleusercontent.com",
+          "client_id": "728732933030-pfocrbgiufj2q9ivlr5q9ib1hefbrosn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.tangzo.restaurant",
             "certificate_hash": "6df862af6a23054a623d228e41324749a4c3cae8"
-          }
-        },
-        {
-          "client_id": "728732933030-u7gvp7lo4oa7kcannthtmu84lt84biuq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tangzo.restaurant",
-            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
           }
         },
         {
@@ -152,10 +128,10 @@
               "client_type": 3
             },
             {
-              "client_id": "728732933030-5ktikfai8crh9qjnld4cjr1bv2gat139.apps.googleusercontent.com",
+              "client_id": "728732933030-c2p0hp23nateq0681jn8fes75k4k9pbt.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.foodies.restaurant.restaurant"
+                "bundle_id": "com.tangzo.customer"
               }
             }
           ]
