@@ -50,6 +50,8 @@
 		<string>Tangzo uses your camera to take a profile photo and to send images to the restaurant or delivery partner in order chat.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Tangzo uses your location to show nearby restaurants, set your delivery address on the map, and display live order tracking to your door.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Tangzo uses your location to show nearby restaurants, set your delivery address on the map, and display live order tracking to your door.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Tangzo uses the microphone when you record a video or use voice search to find restaurants and dishes.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
