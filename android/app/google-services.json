@@ -39,6 +39,14 @@
           }
         },
         {
+          "client_id": "728732933030-rs2l52g7s365lvgd280j9klphjmkj2vj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tangzo.customer",
+            "certificate_hash": "717077acac3f020755d6a16f347bcdeba6b23919"
+          }
+        },
+        {
           "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
           "client_type": 3
         }

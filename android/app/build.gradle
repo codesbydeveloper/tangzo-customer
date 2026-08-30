@@ -58,7 +58,7 @@ android {
         applicationId = "com.tangzo.customer"
         minSdkVersion = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 10
+        versionCode = 11
         versionName = flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
