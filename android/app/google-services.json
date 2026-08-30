@@ -23,6 +23,22 @@
           }
         },
         {
+          "client_id": "728732933030-gv8tdtrbltcs381hdlfuori0459n06be.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tangzo.customer",
+            "certificate_hash": "2ad9d5040159a010eb5e69ea8f74682fbdb751e8"
+          }
+        },
+        {
+          "client_id": "728732933030-j5grn54bchnmuukg2h8mqg372heltngf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tangzo.customer",
+            "certificate_hash": "b2edd3084f5bbd2b10cb061f812eb8dd929dc2f6"
+          }
+        },
+        {
           "client_id": "728732933030-060cg97kmedeo6hbb84ocgms5e4lo267.apps.googleusercontent.com",
           "client_type": 3
         }
