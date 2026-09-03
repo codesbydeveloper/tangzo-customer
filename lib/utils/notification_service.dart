@@ -10,6 +10,7 @@ import 'package:customer/controllers/dash_board_controller.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +38,7 @@ class NotificationService {
     );
 
     if (request.authorizationStatus == AuthorizationStatus.authorized || request.authorizationStatus == AuthorizationStatus.provisional) {
-      const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
       var iosInitializationSettings = const DarwinInitializationSettings();
       final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: iosInitializationSettings);
       await flutterLocalNotificationsPlugin.initialize(
@@ -119,13 +120,22 @@ class NotificationService {
     log('Message data: ${message.notification!.body.toString()}');
     try {
       AndroidNotificationChannel channel = const AndroidNotificationChannel(
-        '0',
-        'foodie-customer',
-        description: 'Show QuickLAI Notification',
+        'high_importance_channel',
+        'Tangzo Notifications',
+        description: 'Tangzo order and chat notifications',
         importance: Importance.max,
       );
-      AndroidNotificationDetails notificationDetails =
-          AndroidNotificationDetails(channel.id, channel.name, channelDescription: 'your channel Description', importance: Importance.high, priority: Priority.high, ticker: 'ticker');
+      AndroidNotificationDetails notificationDetails = AndroidNotificationDetails(
+        channel.id,
+        channel.name,
+        channelDescription: channel.description,
+        importance: Importance.high,
+        priority: Priority.high,
+        ticker: 'ticker',
+        icon: '@mipmap/launcher_icon',
+        largeIcon: const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'),
+        color: const Color(0xFFFF6B1E),
+      );
       const DarwinNotificationDetails darwinNotificationDetails = DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true);
       NotificationDetails notificationDetailsBoth = NotificationDetails(android: notificationDetails, iOS: darwinNotificationDetails);
       await FlutterLocalNotificationsPlugin().show(
