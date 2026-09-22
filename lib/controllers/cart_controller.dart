@@ -5,7 +5,6 @@ import 'dart:math' as maths;
 import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/cart_screen/oder_placing_screens.dart';
 import 'package:customer/app/wallet_screen/wallet_screen.dart';
-import 'package:customer/constant/cashfree_payment_config.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/send_notification.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
@@ -804,7 +803,11 @@ class CartController extends GetxController {
   RxBool isLoading = true.obs;
 
   Future<void> getPaymentSettings() async {
-    cashfreeModel.value = CashfreePaymentConfig.model;
+    await FireStoreUtils.getPaymentSettingsData();
+    final cashFreePref = Preferences.getString(Preferences.cashFreeSettings);
+    if (cashFreePref.isNotEmpty) {
+      cashfreeModel.value = Cashfree.fromJson(jsonDecode(cashFreePref));
+    }
     selectedPaymentMethod.value = PaymentGateway.cashfree.name;
     isLoading.value = false;
   }

@@ -5,7 +5,6 @@ import 'dart:math' as maths;
 
 import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/app/wallet_screen/wallet_screen.dart';
-import 'package:customer/constant/cashfree_payment_config.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/cashfree_service_controller.dart';
@@ -95,7 +94,11 @@ class WalletController extends GetxController {
   Rx<Cashfree> cashfreeModel = Cashfree().obs;
 
   Future<void> getPaymentSettings() async {
-    cashfreeModel.value = CashfreePaymentConfig.model;
+    await FireStoreUtils.getPaymentSettingsData();
+    final cashFreePref = Preferences.getString(Preferences.cashFreeSettings);
+    if (cashFreePref.isNotEmpty) {
+      cashfreeModel.value = Cashfree.fromJson(jsonDecode(cashFreePref));
+    }
     selectedPaymentMethod.value = PaymentGateway.cashfree.name;
     isLoadingPayment.value = false;
   }
