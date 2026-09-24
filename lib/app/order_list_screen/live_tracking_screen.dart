@@ -30,50 +30,71 @@ class LiveTrackingScreen extends StatelessWidget {
             ),
             body: controller.isLoading.value
                 ? Constant.loader()
-                : Constant.selectedMapType == 'osm'
-                    ? flutterMap.FlutterMap(
-                        mapController: controller.osmMapController,
-                        options: flutterMap.MapOptions(
-                          initialCenter: location.LatLng(controller.driverUserModel.value.location?.latitude ?? 20.5937, controller.driverUserModel.value.location?.longitude ?? 78.9629),
-                          initialZoom: 10,
+                : Column(
+                    children: [
+                      if (!controller.driverLocationAvailable.value &&
+                          (controller.orderModel.value.driverID?.isNotEmpty ?? false))
+                        MaterialBanner(
+                          content: const Text('Driver live location temporarily unavailable'),
+                          backgroundColor: themeChange.getThem() ? AppThemeData.grey800 : AppThemeData.grey200,
+                          actions: const [SizedBox.shrink()],
                         ),
-                        children: [
-                          flutterMap.TileLayer(
-                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            userAgentPackageName: Platform.isAndroid ? 'com.foodies.customer.customer' : 'com.foodies.customer.customer',
-                          ),
-                          flutterMap.MarkerLayer(markers: controller.orderModel.value.id == null ? [] : controller.osmMarkers),
-                          if (controller.routePoints.isNotEmpty)
-                            flutterMap.PolylineLayer(
-                              polylines: [
-                                flutterMap.Polyline(
-                                  points: controller.routePoints,
-                                  strokeWidth: 5.0,
-                                  color: Colors.blue,
+                      Expanded(
+                        child: Constant.selectedMapType == 'osm'
+                            ? flutterMap.FlutterMap(
+                                mapController: controller.osmMapController,
+                                options: flutterMap.MapOptions(
+                                  initialCenter: location.LatLng(
+                                      controller.driverUserModel.value.location?.latitude ?? 20.5937,
+                                      controller.driverUserModel.value.location?.longitude ?? 78.9629),
+                                  initialZoom: 10,
                                 ),
-                              ],
-                            ),
-                        ],
-                      )
-                    : Obx(
-                        () => GoogleMap(
-                          padding: EdgeInsets.only(top: 300),
-                          myLocationEnabled: true,
-                          myLocationButtonEnabled: true,
-                          mapType: MapType.terrain,
-                          zoomControlsEnabled: false,
-                          polylines: Set<Polyline>.of(controller.polyLines.values),
-                          markers: Set<Marker>.of(controller.markers.values),
-                          onMapCreated: (GoogleMapController mapController) {
-                            controller.mapController = mapController;
-                          },
-                          initialCameraPosition: CameraPosition(
-                            zoom: 16,
-                            target: LatLng(controller.driverUserModel.value.location?.latitude != null ? controller.driverUserModel.value.location?.latitude ?? 45.521563 : 45.521563,
-                                controller.driverUserModel.value.location?.longitude != null ? controller.driverUserModel.value.location?.longitude ?? 45.521563 : 45.521563),
-                          ),
-                        ),
+                                children: [
+                                  flutterMap.TileLayer(
+                                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    userAgentPackageName:
+                                        Platform.isAndroid ? 'com.foodies.customer.customer' : 'com.foodies.customer.customer',
+                                  ),
+                                  flutterMap.MarkerLayer(markers: controller.orderModel.value.id == null ? [] : controller.osmMarkers),
+                                  if (controller.routePoints.isNotEmpty)
+                                    flutterMap.PolylineLayer(
+                                      polylines: [
+                                        flutterMap.Polyline(
+                                          points: controller.routePoints,
+                                          strokeWidth: 5.0,
+                                          color: Colors.blue,
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              )
+                            : Obx(
+                                () => GoogleMap(
+                                  padding: EdgeInsets.only(top: 300),
+                                  myLocationEnabled: true,
+                                  myLocationButtonEnabled: true,
+                                  mapType: MapType.terrain,
+                                  zoomControlsEnabled: false,
+                                  polylines: Set<Polyline>.of(controller.polyLines.values),
+                                  markers: Set<Marker>.of(controller.markers.values),
+                                  onMapCreated: (GoogleMapController mapController) {
+                                    controller.mapController = mapController;
+                                  },
+                                  initialCameraPosition: CameraPosition(
+                                    zoom: 16,
+                                    target: LatLng(
+                                        controller.driverUserModel.value.location?.latitude != null
+                                            ? controller.driverUserModel.value.location?.latitude ?? 45.521563
+                                            : 45.521563,
+                                        controller.driverUserModel.value.location?.longitude != null
+                                            ? controller.driverUserModel.value.location?.longitude ?? 45.521563
+                                            : 45.521563),
+                                  ),
+                                ),
+                              ),
                       ),
+                    ],
+                  ),
           );
         });
   }

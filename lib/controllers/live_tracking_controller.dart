@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart' hide Constant;
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/models/order_model.dart';
 import 'package:customer/models/user_model.dart';
+import 'package:customer/services/driver_tracking_api.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +23,16 @@ class LiveTrackingController extends GetxController {
   GoogleMapController? mapController;
   final flutterMap.MapController osmMapController = flutterMap.MapController();
 
+  StreamSubscription<DocumentSnapshot>? _orderSubscription;
+  Timer? _driverLocationPollTimer;
+  String? _polledDriverId;
+  bool _locationPollInFlight = false;
+
+  /// True when Redis returned a fresh live location for the assigned driver.
+  RxBool driverLocationAvailable = false.obs;
+
+  static const Duration _driverLocationPollInterval = Duration(seconds: 5);
+
   @override
   void onInit() {
     addMarkerSetup();
@@ -30,7 +42,9 @@ class LiveTrackingController extends GetxController {
 
   @override
   void onClose() {
-    // Clean up controllers and cancel any running animations.
+    _orderSubscription?.cancel();
+    _orderSubscription = null;
+    _stopDriverLocationPolling();
     mapController = null;
     _cancelGoogleAnim();
     _cancelOsmAnim();
@@ -70,84 +84,191 @@ class LiveTrackingController extends GetxController {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       orderModel.value = argumentData['orderModel'];
-      // listen to order doc
-      FireStoreUtils.fireStore.collection(CollectionName.restaurantOrders).doc(orderModel.value.id).snapshots().listen((event) {
-        if (event.data() != null) {
-          OrderModel orderModelStream = OrderModel.fromJson(event.data()!);
-          orderModel.value = orderModelStream;
 
-          // listen to driver doc inside order listener
-          if (orderModel.value.driverID != null && orderModel.value.driverID!.isNotEmpty) {
-            FireStoreUtils.fireStore.collection(CollectionName.users).doc(orderModel.value.driverID).snapshots().listen((event) {
-              if (event.data() != null) {
-                driverUserModel.value = UserModel.fromJson(event.data()!);
+      await _orderSubscription?.cancel();
+      _orderSubscription = FireStoreUtils.fireStore
+          .collection(CollectionName.restaurantOrders)
+          .doc(orderModel.value.id)
+          .snapshots()
+          .listen((event) {
+        if (event.data() == null) {
+          return;
+        }
 
-                // animate / fetch based on map type & order status
-                if (Constant.selectedMapType != 'osm') {
-                  if (orderModel.value.status == Constant.orderShipped) {
-                    getPolyline(
-                        sourceLatitude: driverUserModel.value.location!.latitude,
-                        sourceLongitude: driverUserModel.value.location!.longitude,
-                        destinationLatitude: orderModel.value.vendor!.latitude,
-                        destinationLongitude: orderModel.value.vendor!.longitude);
-                  } else if (orderModel.value.status == Constant.orderInTransit) {
-                    getPolyline(
-                        sourceLatitude: driverUserModel.value.location!.latitude,
-                        sourceLongitude: driverUserModel.value.location!.longitude,
-                        destinationLatitude: orderModel.value.address!.location!.latitude,
-                        destinationLongitude: orderModel.value.address!.location!.longitude);
-                  } else {
-                    getPolyline(
-                        sourceLatitude: orderModel.value.address!.location!.latitude,
-                        sourceLongitude: orderModel.value.address!.location!.longitude,
-                        destinationLatitude: orderModel.value.vendor!.latitude,
-                        destinationLongitude: orderModel.value.vendor!.longitude);
-                  }
+        final OrderModel orderModelStream = OrderModel.fromJson(event.data()!);
+        orderModel.value = orderModelStream;
 
-                  // call animation for Google (non-blocking)
-                } else {
-                  // OSM flow
-                  current.value = location.LatLng(driverUserModel.value.location!.latitude ?? 0.0, driverUserModel.value.location!.longitude ?? 0.0);
-
-                  // set source/destination logically depending on status
-                  if (orderModel.value.status == Constant.orderShipped) {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
-                  } else if (orderModel.value.status == Constant.orderInTransit) {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, destination.value);
-                  } else {
-                    source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
-                    destination.value = location.LatLng(orderModel.value.address!.location!.latitude ?? 0.0, orderModel.value.address!.location!.longitude ?? 0.0);
-                    awaitFetchRouteAndAnimateOSM(current.value, source.value);
-                  }
-                }
-                onDriverLocationUpdate(
-                  lat: driverUserModel.value.location!.latitude,
-                  lng: driverUserModel.value.location!.longitude,
-                  rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
-                );
-              }
-            });
+        final String? driverId = orderModel.value.driverID;
+        if (driverId != null && driverId.isNotEmpty) {
+          if (Constant.useRedisDriverTracking) {
+            _ensureDriverLocationPolling(driverId);
+          } else {
+            _startLegacyDriverUserListener(driverId);
           }
+        } else {
+          _stopDriverLocationPolling();
+          driverLocationAvailable.value = false;
+        }
 
-          if (orderModel.value.status == Constant.orderCompleted) {
-            // ensure we cancel animations before popping
-            _cancelGoogleAnim();
-            _cancelOsmAnim();
-            if (Get.isOverlaysOpen) {
-              // just a gentle guard; your app may not need this
-            }
-            Get.back();
-          }
+        if (orderModel.value.status == Constant.orderCompleted) {
+          _cancelGoogleAnim();
+          _cancelOsmAnim();
+          _stopDriverLocationPolling();
+          Get.back();
         }
       });
     }
 
     isLoading.value = false;
     update();
+  }
+
+  void _ensureDriverLocationPolling(String driverId) {
+    if (_polledDriverId == driverId && _driverLocationPollTimer != null) {
+      return;
+    }
+    _stopDriverLocationPolling();
+    _polledDriverId = driverId;
+    // Immediate fetch, then periodic.
+    _pollDriverLocationOnce();
+    _driverLocationPollTimer = Timer.periodic(_driverLocationPollInterval, (_) {
+      _pollDriverLocationOnce();
+    });
+  }
+
+  void _stopDriverLocationPolling() {
+    _driverLocationPollTimer?.cancel();
+    _driverLocationPollTimer = null;
+    _polledDriverId = null;
+    _legacyDriverSubscription?.cancel();
+    _legacyDriverSubscription = null;
+  }
+
+  StreamSubscription? _legacyDriverSubscription;
+
+  /// Rollback path: previous nested users/{driverId} snapshots.
+  void _startLegacyDriverUserListener(String driverId) {
+    _legacyDriverSubscription?.cancel();
+    _legacyDriverSubscription = FireStoreUtils.fireStore.collection(CollectionName.users).doc(driverId).snapshots().listen((event) {
+      if (event.data() != null) {
+        driverUserModel.value = UserModel.fromJson(event.data()!);
+        final lat = driverUserModel.value.location?.latitude;
+        final lng = driverUserModel.value.location?.longitude;
+        if (lat != null && lng != null) {
+          driverLocationAvailable.value = true;
+          _applyDriverLiveLocation(
+            latitude: lat,
+            longitude: lng,
+            heading: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+          );
+        } else {
+          driverLocationAvailable.value = false;
+        }
+      }
+    });
+  }
+
+  Future<void> _pollDriverLocationOnce() async {
+    if (_locationPollInFlight) {
+      return;
+    }
+    final orderId = orderModel.value.id;
+    final driverId = orderModel.value.driverID ?? _polledDriverId;
+    if (orderId == null || orderId.isEmpty || driverId == null || driverId.isEmpty) {
+      return;
+    }
+
+    _locationPollInFlight = true;
+    try {
+      final live = await DriverTrackingApi.getDriverLocation(
+        driverId: driverId,
+        orderId: orderId,
+      );
+
+      if (live == null) {
+        // Do not invent or keep advertising stale coords as "current".
+        driverLocationAvailable.value = false;
+        driverUserModel.value.location = null;
+        update();
+        return;
+      }
+
+      driverLocationAvailable.value = true;
+      driverUserModel.value.location = UserLocation(
+        latitude: live.latitude,
+        longitude: live.longitude,
+      );
+      driverUserModel.value.rotation = live.heading;
+      _applyDriverLiveLocation(
+        latitude: live.latitude,
+        longitude: live.longitude,
+        heading: live.heading,
+      );
+    } finally {
+      _locationPollInFlight = false;
+    }
+  }
+
+  void _applyDriverLiveLocation({
+    required double latitude,
+    required double longitude,
+    required double heading,
+  }) {
+    if (Constant.selectedMapType != 'osm') {
+      if (orderModel.value.status == Constant.orderShipped) {
+        getPolyline(
+          sourceLatitude: latitude,
+          sourceLongitude: longitude,
+          destinationLatitude: orderModel.value.vendor!.latitude,
+          destinationLongitude: orderModel.value.vendor!.longitude,
+        );
+      } else if (orderModel.value.status == Constant.orderInTransit) {
+        getPolyline(
+          sourceLatitude: latitude,
+          sourceLongitude: longitude,
+          destinationLatitude: orderModel.value.address!.location!.latitude,
+          destinationLongitude: orderModel.value.address!.location!.longitude,
+        );
+      } else {
+        getPolyline(
+          sourceLatitude: orderModel.value.address!.location!.latitude,
+          sourceLongitude: orderModel.value.address!.location!.longitude,
+          destinationLatitude: orderModel.value.vendor!.latitude,
+          destinationLongitude: orderModel.value.vendor!.longitude,
+        );
+      }
+    } else {
+      current.value = location.LatLng(latitude, longitude);
+
+      if (orderModel.value.status == Constant.orderShipped) {
+        source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+        destination.value = location.LatLng(
+          orderModel.value.address!.location!.latitude ?? 0.0,
+          orderModel.value.address!.location!.longitude ?? 0.0,
+        );
+        awaitFetchRouteAndAnimateOSM(current.value, source.value);
+      } else if (orderModel.value.status == Constant.orderInTransit) {
+        source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+        destination.value = location.LatLng(
+          orderModel.value.address!.location!.latitude ?? 0.0,
+          orderModel.value.address!.location!.longitude ?? 0.0,
+        );
+        awaitFetchRouteAndAnimateOSM(current.value, destination.value);
+      } else {
+        source.value = location.LatLng(orderModel.value.vendor!.latitude ?? 0.0, orderModel.value.vendor!.longitude ?? 0.0);
+        destination.value = location.LatLng(
+          orderModel.value.address!.location!.latitude ?? 0.0,
+          orderModel.value.address!.location!.longitude ?? 0.0,
+        );
+        awaitFetchRouteAndAnimateOSM(current.value, source.value);
+      }
+    }
+
+    onDriverLocationUpdate(
+      lat: latitude,
+      lng: longitude,
+      rotation: heading,
+    );
   }
 
   Future<void> awaitFetchRouteAndAnimateOSM(location.LatLng cur, location.LatLng dest) async {
@@ -236,13 +357,17 @@ class LiveTrackingController extends GetxController {
       }
 
       // Set markers depending on order status
+      final driverLat = driverUserModel.value.location?.latitude;
+      final driverLng = driverUserModel.value.location?.longitude;
       if (orderModel.value.status == Constant.orderShipped) {
-        _setOrUpdateMarker(
-          id: 'Driver',
-          position: LatLng(driverUserModel.value.location!.latitude!, driverUserModel.value.location!.longitude!),
-          descriptor: driverIcon,
-          rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
-        );
+        if (driverLat != null && driverLng != null) {
+          _setOrUpdateMarker(
+            id: 'Driver',
+            position: LatLng(driverLat, driverLng),
+            descriptor: driverIcon,
+            rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+          );
+        }
         _setOrUpdateMarker(
           id: 'Departure',
           position: LatLng(orderModel.value.vendor!.latitude!, orderModel.value.vendor!.longitude!),
@@ -250,12 +375,14 @@ class LiveTrackingController extends GetxController {
           rotation: 0.0,
         );
       } else if (orderModel.value.status == Constant.orderInTransit) {
-        _setOrUpdateMarker(
-          id: 'Driver',
-          position: LatLng(driverUserModel.value.location!.latitude!, driverUserModel.value.location!.longitude!),
-          descriptor: driverIcon,
-          rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
-        );
+        if (driverLat != null && driverLng != null) {
+          _setOrUpdateMarker(
+            id: 'Driver',
+            position: LatLng(driverLat, driverLng),
+            descriptor: driverIcon,
+            rotation: double.tryParse(driverUserModel.value.rotation.toString()) ?? 0.0,
+          );
+        }
         _setOrUpdateMarker(
           id: 'Destination',
           position: LatLng(orderModel.value.address!.location!.latitude!, orderModel.value.address!.location!.longitude!),

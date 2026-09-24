@@ -60,6 +60,10 @@ class Constant {
   static String senderId = '728732933030';
   static String jsonNotificationFileURL = '';
 
+  /// Phase 4: customer live tracking reads driver GPS from Redis via Cloud Functions.
+  /// Order status stays on Firestore. Set false to use legacy users.location snapshots.
+  static bool useRedisDriverTracking = true;
+
   static bool isCashbackActive = false;
   static String defaultCountryCode = '';
 
