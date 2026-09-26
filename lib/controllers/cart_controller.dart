@@ -220,11 +220,14 @@ class CartController extends GetxController {
           final charge = vendorModel.value.deliveryCharge ?? deliveryChargeModel.value;
           deliveryCharges.value = totalDistance.value > charge.minimumDeliveryChargesWithinKm! ? totalDistance.value * charge.deliveryChargesPerKm! : charge.minimumDeliveryCharges!.toDouble();
         }
+        deliveryCharges.value = Constant.roundAmount(deliveryCharges.value);
       }
     }
 
     /// ---------------- PACKAGING & PLATFORM ----------------
-    packagingCharge.value = Constant.packagingChargeEnable == true && vendorModel.value.packagingCharge != null ? double.parse(vendorModel.value.packagingCharge.toString()) : 0.0;
+    packagingCharge.value = Constant.roundAmount(
+      Constant.packagingChargeEnable == true && vendorModel.value.packagingCharge != null ? double.parse(vendorModel.value.packagingCharge.toString()) : 0.0,
+    );
 
     platformFee.value = Constant.calculatePlatFormMeModel(platFromFeeModel: Constant.platformFeeModel);
 
@@ -237,6 +240,7 @@ class CartController extends GetxController {
 
       subTotal.value += (price * qty) + (extras * qty);
     }
+    subTotal.value = Constant.roundAmount(subTotal.value);
 
     /// ---------------- COUPON ----------------
     if (selectedCouponModel.value.id != null) {
@@ -263,7 +267,7 @@ class CartController extends GetxController {
                 specialDiscount.value = double.parse(slot.discount.toString());
                 specialType.value = slot.type.toString();
 
-                specialDiscountAmount.value = slot.type == "percentage" ? (subTotal.value * specialDiscount.value / 100) : specialDiscount.value;
+                specialDiscountAmount.value = Constant.roundAmount(slot.type == "percentage" ? (subTotal.value * specialDiscount.value / 100) : specialDiscount.value);
               }
             }
           }
@@ -272,7 +276,7 @@ class CartController extends GetxController {
     }
 
     /// ---------------- DISCOUNT RATIO ----------------
-    final totalDiscount = couponAmount.value + specialDiscountAmount.value;
+    final totalDiscount = Constant.roundAmount(couponAmount.value + specialDiscountAmount.value);
     double discountRatio = 0.0;
 
     if (subTotal.value > 0 && totalDiscount > 0) {
@@ -348,10 +352,24 @@ class CartController extends GetxController {
     }
 
     /// ---------------- TOTAL ----------------
-    totalTaxAmount.value = productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value;
+    productTaxAmount.value = Constant.roundAmount(productTaxAmount.value);
+    orderTaxAmount.value = Constant.roundAmount(orderTaxAmount.value);
+    driverDeliveryTaxAmount.value = Constant.roundAmount(driverDeliveryTaxAmount.value);
+    packagingTaxAmount.value = Constant.roundAmount(packagingTaxAmount.value);
+    platformTaxAmount.value = Constant.roundAmount(platformTaxAmount.value);
+    totalTaxAmount.value = Constant.roundAmount(
+      productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value,
+    );
 
-    totalAmount.value =
-        (subTotal.value - totalDiscount) + totalTaxAmount.value + (isEnableFreeDeliveryByAdmin.value ? 0 : deliveryCharges.value) + deliveryTips.value + packagingCharge.value + platformFee.value;
+    deliveryTips.value = Constant.roundAmount(deliveryTips.value);
+    totalAmount.value = Constant.roundAmount(
+      (subTotal.value - totalDiscount) +
+          totalTaxAmount.value +
+          (isEnableFreeDeliveryByAdmin.value ? 0 : deliveryCharges.value) +
+          deliveryTips.value +
+          packagingCharge.value +
+          platformFee.value,
+    );
 
     getCashback();
   }

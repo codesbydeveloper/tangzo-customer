@@ -102,10 +102,12 @@ class Constant {
   static String localisationType = "Deepl"; // AI/ML or Deepl
   static String apiKeyOfDeepl = ""; // AI/ML or Deepl
 
+  static const int amountDecimalDigits = 3;
+
   static CurrencyModel inrCurrency = CurrencyModel(
     id: "",
     code: "INR",
-    decimalDigits: 2,
+    decimalDigits: amountDecimalDigits,
     isActive: true,
     name: "Indian Rupee",
     symbol: "₹",
@@ -189,9 +191,17 @@ class Constant {
 
   static String? adminType = "admin";
 
+  static double roundAmount(num? value) {
+    final parsed = value == null ? 0.0 : value.toDouble();
+    if (parsed.isNaN || parsed.isInfinite) {
+      return 0.0;
+    }
+    return double.parse(parsed.toStringAsFixed(amountDecimalDigits));
+  }
+
   static String amountShow({required String? amount}) {
-    final value = (amount == null || amount == "null" || amount.isEmpty) ? 0.0 : double.parse(amount);
-    final formatted = value.toStringAsFixed(currencyModel?.decimalDigits ?? 0);
+    final value = (amount == null || amount == "null" || amount.isEmpty) ? 0.0 : double.tryParse(amount) ?? 0.0;
+    final formatted = roundAmount(value).toStringAsFixed(currencyModel?.decimalDigits ?? amountDecimalDigits);
     final symbol = currencyModel?.symbol ?? '₹';
 
     return currencyModel?.symbolAtRight == true ? '$formatted $symbol' : '$symbol $formatted';
@@ -253,7 +263,7 @@ class Constant {
         taxAmount = (double.parse(amount.toString()) * double.parse(taxModel.tax!.toString())) / 100;
       }
     }
-    return taxAmount;
+    return roundAmount(taxAmount);
   }
 
   static double calculatePlatFormMeModel({PlatformFeeModel? platFromFeeModel}) {
@@ -261,7 +271,7 @@ class Constant {
     if (platFromFeeModel != null && platFromFeeModel.enable == true) {
       taxAmount = double.parse(platFromFeeModel.amount.toString());
     }
-    return taxAmount;
+    return roundAmount(taxAmount);
   }
 
   static double calculateDiscount({String? amount, CouponModel? offerModel}) {
@@ -273,7 +283,7 @@ class Constant {
         taxAmount = double.parse(offerModel.discount.toString());
       }
     }
-    return taxAmount;
+    return roundAmount(taxAmount);
   }
 
   static String calculateReview({required String? reviewCount, required String? reviewSum}) {
@@ -592,15 +602,16 @@ class Constant {
 
       subTotal += (price * qty) + (extras * qty);
     }
+    subTotal = Constant.roundAmount(subTotal);
 
     /// ---------------- DISCOUNTS ----------------
-    couponAmount = double.parse(orderModel.discount.toString());
+    couponAmount = Constant.roundAmount(double.parse(orderModel.discount.toString()));
 
     if (orderModel.specialDiscount != null && orderModel.specialDiscount!['special_discount'] != null) {
-      specialDiscountAmount = double.parse(orderModel.specialDiscount!['special_discount'].toString());
+      specialDiscountAmount = Constant.roundAmount(double.parse(orderModel.specialDiscount!['special_discount'].toString()));
     }
 
-    final double totalDiscount = couponAmount + specialDiscountAmount;
+    final double totalDiscount = Constant.roundAmount(couponAmount + specialDiscountAmount);
 
     /// ---------------- DISCOUNT RATIO ----------------
     double discountRatio = 0.0;
@@ -648,13 +659,13 @@ class Constant {
     }
 
     /// ---------------- OTHER CHARGES ----------------
-    deliveryCharges = double.parse(orderModel.deliveryCharge.toString());
+    deliveryCharges = Constant.roundAmount(double.parse(orderModel.deliveryCharge.toString()));
 
-    deliveryTips = double.parse(orderModel.tipAmount.toString());
+    deliveryTips = Constant.roundAmount(double.parse(orderModel.tipAmount.toString()));
 
-    packagingCharge = double.parse(orderModel.vendor!.packagingCharge.toString());
+    packagingCharge = Constant.roundAmount(double.parse(orderModel.vendor!.packagingCharge.toString()));
 
-    platformFee = double.parse(orderModel.platformFee ?? '0.0');
+    platformFee = Constant.roundAmount(double.parse(orderModel.platformFee ?? '0.0'));
 
     /// ---------------- DELIVERY TAX ----------------
     if (orderModel.takeAway != true && orderModel.vendor?.isSelfDelivery != true) {
@@ -687,10 +698,17 @@ class Constant {
     }
 
     /// ---------------- TOTAL TAX ----------------
-    totalTaxAmount = productTaxAmount + orderTaxAmount + driverDeliveryTaxAmount + packagingTaxAmount + platformTaxAmount;
+    productTaxAmount = Constant.roundAmount(productTaxAmount);
+    orderTaxAmount = Constant.roundAmount(orderTaxAmount);
+    driverDeliveryTaxAmount = Constant.roundAmount(driverDeliveryTaxAmount);
+    packagingTaxAmount = Constant.roundAmount(packagingTaxAmount);
+    platformTaxAmount = Constant.roundAmount(platformTaxAmount);
+    totalTaxAmount = Constant.roundAmount(productTaxAmount + orderTaxAmount + driverDeliveryTaxAmount + packagingTaxAmount + platformTaxAmount);
 
     /// ---------------- FINAL TOTAL ----------------
-    totalAmountData = (subTotal - totalDiscount) + totalTaxAmount + (orderModel.isFreeDelivery == false ? deliveryCharges + deliveryTips : 0) + packagingCharge + platformFee;
+    totalAmountData = Constant.roundAmount(
+      (subTotal - totalDiscount) + totalTaxAmount + (orderModel.isFreeDelivery == false ? deliveryCharges + deliveryTips : 0) + packagingCharge + platformFee,
+    );
 
     EmailTemplateModel? emailTemplateModel = await FireStoreUtils.getEmailTemplates(newOrderPlacedd);
 

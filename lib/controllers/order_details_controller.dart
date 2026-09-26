@@ -65,12 +65,13 @@ class OrderDetailsController extends GetxController {
 
       subTotal.value += (price * qty) + (extras * qty);
     }
+    subTotal.value = Constant.roundAmount(subTotal.value);
 
     /// ---------------- DISCOUNTS ----------------
-    couponAmount.value = double.parse(orderModel.value.discount.toString());
+    couponAmount.value = Constant.roundAmount(double.parse(orderModel.value.discount.toString()));
 
     if (orderModel.value.specialDiscount != null && orderModel.value.specialDiscount!['special_discount'] != null) {
-      specialDiscountAmount.value = double.parse(orderModel.value.specialDiscount!['special_discount'].toString());
+      specialDiscountAmount.value = Constant.roundAmount(double.parse(orderModel.value.specialDiscount!['special_discount'].toString()));
     }
 
     if (orderModel.value.taxSetting != null) {
@@ -80,7 +81,7 @@ class OrderDetailsController extends GetxController {
       }
     }
 
-    final double totalDiscount = couponAmount.value + specialDiscountAmount.value;
+    final double totalDiscount = Constant.roundAmount(couponAmount.value + specialDiscountAmount.value);
 
     /// ---------------- DISCOUNT RATIO ----------------
     double discountRatio = 0.0;
@@ -128,13 +129,13 @@ class OrderDetailsController extends GetxController {
     }
 
     /// ---------------- OTHER CHARGES ----------------
-    deliveryCharges.value = double.parse(orderModel.value.deliveryCharge.toString());
+    deliveryCharges.value = Constant.roundAmount(double.parse(orderModel.value.deliveryCharge.toString()));
 
-    deliveryTips.value = double.parse(orderModel.value.tipAmount.toString());
+    deliveryTips.value = Constant.roundAmount(double.parse(orderModel.value.tipAmount.toString()));
 
-    packagingCharge.value = double.parse(orderModel.value.vendor!.packagingCharge.toString());
+    packagingCharge.value = Constant.roundAmount(double.parse(orderModel.value.vendor!.packagingCharge.toString()));
 
-    platformFee.value = double.parse(orderModel.value.platformFee ?? '0.0');
+    platformFee.value = Constant.roundAmount(double.parse(orderModel.value.platformFee ?? '0.0'));
 
     /// ---------------- DELIVERY TAX ----------------
     if (orderModel.value.takeAway != true && orderModel.value.vendor?.isSelfDelivery != true) {
@@ -167,14 +168,23 @@ class OrderDetailsController extends GetxController {
     }
 
     /// ---------------- TOTAL TAX ----------------
-    totalTaxAmount.value = productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value;
+    productTaxAmount.value = Constant.roundAmount(productTaxAmount.value);
+    orderTaxAmount.value = Constant.roundAmount(orderTaxAmount.value);
+    driverDeliveryTaxAmount.value = Constant.roundAmount(driverDeliveryTaxAmount.value);
+    packagingTaxAmount.value = Constant.roundAmount(packagingTaxAmount.value);
+    platformTaxAmount.value = Constant.roundAmount(platformTaxAmount.value);
+    totalTaxAmount.value = Constant.roundAmount(
+      productTaxAmount.value + orderTaxAmount.value + driverDeliveryTaxAmount.value + packagingTaxAmount.value + platformTaxAmount.value,
+    );
 
     /// ---------------- FINAL TOTAL ----------------
-    totalAmount.value = (subTotal.value - totalDiscount) +
-        totalTaxAmount.value +
-        (orderModel.value.isFreeDelivery == false ? deliveryCharges.value + deliveryTips.value : 0) +
-        packagingCharge.value +
-        platformFee.value;
+    totalAmount.value = Constant.roundAmount(
+      (subTotal.value - totalDiscount) +
+          totalTaxAmount.value +
+          (orderModel.value.isFreeDelivery == false ? deliveryCharges.value + deliveryTips.value : 0) +
+          packagingCharge.value +
+          platformFee.value,
+    );
 
     isLoading.value = false;
   }

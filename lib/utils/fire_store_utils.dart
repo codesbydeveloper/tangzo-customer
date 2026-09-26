@@ -335,6 +335,7 @@ class FireStoreUtils {
           Constant.currencyModel!.code = "INR";
           Constant.currencyModel!.name = "Indian Rupee";
           Constant.currencyModel!.symbolAtRight = false;
+          Constant.currencyModel!.decimalDigits = Constant.amountDecimalDigits;
         } else {
           Constant.currencyModel = Constant.inrCurrency;
         }
