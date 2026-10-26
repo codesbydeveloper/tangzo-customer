@@ -826,6 +826,10 @@ class CartController extends GetxController {
     if (cashFreePref.isNotEmpty) {
       cashfreeModel.value = Cashfree.fromJson(jsonDecode(cashFreePref));
     }
+    final codPref = Preferences.getString(Preferences.codSettings);
+    if (codPref.isNotEmpty) {
+      cashOnDeliverySettingModel.value = CodSettingModel.fromJson(jsonDecode(codPref));
+    }
     selectedPaymentMethod.value = PaymentGateway.cashfree.name;
     isLoading.value = false;
   }

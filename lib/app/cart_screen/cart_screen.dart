@@ -1359,8 +1359,18 @@ class CartScreen extends StatelessWidget {
                                       }
                                       controller.isOrderPlaced.value = true;
                                       await controller.getCashback();
-                                      controller.cashFreeMakePayment(context: context, amount: controller.totalAmount.value.toString(), paymentDesc: "Order Payment");
-                                      // Other payment gateways disabled — Cashfree only
+                                      if (controller.selectedPaymentMethod.value == PaymentGateway.cod.name) {
+                                        await controller.placeOrder();
+                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.cashfree.name) {
+                                        await controller.cashFreeMakePayment(
+                                          context: context,
+                                          amount: controller.totalAmount.value.toString(),
+                                          paymentDesc: "Order Payment",
+                                        );
+                                      } else {
+                                        ShowToastDialog.closeLoader();
+                                        ShowToastDialog.showToast("Please select a payment method.");
+                                      }
                                       controller.isOrderPlaced.value = false;
                                     }
                                   },

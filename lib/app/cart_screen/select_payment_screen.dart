@@ -85,9 +85,10 @@ class SelectPaymentScreen extends StatelessWidget {
                             child: Column(
                               children: [
                                 cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
-                                // Wallet, COD and other gateways disabled — Cashfree only
-                                // Visibility(visible: controller.walletSettingModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.wallet, themeChange, "assets/images/ic_wallet.png")),
-                                // Visibility(visible: controller.cashOnDeliverySettingModel.value.isEnabled == true, child: cardDecoration(controller, PaymentGateway.cod, themeChange, "assets/images/ic_cash.png")),
+                                Visibility(
+                                  visible: controller.cashOnDeliverySettingModel.value.isEnabled == true,
+                                  child: cardDecoration(controller, PaymentGateway.cod, themeChange, "assets/images/ic_cash.png"),
+                                ),
                               ],
                             ),
                           ),
@@ -178,7 +179,11 @@ class SelectPaymentScreen extends StatelessWidget {
                         )
                       : Expanded(
                           child: TranslatedText(
-                            value.name.toString().capitalizeFirst ?? '',
+                            value == PaymentGateway.cod
+                                ? "Cash on Delivery"
+                                : value == PaymentGateway.cashfree
+                                    ? "Cashfree"
+                                    : (value.name.toString().capitalizeFirst ?? ''),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                               fontFamily: AppThemeData.medium,
