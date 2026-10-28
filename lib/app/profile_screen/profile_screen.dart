@@ -259,9 +259,10 @@ class ProfileScreen extends StatelessWidget {
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                           child: Column(
                                             children: [
-                                              cardDecoration(themeChange, controller, "assets/icons/ic_restaurant_chat.svg", "Restaurant Inbox", () {
-                                                Get.to(const RestaurantInboxScreen());
-                                              }),
+                                              if (Constant.enableRestaurantCustomerChatCall)
+                                                cardDecoration(themeChange, controller, "assets/icons/ic_restaurant_chat.svg", "Restaurant Inbox", () {
+                                                  Get.to(const RestaurantInboxScreen());
+                                                }),
                                               cardDecoration(themeChange, controller, "assets/icons/ic_restaurant_driver.svg", "Driver Inbox", () {
                                                 Get.to(const DriverInboxScreen());
                                               }),

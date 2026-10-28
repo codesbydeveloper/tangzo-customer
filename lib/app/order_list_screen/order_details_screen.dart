@@ -168,72 +168,67 @@ class OrderDetailsScreen extends StatelessWidget {
                                                 ],
                                               ),
                                             ),
-                                            controller.orderModel.value.status == Constant.orderPlaced ||
-                                                    controller.orderModel.value.status == Constant.orderRejected ||
-                                                    controller.orderModel.value.status == Constant.orderCompleted
-                                                ? const SizedBox()
-                                                : InkWell(
-                                                    onTap: () {
-                                                      Constant.makePhoneCall(controller.orderModel.value.vendor!.phonenumber.toString());
-                                                    },
-                                                    child: Container(
-                                                      width: 42,
-                                                      height: 42,
-                                                      decoration: ShapeDecoration(
-                                                        shape: RoundedRectangleBorder(
-                                                          side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                          borderRadius: BorderRadius.circular(120),
-                                                        ),
-                                                      ),
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.all(8.0),
-                                                        child: SvgPicture.asset("assets/icons/ic_phone_call.svg"),
-                                                      ),
+                                            if (Constant.enableRestaurantCustomerChatCall &&
+                                                controller.orderModel.value.status != Constant.orderPlaced &&
+                                                controller.orderModel.value.status != Constant.orderRejected &&
+                                                controller.orderModel.value.status != Constant.orderCompleted) ...[
+                                              InkWell(
+                                                onTap: () {
+                                                  Constant.makePhoneCall(controller.orderModel.value.vendor!.phonenumber.toString());
+                                                },
+                                                child: Container(
+                                                  width: 42,
+                                                  height: 42,
+                                                  decoration: ShapeDecoration(
+                                                    shape: RoundedRectangleBorder(
+                                                      side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
+                                                      borderRadius: BorderRadius.circular(120),
                                                     ),
                                                   ),
-                                            const SizedBox(
-                                              width: 10,
-                                            ),
-                                            controller.orderModel.value.status == Constant.orderPlaced ||
-                                                    controller.orderModel.value.status == Constant.orderRejected ||
-                                                    controller.orderModel.value.status == Constant.orderCompleted
-                                                ? const SizedBox()
-                                                : InkWell(
-                                                    onTap: () async {
-                                                      ShowToastDialog.showLoader("Please wait");
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: SvgPicture.asset("assets/icons/ic_phone_call.svg"),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              InkWell(
+                                                onTap: () async {
+                                                  ShowToastDialog.showLoader("Please wait");
 
-                                                      UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
-                                                      UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
-                                                      VendorModel? vendorModel = await FireStoreUtils.getVendorById(restaurantUser!.vendorID.toString());
-                                                      ShowToastDialog.closeLoader();
+                                                  UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
+                                                  UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
+                                                  VendorModel? vendorModel = await FireStoreUtils.getVendorById(restaurantUser!.vendorID.toString());
+                                                  ShowToastDialog.closeLoader();
 
-                                                      Get.to(const ChatScreen(), arguments: {
-                                                        "senderName": '${customer!.fullName()}',
-                                                        "senderId": customer.id,
-                                                        "senderProfileUrl": customer.profilePictureURL,
-                                                        "receivedName": vendorModel!.title,
-                                                        "receivedId": restaurantUser.id,
-                                                        "receivedProfileUrl": vendorModel.photo,
-                                                        "orderId": "${Constant.userRoleVendor}${controller.orderModel.value.id}",
-                                                        "token": restaurantUser.fcmToken,
-                                                        "chatType": Constant.userRoleVendor,
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      width: 42,
-                                                      height: 42,
-                                                      decoration: ShapeDecoration(
-                                                        shape: RoundedRectangleBorder(
-                                                          side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                          borderRadius: BorderRadius.circular(120),
-                                                        ),
-                                                      ),
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.all(8.0),
-                                                        child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
-                                                      ),
+                                                  Get.to(const ChatScreen(), arguments: {
+                                                    "senderName": '${customer!.fullName()}',
+                                                    "senderId": customer.id,
+                                                    "senderProfileUrl": customer.profilePictureURL,
+                                                    "receivedName": vendorModel!.title,
+                                                    "receivedId": restaurantUser.id,
+                                                    "receivedProfileUrl": vendorModel.photo,
+                                                    "orderId": "${Constant.userRoleVendor}${controller.orderModel.value.id}",
+                                                    "token": restaurantUser.fcmToken,
+                                                    "chatType": Constant.userRoleVendor,
+                                                  });
+                                                },
+                                                child: Container(
+                                                  width: 42,
+                                                  height: 42,
+                                                  decoration: ShapeDecoration(
+                                                    shape: RoundedRectangleBorder(
+                                                      side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
+                                                      borderRadius: BorderRadius.circular(120),
                                                     ),
-                                                  )
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -299,72 +294,67 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                   ],
                                                                 ),
                                                               ),
-                                                              controller.orderModel.value.status == Constant.orderPlaced ||
-                                                                      controller.orderModel.value.status == Constant.orderRejected ||
-                                                                      controller.orderModel.value.status == Constant.orderCompleted
-                                                                  ? const SizedBox()
-                                                                  : InkWell(
-                                                                      onTap: () {
-                                                                        Constant.makePhoneCall(controller.orderModel.value.vendor!.phonenumber.toString());
-                                                                      },
-                                                                      child: Container(
-                                                                        width: 42,
-                                                                        height: 42,
-                                                                        decoration: ShapeDecoration(
-                                                                          shape: RoundedRectangleBorder(
-                                                                            side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                                            borderRadius: BorderRadius.circular(120),
-                                                                          ),
-                                                                        ),
-                                                                        child: Padding(
-                                                                          padding: const EdgeInsets.all(8.0),
-                                                                          child: SvgPicture.asset("assets/icons/ic_phone_call.svg"),
-                                                                        ),
+                                                              if (Constant.enableRestaurantCustomerChatCall &&
+                                                                  controller.orderModel.value.status != Constant.orderPlaced &&
+                                                                  controller.orderModel.value.status != Constant.orderRejected &&
+                                                                  controller.orderModel.value.status != Constant.orderCompleted) ...[
+                                                                InkWell(
+                                                                  onTap: () {
+                                                                    Constant.makePhoneCall(controller.orderModel.value.vendor!.phonenumber.toString());
+                                                                  },
+                                                                  child: Container(
+                                                                    width: 42,
+                                                                    height: 42,
+                                                                    decoration: ShapeDecoration(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
+                                                                        borderRadius: BorderRadius.circular(120),
                                                                       ),
                                                                     ),
-                                                              const SizedBox(
-                                                                width: 10,
-                                                              ),
-                                                              controller.orderModel.value.status == Constant.orderPlaced ||
-                                                                      controller.orderModel.value.status == Constant.orderRejected ||
-                                                                      controller.orderModel.value.status == Constant.orderCompleted
-                                                                  ? const SizedBox()
-                                                                  : InkWell(
-                                                                      onTap: () async {
-                                                                        ShowToastDialog.showLoader("Please wait");
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets.all(8.0),
+                                                                      child: SvgPicture.asset("assets/icons/ic_phone_call.svg"),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(width: 10),
+                                                                InkWell(
+                                                                  onTap: () async {
+                                                                    ShowToastDialog.showLoader("Please wait");
 
-                                                                        UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
-                                                                        UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
-                                                                        VendorModel? vendorModel = await FireStoreUtils.getVendorById(restaurantUser!.vendorID.toString());
-                                                                        ShowToastDialog.closeLoader();
+                                                                    UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
+                                                                    UserModel? restaurantUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor!.author.toString());
+                                                                    VendorModel? vendorModel = await FireStoreUtils.getVendorById(restaurantUser!.vendorID.toString());
+                                                                    ShowToastDialog.closeLoader();
 
-                                                                        Get.to(const ChatScreen(), arguments: {
-                                                                          "senderName": '${customer!.fullName()}',
-                                                                          "senderId": customer.id,
-                                                                          "senderProfileUrl": customer.profilePictureURL,
-                                                                          "receivedName": vendorModel!.title,
-                                                                          "receivedId": restaurantUser.id,
-                                                                          "receivedProfileUrl": vendorModel.photo,
-                                                                          "orderId": "${Constant.userRoleVendor}${controller.orderModel.value.id}",
-                                                                          "token": restaurantUser.fcmToken,
-                                                                          "chatType": Constant.userRoleVendor,
-                                                                        });
-                                                                      },
-                                                                      child: Container(
-                                                                        width: 42,
-                                                                        height: 42,
-                                                                        decoration: ShapeDecoration(
-                                                                          shape: RoundedRectangleBorder(
-                                                                            side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                                            borderRadius: BorderRadius.circular(120),
-                                                                          ),
-                                                                        ),
-                                                                        child: Padding(
-                                                                          padding: const EdgeInsets.all(8.0),
-                                                                          child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
-                                                                        ),
+                                                                    Get.to(const ChatScreen(), arguments: {
+                                                                      "senderName": '${customer!.fullName()}',
+                                                                      "senderId": customer.id,
+                                                                      "senderProfileUrl": customer.profilePictureURL,
+                                                                      "receivedName": vendorModel!.title,
+                                                                      "receivedId": restaurantUser.id,
+                                                                      "receivedProfileUrl": vendorModel.photo,
+                                                                      "orderId": "${Constant.userRoleVendor}${controller.orderModel.value.id}",
+                                                                      "token": restaurantUser.fcmToken,
+                                                                      "chatType": Constant.userRoleVendor,
+                                                                    });
+                                                                  },
+                                                                  child: Container(
+                                                                    width: 42,
+                                                                    height: 42,
+                                                                    decoration: ShapeDecoration(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
+                                                                        borderRadius: BorderRadius.circular(120),
                                                                       ),
-                                                                    )
+                                                                    ),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets.all(8.0),
+                                                                      child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ],
                                                           )
                                                         : Column(

@@ -108,7 +108,9 @@ class NotificationService {
       dashBoardScreen.selectedIndex.value = 4;
       Get.offAll(DashBoardScreen());
       if (role == Constant.userRoleVendor) {
-        Get.to(RestaurantInboxScreen());
+        if (Constant.enableRestaurantCustomerChatCall) {
+          Get.to(RestaurantInboxScreen());
+        }
       } else {
         Get.to(DriverInboxScreen());
       }

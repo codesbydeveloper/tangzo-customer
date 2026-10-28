@@ -46,6 +46,9 @@ class Constant {
   static String userRoleCustomer = 'customer';
   static String userRoleVendor = 'vendor';
 
+  /// When false, customers cannot chat or call restaurants (order details, inbox, dine-in).
+  static const bool enableRestaurantCustomerChatCall = false;
+
   static ShippingAddress selectedLocation = ShippingAddress();
   static UserModel? userModel;
   static const globalUrl = "https://admin.tangzo.in/";

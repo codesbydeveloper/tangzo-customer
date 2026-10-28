@@ -154,36 +154,38 @@ class DineInBookingDetails extends StatelessWidget {
                                             decorationColor: AppThemeData.primary300),
                                       ),
                                     ),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 16),
-                                      child: SizedBox(
-                                        height: 16,
-                                        child: VerticalDivider(
-                                          width: 1,
+                                    if (Constant.enableRestaurantCustomerChatCall) ...[
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16),
+                                        child: SizedBox(
+                                          height: 16,
+                                          child: VerticalDivider(
+                                            width: 1,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        if (controller.bookingModel.value.vendor!.phonenumber!.isNotEmpty) {
-                                          final Uri launchUri = Uri(
-                                            scheme: 'tel',
-                                            path: controller.bookingModel.value.vendor!.phonenumber,
-                                          );
-                                          launchUrl(launchUri);
-                                        }
-                                      },
-                                      child: TranslatedText(
-                                        "Call Now",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                            fontFamily: AppThemeData.medium,
-                                            fontWeight: FontWeight.w500,
-                                            decoration: TextDecoration.underline,
-                                            decorationColor: AppThemeData.primary300),
+                                      InkWell(
+                                        onTap: () {
+                                          if (controller.bookingModel.value.vendor!.phonenumber!.isNotEmpty) {
+                                            final Uri launchUri = Uri(
+                                              scheme: 'tel',
+                                              path: controller.bookingModel.value.vendor!.phonenumber,
+                                            );
+                                            launchUrl(launchUri);
+                                          }
+                                        },
+                                        child: TranslatedText(
+                                          "Call Now",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
+                                              fontFamily: AppThemeData.medium,
+                                              fontWeight: FontWeight.w500,
+                                              decoration: TextDecoration.underline,
+                                              decorationColor: AppThemeData.primary300),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ],
                                 ),
                                 const SizedBox(
