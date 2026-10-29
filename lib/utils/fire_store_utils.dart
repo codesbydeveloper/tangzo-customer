@@ -1235,7 +1235,6 @@ class FireStoreUtils {
       await fireStore
           .collection(CollectionName.vendorProducts)
           .where("vendorID", isEqualTo: vendorId)
-          .where("takeawayOption", isEqualTo: false)
           .where('publish', isEqualTo: true)
           .orderBy("createdAt", descending: false)
           .get()

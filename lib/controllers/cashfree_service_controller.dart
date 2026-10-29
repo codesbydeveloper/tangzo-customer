@@ -6,13 +6,13 @@ import 'package:http/http.dart' as http;
 class CashfreeService {
   Future<String?> createPaymentLink({required Cashfree cashfree, required UserModel userModel, required double amount, required String paymentDesc}) async {
     try {
-      String baseUrl = cashfree.isSandbox == true ? "https://sandbox.cashfree.com/pg/links" : "https://api.cashfree.com/pg/links";
+      String baseUrl = cashfree.isSandbox == true ? "https://sandbox.cashfree.com/pg/links" : "https://api.cashfree.com/pg  ";
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: {
           "x-client-id": cashfree.clientId!,
           "x-client-secret": cashfree.clientSecret!,
-          "x-api-version": "2025-01-01",
+          "x-api-version": "2026-01-01",
           "Content-Type": "application/json",
           "Accept": "application/json",
           "x-request-id": DateTime.now().millisecondsSinceEpoch.toString(),
