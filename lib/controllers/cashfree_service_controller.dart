@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class CashfreeService {
   Future<String?> createPaymentLink({required Cashfree cashfree, required UserModel userModel, required double amount, required String paymentDesc}) async {
     try {
-      String baseUrl = cashfree.isSandbox == true ? "https://sandbox.cashfree.com/pg/links" : "https://api.cashfree.com/pg  ";
+      String baseUrl = cashfree.isSandbox == true ? "https://sandbox.cashfree.com/pg" : "https://api.cashfree.com/pg";
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: {
