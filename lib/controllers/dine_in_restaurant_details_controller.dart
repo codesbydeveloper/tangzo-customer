@@ -226,7 +226,10 @@ class DineInRestaurantDetailsController extends GetxController {
       );
     }
 
-    await FireStoreUtils.getVendorCuisines(vendorModel.value.id.toString()).then(
+    await FireStoreUtils.getVendorCuisines(
+      vendorModel.value.id.toString(),
+      menuVersion: vendorModel.value.menuVersion,
+    ).then(
       (value) {
         tags.value = value;
       },

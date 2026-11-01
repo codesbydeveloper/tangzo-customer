@@ -397,13 +397,11 @@ class SearchScreen extends StatelessWidget {
                                             String disPrice = map['disPrice'];
                                             return InkWell(
                                               onTap: () async {
-                                                await FireStoreUtils.getVendorById(productModel.vendorID.toString()).then(
-                                                  (value) {
-                                                    if (value != null) {
-                                                      Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": value});
-                                                    }
-                                                  },
-                                                );
+                                                final value = controller.findVendor(productModel.vendorID.toString()) ??
+                                                    await FireStoreUtils.getVendorById(productModel.vendorID.toString());
+                                                if (value != null) {
+                                                  Get.to(const RestaurantDetailsScreen(), arguments: {"vendorModel": value});
+                                                }
                                               },
                                               child: Padding(
                                                 padding: const EdgeInsets.only(bottom: 20),
@@ -565,7 +563,12 @@ class SearchScreen extends StatelessWidget {
     print(productModel.price);
     print(productModel.disPrice);
 
-    VendorModel? vendorModel = await FireStoreUtils.getVendorById(productModel.vendorID.toString());
+    // Prefer in-memory vendor from search list / session cache — avoids a
+    // Firestore read per product row on every FutureBuilder rebuild.
+    final searchController = Get.find<SearchScreenController>();
+    VendorModel? vendorModel =
+        searchController.findVendor(productModel.vendorID.toString()) ??
+            await FireStoreUtils.getVendorById(productModel.vendorID.toString());
     if (productModel.itemAttribute != null) {
       if (productModel.itemAttribute!.attributes!.isNotEmpty) {
         for (var element in productModel.itemAttribute!.attributes!) {

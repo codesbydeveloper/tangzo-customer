@@ -46,6 +46,11 @@ class VendorModel {
   String? subscriptionTotalOrders;
   bool? isSelfDelivery;
   String? packagingCharge;
+  /// Bumped by restaurant app on menu create/update/delete/publish changes.
+  /// Used by customer menu cache invalidation without an extra Firestore round-trip
+  /// when the vendor document is already in memory (home/geo list).
+  int? menuVersion;
+  Timestamp? menuUpdatedAt;
 
   VendorModel(
       {this.author,
@@ -90,7 +95,9 @@ class VendorModel {
       this.subscriptionPlan,
       this.subscriptionTotalOrders,
       this.isSelfDelivery,
-      this.packagingCharge});
+      this.packagingCharge,
+      this.menuVersion,
+      this.menuUpdatedAt});
 
   VendorModel.fromJson(Map<String, dynamic> json) {
     author = json['author'];
@@ -146,6 +153,10 @@ class VendorModel {
     subscriptionTotalOrders = json['subscriptionTotalOrders'];
     isSelfDelivery = json['isSelfDelivery'] ?? false;
     packagingCharge = json['packagingCharge'] ?? "0";
+    menuVersion = json['menuVersion'] is int
+        ? json['menuVersion'] as int
+        : int.tryParse(json['menuVersion']?.toString() ?? '');
+    menuUpdatedAt = json['menuUpdatedAt'];
   }
 
   Map<String, dynamic> toJson() {
@@ -205,6 +216,8 @@ class VendorModel {
     data['latitude'] = latitude;
     data['isSelfDelivery'] = isSelfDelivery ?? false;
     data['packagingCharge'] = packagingCharge;
+    data['menuVersion'] = menuVersion;
+    data['menuUpdatedAt'] = menuUpdatedAt;
     return data;
   }
 }

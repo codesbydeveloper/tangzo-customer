@@ -38,6 +38,13 @@ class RestaurantDetailsScreen extends StatelessWidget {
         init: RestaurantDetailsController(),
         autoRemove: false,
         builder: (controller) {
+          // Controller may be reused across restaurants — sync when vendor args change.
+          final argVendor = Get.arguments != null ? Get.arguments['vendorModel'] as VendorModel? : null;
+          if (argVendor != null && argVendor.id != controller.vendorModel.value.id) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controller.syncFromArguments();
+            });
+          }
           return Scaffold(
             bottomNavigationBar: cartItem.isEmpty
                 ? null

@@ -10,6 +10,7 @@ import 'package:customer/models/tax_model.dart';
 import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/services/cart_provider.dart';
+import 'package:customer/services/firestore_read_cache.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:flutter/material.dart';
@@ -125,6 +126,10 @@ class HomeController extends GetxController {
       //:: ${Constant.timestampToDate(vendorModel.createdAt!)}
       popularRestaurantList.assignAll(restaurants.take(10)); // only top 10
       Constant.restaurantList = allNearestRestaurant;
+      // Seed session vendor cache so product cards / FutureBuilders avoid re-reads.
+      for (final vendor in restaurants) {
+        FirestoreReadCache.putVendor(vendor);
+      }
 
       // Filter categories used by restaurants
       final usedCategoryIds = restaurants.expand((v) => v.categoryID ?? []).toSet();

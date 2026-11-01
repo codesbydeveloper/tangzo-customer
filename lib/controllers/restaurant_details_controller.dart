@@ -10,7 +10,11 @@ import 'package:customer/models/product_model.dart';
 import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/services/cart_provider.dart';
+import 'package:customer/services/firestore_cache_metrics.dart';
+import 'package:customer/services/firestore_read_cache.dart';
+import 'package:customer/services/menu_cache_repository.dart';
 import 'package:customer/utils/fire_store_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -35,12 +39,19 @@ class RestaurantDetailsController extends GetxController {
 
   RxList<CouponModel> couponList = <CouponModel>[].obs;
 
+  StreamSubscription? _cartSubscription;
+  bool _productsLoaded = false;
+
   @override
   void onInit() {
-    // TODO: implement onInit
     getArgument();
-
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _cartSubscription?.cancel();
+    super.onClose();
   }
 
   void animateSlider() {
@@ -68,16 +79,36 @@ class RestaurantDetailsController extends GetxController {
   final CartProvider cartProvider = CartProvider();
 
   Future<void> getArgument() async {
-    cartProvider.cartStream.listen(
+    _cartSubscription?.cancel();
+    _cartSubscription = cartProvider.cartStream.listen(
       (event) async {
         cartItem.clear();
         cartItem.addAll(event);
       },
     );
+    await syncFromArguments(force: true);
+  }
+
+  /// Safe to call when the screen is reused (GetX autoRemove: false).
+  /// Reloads only when the vendor changes or [force] is true.
+  Future<void> syncFromArguments({bool force = false}) async {
     dynamic argumentData = Get.arguments;
-    if (argumentData != null) {
-      vendorModel.value = argumentData['vendorModel'];
+    if (argumentData == null || argumentData['vendorModel'] == null) return;
+
+    final incoming = argumentData['vendorModel'] as VendorModel;
+    final sameVendor = vendorModel.value.id == incoming.id && _productsLoaded;
+    if (sameVendor && !force) {
+      return;
     }
+
+    isLoading.value = true;
+    vendorModel.value = incoming;
+    FirestoreReadCache.putVendor(vendorModel.value);
+    allProductList.clear();
+    productList.clear();
+    vendorCategoryList.clear();
+    _productsLoaded = false;
+
     animateSlider();
     statusCheck();
 
@@ -85,39 +116,95 @@ class RestaurantDetailsController extends GetxController {
 
     isLoading.value = false;
     await getFavouriteList();
-
     update();
   }
 
-  Future<void> getProduct() async {
-    await FireStoreUtils.getProductByVendorId(vendorModel.value.id.toString()).then((value) {
-      if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && vendorModel.value.subscriptionPlan != null) {
-        if (vendorModel.value.subscriptionPlan?.itemLimit == '-1') {
-          allProductList.value = value;
-          productList.value = value;
-        } else {
-          int selectedProduct =
-              value.length < int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0') ? (value.isEmpty ? 0 : (value.length)) : int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0');
-          allProductList.value = value.sublist(0, selectedProduct);
-          productList.value = value.sublist(0, selectedProduct);
-        }
-      } else {
+  Future<void> getProduct({bool forceRefresh = false}) async {
+    // Guard against duplicate concurrent loads from rebuilds / re-entry.
+    if (_productsLoaded && !forceRefresh && productList.isNotEmpty) {
+      return;
+    }
+
+    final vendorId = vendorModel.value.id.toString();
+    final value = await FireStoreUtils.getProductByVendorId(
+      vendorId,
+      menuVersion: vendorModel.value.menuVersion,
+      forceRefresh: forceRefresh,
+    );
+
+    if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) &&
+        vendorModel.value.subscriptionPlan != null) {
+      if (vendorModel.value.subscriptionPlan?.itemLimit == '-1') {
         allProductList.value = value;
         productList.value = value;
+      } else {
+        int selectedProduct = value.length <
+                int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0')
+            ? (value.isEmpty ? 0 : (value.length))
+            : int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0');
+        allProductList.value = value.sublist(0, selectedProduct);
+        productList.value = value.sublist(0, selectedProduct);
       }
-    });
-
-    for (var element in productList) {
-      await FireStoreUtils.getVendorCategoryById(element.categoryID.toString()).then(
-        (value) {
-          if (value != null) {
-            vendorCategoryList.add(value);
-          }
-        },
-      );
+    } else {
+      allProductList.value = value;
+      productList.value = value;
     }
-    var seen = <String>{};
-    vendorCategoryList.value = vendorCategoryList.where((element) => seen.add(element.id.toString())).toList();
+
+    await _loadCategoriesForProducts();
+    _productsLoaded = true;
+
+    if (kDebugMode) {
+      FirestoreCacheMetrics.log('restaurant_menu_ready', data: {
+        'vendorId': vendorId,
+        'products': productList.length,
+        'categories': vendorCategoryList.length,
+      });
+    }
+  }
+
+  /// Unique category IDs only — avoids N+1 reads (one per product).
+  Future<void> _loadCategoriesForProducts() async {
+    vendorCategoryList.clear();
+    final uniqueIds = productList
+        .map((e) => e.categoryID)
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet();
+
+    if (uniqueIds.isEmpty) return;
+
+    // Prefer session category cache (single published-categories fetch).
+    final allCats = await FirestoreReadCache.getAllPublishedCategories();
+    final byId = {for (final c in allCats) if (c.id != null) c.id!: c};
+
+    final resolved = <VendorCategoryModel>[];
+    for (final id in uniqueIds) {
+      final fromAll = byId[id];
+      if (fromAll != null) {
+        resolved.add(fromAll);
+        continue;
+      }
+      final single = await FireStoreUtils.getVendorCategoryById(id);
+      if (single != null) {
+        resolved.add(single);
+      }
+    }
+    vendorCategoryList.assignAll(resolved);
+  }
+
+  /// Pull-to-refresh / manual reload bypasses TTL and version cache.
+  Future<void> refreshMenu() async {
+    final vendorId = vendorModel.value.id.toString();
+    await MenuCacheRepository.instance.invalidate(vendorId);
+    // Refresh vendor doc so menuVersion stays accurate after restaurant edits.
+    final freshVendor = await FireStoreUtils.fetchVendorByIdRaw(vendorId);
+    if (freshVendor != null) {
+      vendorModel.value = freshVendor;
+      FirestoreReadCache.putVendor(freshVendor);
+    }
+    _productsLoaded = false;
+    await getProduct(forceRefresh: true);
+    update();
   }
 
   void searchProduct(String name) {

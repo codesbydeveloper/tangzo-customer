@@ -60,6 +60,8 @@ import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/models/wallet_transaction_model.dart';
 import 'package:customer/models/zone_model.dart';
+import 'package:customer/services/firestore_read_cache.dart';
+import 'package:customer/services/menu_cache_repository.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:customer/widget/geoflutterfire/src/geoflutterfire.dart';
@@ -872,6 +874,11 @@ class FireStoreUtils {
   }
 
   static Future<VendorModel?> getVendorById(String vendorId) async {
+    return FirestoreReadCache.getVendorById(vendorId);
+  }
+
+  /// Uncached vendor document fetch used by [FirestoreReadCache].
+  static Future<VendorModel?> fetchVendorByIdRaw(String vendorId) async {
     VendorModel? vendorModel;
     try {
       await fireStore
@@ -884,7 +891,7 @@ class FireStoreUtils {
         }
       });
     } catch (e, s) {
-      log('FireStoreUtils.firebaseCreateNewUser $e $s');
+      log('FireStoreUtils.fetchVendorByIdRaw $e $s');
       return null;
     }
     return vendorModel;
@@ -1210,48 +1217,26 @@ class FireStoreUtils {
         .add(favouriteModel.toJson());
   }
 
+  /// Cached menu fetch (memory → disk → Firestore) with in-flight dedupe.
+  /// Pass [menuVersion] from the already-loaded vendor document when available.
   static Future<List<ProductModel>> getProductByVendorId(
-      String vendorId) async {
-    String selectedFoodType = Preferences.getString(
-        Preferences.foodDeliveryType,
-        defaultValue: "Delivery");
-    List<ProductModel> list = [];
-    if (selectedFoodType == "TakeAway") {
-      await fireStore
-          .collection(CollectionName.vendorProducts)
-          .where("vendorID", isEqualTo: vendorId)
-          .where('publish', isEqualTo: true)
-          .orderBy("createdAt", descending: false)
-          .get()
-          .then((value) {
-        for (var element in value.docs) {
-          ProductModel productModel = ProductModel.fromJson(element.data());
-          list.add(productModel);
-        }
-      }).catchError((error) {
-        log(error.toString());
-      });
-    } else {
-      await fireStore
-          .collection(CollectionName.vendorProducts)
-          .where("vendorID", isEqualTo: vendorId)
-          .where('publish', isEqualTo: true)
-          .orderBy("createdAt", descending: false)
-          .get()
-          .then((value) {
-        for (var element in value.docs) {
-          ProductModel productModel = ProductModel.fromJson(element.data());
-          list.add(productModel);
-        }
-      }).catchError((error) {
-        log(error.toString());
-      });
-    }
-
-    return list;
+    String vendorId, {
+    int? menuVersion,
+    bool forceRefresh = false,
+  }) {
+    return MenuCacheRepository.instance.getMenu(
+      vendorId,
+      menuVersion: menuVersion,
+      forceRefresh: forceRefresh,
+    );
   }
 
   static Future<VendorCategoryModel?> getVendorCategoryById(
+      String categoryId) async {
+    return FirestoreReadCache.getCategoryById(categoryId);
+  }
+
+  static Future<VendorCategoryModel?> fetchVendorCategoryByIdRaw(
       String categoryId) async {
     VendorCategoryModel? vendorCategoryModel;
     try {
@@ -1265,7 +1250,7 @@ class FireStoreUtils {
         }
       });
     } catch (e, s) {
-      log('FireStoreUtils.firebaseCreateNewUser $e $s');
+      log('FireStoreUtils.fetchVendorCategoryByIdRaw $e $s');
       return null;
     }
     return vendorCategoryModel;
@@ -1311,6 +1296,10 @@ class FireStoreUtils {
   }
 
   static Future<List<AttributesModel>?> getAttributes() async {
+    return FirestoreReadCache.getAttributes();
+  }
+
+  static Future<List<AttributesModel>?> fetchAttributesRaw() async {
     List<AttributesModel> attributeList = [];
     await fireStore.collection(CollectionName.vendorAttributes).get().then(
       (value) {
@@ -1695,35 +1684,26 @@ class FireStoreUtils {
         recipients: [Constant.userModel!.email]);
   }
 
-  static Future<List> getVendorCuisines(String id) async {
-    List tagList = [];
-    List prodTagList = [];
-    QuerySnapshot<Map<String, dynamic>> productsQuery = await fireStore
-        .collection(CollectionName.vendorProducts)
-        .where('vendorID', isEqualTo: id)
-        .get();
-    await Future.forEach(productsQuery.docs,
-        (QueryDocumentSnapshot<Map<String, dynamic>> document) {
-      if (document.data().containsKey("categoryID") &&
-          document.data()['categoryID'].toString().isNotEmpty) {
-        prodTagList.add(document.data()['categoryID']);
+  /// Cuisine tags for a vendor — uses menu + category session caches.
+  /// Avoids unbounded product + full-category dual scans on every open.
+  static Future<List> getVendorCuisines(String id, {int? menuVersion}) async {
+    final products = await getProductByVendorId(id, menuVersion: menuVersion);
+    final categoryIds = products
+        .map((p) => p.categoryID)
+        .whereType<String>()
+        .where((c) => c.isNotEmpty)
+        .toSet();
+    if (categoryIds.isEmpty) return [];
+
+    final categories = await FirestoreReadCache.getAllPublishedCategories();
+    final tagList = <String>[];
+    for (final cat in categories) {
+      if (cat.id != null &&
+          categoryIds.contains(cat.id) &&
+          (cat.title?.isNotEmpty ?? false)) {
+        tagList.add(cat.title!);
       }
-    });
-    QuerySnapshot<Map<String, dynamic>> catQuery = await fireStore
-        .collection(CollectionName.vendorCategories)
-        .where('publish', isEqualTo: true)
-        .get();
-    await Future.forEach(catQuery.docs,
-        (QueryDocumentSnapshot<Map<String, dynamic>> document) {
-      Map<String, dynamic> catDoc = document.data();
-      if (catDoc.containsKey("id") &&
-          catDoc['id'].toString().isNotEmpty &&
-          catDoc.containsKey("title") &&
-          catDoc['title'].toString().isNotEmpty &&
-          prodTagList.contains(catDoc['id'])) {
-        tagList.add(catDoc['title']);
-      }
-    });
+    }
     return tagList;
   }
 
