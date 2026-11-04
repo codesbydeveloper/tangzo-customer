@@ -5,11 +5,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/models/product_model.dart';
 import 'package:customer/services/firestore_cache_metrics.dart';
+import 'package:customer/services/menu_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Multi-level restaurant menu cache:
-/// UI → Repository → Memory → Persistent file → Firestore
+/// UI → Memory → Device disk → Redis (shared via Cloud Function) → Firestore
+///
+/// Device cache is free (no Firestore billing). Redis is the shared layer so
+/// many users share one Firestore fill. Direct Firestore is only a fallback.
 ///
 /// Includes in-flight request deduplication so concurrent callers share one Future.
 class MenuCacheRepository {
@@ -101,25 +105,60 @@ class MenuCacheRepository {
 
     FirestoreCacheMetrics.menuCacheMisses++;
     FirestoreCacheMetrics.menuFetches++;
-    FirestoreCacheMetrics.log('firestore_fetch', data: {
+    FirestoreCacheMetrics.log('shared_fetch', data: {
       'vendorId': vendorId,
       'forceRefresh': forceRefresh,
       'menuVersion': menuVersion,
     });
 
-    final products = await fetchProductsFromFirestore(vendorId);
+    final fetched = await fetchProductsShared(
+      vendorId,
+      forceRefresh: forceRefresh,
+    );
     final cached = _CachedMenu(
       vendorId: vendorId,
-      products: products,
+      products: fetched.products,
       cachedAt: DateTime.now(),
-      menuVersion: menuVersion,
+      menuVersion: fetched.menuVersion ?? menuVersion,
     );
     _memoryCache[vendorId] = cached;
     await _writePersistent(cached);
-    return List<ProductModel>.from(products);
+    return List<ProductModel>.from(fetched.products);
   }
 
-  /// Raw one-shot Firestore query (no realtime listener).
+  /// Prefer Redis-backed Cloud Function; fall back to direct Firestore only if
+  /// the function is unreachable so the app still works.
+  static Future<({List<ProductModel> products, int? menuVersion})>
+      fetchProductsShared(
+    String vendorId, {
+    bool forceRefresh = false,
+  }) async {
+    final api = await MenuApi.getVendorMenu(
+      vendorId: vendorId,
+      forceRefresh: forceRefresh,
+    );
+    if (api != null) {
+      FirestoreCacheMetrics.log('redis_api_${api.source}', data: {
+        'vendorId': vendorId,
+        'items': api.products.length,
+        'menuVersion': api.menuVersion,
+      });
+      final products = api.products
+          .map((raw) => ProductModel.fromJson(
+                MenuCacheRepository._deserializeProductMap(raw),
+              ))
+          .toList();
+      return (products: products, menuVersion: api.menuVersion);
+    }
+
+    FirestoreCacheMetrics.log('firestore_fallback', data: {
+      'vendorId': vendorId,
+    });
+    final products = await fetchProductsFromFirestore(vendorId);
+    return (products: products, menuVersion: null);
+  }
+
+  /// Raw one-shot Firestore query (fallback only — avoid for shared traffic).
   static Future<List<ProductModel>> fetchProductsFromFirestore(
       String vendorId) async {
     final list = <ProductModel>[];

@@ -245,7 +245,8 @@ class Constant {
         }
       } else {
         if (vendorModel.adminCommission!.commissionType!.toLowerCase() == "Percent".toLowerCase() || vendorModel.adminCommission!.commissionType?.toLowerCase() == "Percentage".toLowerCase()) {
-          commission = (double.parse(price) + (double.parse(price) * double.parse(vendorModel.adminCommission!.amount.toString()) / 100)).toString();
+          commission = (double.
+          parse(price) + (double.parse(price) * double.parse(vendorModel.adminCommission!.amount.toString()) / 100)).toString();
         } else {
           commission = (double.parse(price) + double.parse(vendorModel.adminCommission!.amount.toString())).toString();
         }

@@ -182,6 +182,22 @@ class CartController extends GetxController {
     );
   }
 
+  /// Per-km rate always applies. Within [minimumDeliveryChargesWithinKm],
+  /// [minimumDeliveryCharges] is only a floor (not a flat fee).
+  /// Distance is rounded to nearest km first (e.g. 4.4 → 4, 4.6 → 5).
+  double _calculateDeliveryCharges({required double distance, required DeliveryCharge charge}) {
+    final double roundedDistance = distance.roundToDouble();
+    final double perKmRate = (charge.deliveryChargesPerKm ?? 0).toDouble();
+    final double minimumCharge = (charge.minimumDeliveryCharges ?? 0).toDouble();
+    final double withinKm = (charge.minimumDeliveryChargesWithinKm ?? 0).toDouble();
+    final double calculatedCharge = roundedDistance * perKmRate;
+
+    if (roundedDistance <= withinKm) {
+      return maths.max(minimumCharge, calculatedCharge);
+    }
+    return calculatedCharge;
+  }
+
   Future<void> calculatePrice() async {
     // Reset values
     deliveryCharges.value = 0.0;
@@ -208,17 +224,18 @@ class CartController extends GetxController {
           lng1: selectedAddress.value.location!.longitude.toString(),
           lat2: vendorModel.value.latitude.toString(),
           lng2: vendorModel.value.longitude.toString(),
-        ));
+        )).roundToDouble();
 
         if (vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) {
           deliveryCharges.value = 0.0;
-        } else if (deliveryChargeModel.value.vendorCanModify == false) {
-          deliveryCharges.value = totalDistance.value > deliveryChargeModel.value.minimumDeliveryChargesWithinKm!
-              ? totalDistance.value * deliveryChargeModel.value.deliveryChargesPerKm!
-              : deliveryChargeModel.value.minimumDeliveryCharges!.toDouble();
         } else {
-          final charge = vendorModel.value.deliveryCharge ?? deliveryChargeModel.value;
-          deliveryCharges.value = totalDistance.value > charge.minimumDeliveryChargesWithinKm! ? totalDistance.value * charge.deliveryChargesPerKm! : charge.minimumDeliveryCharges!.toDouble();
+          final charge = deliveryChargeModel.value.vendorCanModify == true
+              ? (vendorModel.value.deliveryCharge ?? deliveryChargeModel.value)
+              : deliveryChargeModel.value;
+          deliveryCharges.value = _calculateDeliveryCharges(
+            distance: totalDistance.value,
+            charge: charge,
+          );
         }
         deliveryCharges.value = Constant.roundAmount(deliveryCharges.value);
       }
