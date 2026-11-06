@@ -88,9 +88,40 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-                                cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
-                                // Wallet and other gateways disabled — Cashfree only
-                                // if (controller.walletSettingModel.value.isEnabled == true) cardDecoration(controller, PaymentGateway.wallet, ...),
+                                if (controller.walletSettingModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.wallet, themeChange, "assets/images/ic_wallet.png"),
+                                if (controller.cashfreeModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.cashfree, themeChange, "assets/images/cashfree.png"),
+                                if (controller.stripeModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.stripe, themeChange, "assets/images/stripe.png"),
+                                if (controller.payPalModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.paypal, themeChange, "assets/images/paypal.png"),
+                                if (controller.payStackModel.value.isEnable == true)
+                                  cardDecoration(controller, PaymentGateway.payStack, themeChange, "assets/images/paystack.png"),
+                                if (controller.razorPayModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.razorpay, themeChange, "assets/images/razorpay.png"),
+                                if (controller.flutterWaveModel.value.isEnable == true)
+                                  cardDecoration(controller, PaymentGateway.flutterWave, themeChange, "assets/images/flutterwave_logo.png"),
+                                if (controller.payFastModel.value.isEnable == true)
+                                  cardDecoration(controller, PaymentGateway.payFast, themeChange, "assets/images/payfast.png"),
+                                if (controller.paytmModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.paytm, themeChange, "assets/images/paytm.png"),
+                                if (controller.mercadoPagoModel.value.isEnabled == true)
+                                  cardDecoration(controller, PaymentGateway.mercadoPago, themeChange, "assets/images/mercado-pago.png"),
+                                if (controller.midTransModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.midTrans, themeChange, "assets/images/midtrans.png"),
+                                if (controller.orangeMoneyModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.orangeMoney, themeChange, "assets/images/orange_money.png"),
+                                if (controller.xenditModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.xendit, themeChange, "assets/images/xendit.png"),
+                                if (controller.mtnMomoModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.mtnMomo, themeChange, "assets/images/mtnmom.png"),
+                                if (controller.phonePeModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.phonePe, themeChange, "assets/images/phonepe.png"),
+                                if (controller.instamojoModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.instamojo, themeChange, "assets/images/instamojo.png"),
+                                if (controller.payMongoModel.value.enable == true)
+                                  cardDecoration(controller, PaymentGateway.payMongo, themeChange, "assets/images/payMongo.png"),
                               ],
                             ),
                           ),
@@ -112,8 +143,58 @@ class SelectGiftPaymentScreen extends StatelessWidget {
                 textColor: AppThemeData.grey50,
                 fontSizes: 16,
                 onPress: () async {
-                  controller.cashFreeMakePayment(context: context, amount: controller.amountController.value.text.toString(), paymentDesc: "GiftCard Payment");
-                  // Other payment gateways disabled — Cashfree only
+                  final amount = controller.amountController.value.text.toString();
+                  final method = controller.selectedPaymentMethod.value;
+                  if (method == PaymentGateway.wallet.name) {
+                    await controller.placeOrder();
+                  } else if (method == PaymentGateway.cashfree.name) {
+                    controller.cashFreeMakePayment(context: context, amount: amount, paymentDesc: "GiftCard Payment");
+                  } else if (method == PaymentGateway.stripe.name) {
+                    controller.stripeMakePayment(amount: amount);
+                  } else if (method == PaymentGateway.paypal.name) {
+                    controller.paypalPaymentSheet(amount, context);
+                  } else if (method == PaymentGateway.payStack.name) {
+                    controller.payStackPayment(amount);
+                  } else if (method == PaymentGateway.razorpay.name) {
+                    ShowToastDialog.showLoader("Please wait");
+                    RazorPayController().createOrderRazorPay(amount: double.parse(amount), razorpayModel: controller.razorPayModel.value).then((value) {
+                      if (value == null) {
+                        ShowToastDialog.closeLoader();
+                        ShowToastDialog.showToast("Something went wrong, please contact admin.");
+                      } else {
+                        CreateRazorPayOrderModel result = value;
+                        controller.openCheckout(amount: amount, orderId: result.id);
+                      }
+                    });
+                  } else if (method == PaymentGateway.flutterWave.name) {
+                    controller.flutterWaveInitiatePayment(context: context, amount: amount);
+                  } else if (method == PaymentGateway.payFast.name) {
+                    controller.payFastPayment(context: context, amount: amount);
+                  } else if (method == PaymentGateway.paytm.name) {
+                    controller.getPaytmCheckSum(context, amount: double.parse(amount));
+                  } else if (method == PaymentGateway.mercadoPago.name) {
+                    controller.mercadoPagoMakePayment(context: context, amount: amount);
+                  } else if (method == PaymentGateway.midTrans.name) {
+                    controller.midtransMakePayment(context: context, amount: amount);
+                  } else if (method == PaymentGateway.orangeMoney.name) {
+                    controller.orangeMakePayment(context: context, amount: amount);
+                  } else if (method == PaymentGateway.xendit.name) {
+                    controller.xenditPayment(context, amount);
+                  } else if (method == PaymentGateway.mtnMomo.name) {
+                    controller.mtnMomoMakePayment(amount: amount);
+                  } else if (method == PaymentGateway.phonePe.name) {
+                    PhonePePaymentService.phonePe = controller.phonePeModel.value;
+                    await PhonePePaymentService.payNow(amountInPaise: (double.parse(amount) * 100).round());
+                    if (PhonePePaymentService.isSucess) {
+                      controller.placeOrder();
+                    }
+                  } else if (method == PaymentGateway.instamojo.name) {
+                    controller.makeInstamojoPayment(amount: amount, paymentDesc: "GiftCard Payment");
+                  } else if (method == PaymentGateway.payMongo.name) {
+                    controller.makePayMongoPayment(amount: amount, paymentDesc: "GiftCard Payment");
+                  } else {
+                    ShowToastDialog.showToast("Please select payment method");
+                  }
                 },
               ),
             ),

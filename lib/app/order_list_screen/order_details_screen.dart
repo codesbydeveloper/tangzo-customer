@@ -1269,20 +1269,27 @@ class OrderDetailsScreen extends StatelessWidget {
                           UserModel? vendorUserModel = await FireStoreUtils.getUserProfile(controller.orderModel.value.vendor?.author ?? '');
                           SendNotification.sendFcmMessage(Constant.customerCancelled, vendorUserModel?.fcmToken ?? '', {});
                           if (controller.orderModel.value.paymentMethod!.toLowerCase() != 'cod') {
-                            WalletTransactionModel historyModel = WalletTransactionModel(
-                                amount: controller.totalAmount.value,
-                                id: const Uuid().v4(),
-                                orderId: controller.orderModel.value.id,
-                                userId: controller.orderModel.value.author?.id,
-                                date: Timestamp.now(),
-                                isTopup: true,
-                                paymentMethod: "Wallet",
-                                paymentStatus: "success",
-                                note: "Order Refund success",
-                                transactionUser: "user");
+                            final refundAmount = await FireStoreUtils.getCustomerDebitedAmountForOrder(
+                              orderId: controller.orderModel.value.id ?? '',
+                              userId: controller.orderModel.value.author?.id ?? '',
+                              fallbackAmount: controller.totalAmount.value,
+                            );
+                            if (refundAmount > 0) {
+                              WalletTransactionModel historyModel = WalletTransactionModel(
+                                  amount: refundAmount,
+                                  id: const Uuid().v4(),
+                                  orderId: controller.orderModel.value.id,
+                                  userId: controller.orderModel.value.author?.id,
+                                  date: Timestamp.now(),
+                                  isTopup: true,
+                                  paymentMethod: "Wallet",
+                                  paymentStatus: "success",
+                                  note: "Order Refund success",
+                                  transactionUser: "user");
 
-                            await FireStoreUtils.fireStore.collection(CollectionName.wallet).doc(historyModel.id).set(historyModel.toJson());
-                            await FireStoreUtils.updateUserWallet(amount: controller.totalAmount.value.toString(), userId: controller.orderModel.value.author!.id.toString());
+                              await FireStoreUtils.fireStore.collection(CollectionName.wallet).doc(historyModel.id).set(historyModel.toJson());
+                              await FireStoreUtils.updateUserWallet(amount: refundAmount.toString(), userId: controller.orderModel.value.author!.id.toString());
+                            }
                           }
                           ShowToastDialog.closeLoader();
                           ShowToastDialog.showToast("You have successfully canceled your order.");

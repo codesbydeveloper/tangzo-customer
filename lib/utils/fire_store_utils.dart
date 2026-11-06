@@ -60,8 +60,10 @@ import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/models/wallet_transaction_model.dart';
 import 'package:customer/models/zone_model.dart';
+import 'package:customer/services/catalog_api.dart';
 import 'package:customer/services/firestore_read_cache.dart';
 import 'package:customer/services/menu_cache_repository.dart';
+import 'package:customer/services/settings_api.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/preferences.dart';
 import 'package:customer/widget/geoflutterfire/src/geoflutterfire.dart';
@@ -244,6 +246,42 @@ class FireStoreUtils {
     return isAdded;
   }
 
+  /// Exact amount still to refund for an order (original debit minus prior refunds).
+  static Future<double> getCustomerDebitedAmountForOrder({
+    required String orderId,
+    required String userId,
+    required double fallbackAmount,
+  }) async {
+    try {
+      final snap = await fireStore
+          .collection(CollectionName.wallet)
+          .where('order_id', isEqualTo: orderId)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      double debited = 0.0;
+      double alreadyRefunded = 0.0;
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final note = (data['note'] ?? '').toString();
+        final amount = double.tryParse('${data['amount'] ?? 0}') ?? 0.0;
+        final isTopUp = data['isTopUp'] == true;
+        if (note == 'Order Amount debited' && isTopUp == false) {
+          debited += amount;
+        }
+        if (note == 'Order Refund success' && isTopUp == true) {
+          alreadyRefunded += amount;
+        }
+      }
+      final remaining = debited - alreadyRefunded;
+      if (remaining > 0) return remaining;
+      if (debited > 0) return 0.0;
+    } catch (e) {
+      log('getCustomerDebitedAmountForOrder: $e');
+    }
+    return fallbackAmount;
+  }
+
   static Future<bool> updateUser(UserModel userModel) async {
     bool isUpdate = false;
     await fireStore
@@ -312,18 +350,169 @@ class FireStoreUtils {
     return isAdded;
   }
 
+  static final List<StreamSubscription> _settingsLiveSubs = [];
+
+  static void _applyCustomerSettingsDocs(
+      Map<String, Map<String, dynamic>?> docs) {
+    final restaurant = docs['restaurant'];
+    if (restaurant != null) {
+      Constant.isSubscriptionModelApplied = restaurant['subscription_model'];
+      Constant.packagingChargeEnable = restaurant['packagingChargeEnable'];
+    }
+    final nearby = docs['RestaurantNearBy'];
+    if (nearby != null) {
+      Constant.radius = nearby['radios'];
+      Constant.driverRadios = nearby['driverRadios'];
+      Constant.distanceType = nearby['distanceType'];
+    }
+    final global = docs['globalSettings'];
+    if (global != null) {
+      Constant.defaultCountryCode = global['defaultCountryCode'] ?? '';
+      Constant.isEnableAdsFeature = global['isEnableAdsFeature'] ?? false;
+      Constant.isSelfDeliveryFeature = global['isSelfDelivery'] ?? false;
+      final color = global['app_customer_color']?.toString();
+      if (color != null && color.isNotEmpty) {
+        AppThemeData.primary300 =
+            Color(int.parse(color.replaceFirst("#", "0xff")));
+      }
+      Constant.taxScope = global['taxScope'] ?? "";
+    }
+    final dinein = docs['DineinForRestaurant'];
+    if (dinein != null) {
+      Constant.isDineInEnable = dinein['isEnabled'];
+      Constant.isEnabledForCustomer = dinein['isEnabledForCustomer'] ?? false;
+    }
+    final mapKey = docs['googleMapKey'];
+    if (mapKey != null) {
+      Constant.mapAPIKey = mapKey['key'];
+      Constant.placeHolderImage = mapKey['placeHolderImage'];
+    }
+    final theme = docs['home_page_theme'];
+    if (theme != null) {
+      Constant.theme = theme['theme'];
+    }
+    final cashback = docs['cashbackOffer'];
+    if (cashback != null) {
+      Constant.isCashbackActive = cashback['isEnable'] ?? false;
+    }
+    final driverNear = docs['DriverNearBy'];
+    if (driverNear != null) {
+      Constant.selectedMapType = driverNear['selectedMapType'];
+      Constant.mapType = driverNear['mapType'];
+    }
+    final privacy = docs['privacyPolicy'];
+    if (privacy != null) {
+      Constant.privacyPolicy = privacy['privacy_policy'];
+    }
+    final terms = docs['termsAndConditions'];
+    if (terms != null) {
+      Constant.termsAndConditions = terms['termsAndConditions'];
+    }
+    final wallet = docs['walletSettings'];
+    if (wallet != null) {
+      Constant.walletSetting = wallet['isEnabled'];
+    }
+    final version = docs['Version'];
+    if (version != null) {
+      Constant.googlePlayLink = version['googlePlayLink'] ?? '';
+      Constant.appStoreLink = version['appStoreLink'] ?? '';
+      Constant.appVersion = version['app_version'] ?? '';
+      Constant.websiteUrl = version['websiteUrl'] ?? '';
+    }
+    final story = docs['story'];
+    if (story != null) {
+      Constant.storyEnable = story['isEnabled'] ?? false;
+    }
+    final adminSettings = docs['adminSettings'];
+    if (adminSettings != null) {
+      Constant.platformFeeModel = PlatformFeeModel.fromJson(adminSettings);
+    }
+    final referral = docs['referral_amount'];
+    if (referral != null) {
+      Constant.referralAmount = '${referral['referralAmount'] ?? '0.0'}';
+    }
+    final placeholder = docs['placeHolderImage'];
+    if (placeholder != null) {
+      Constant.placeholderImage = placeholder['image'] ?? '';
+    }
+    final email = docs['emailSetting'];
+    if (email != null) {
+      Constant.mailSettings = MailSettings.fromJson(email);
+    }
+    final special = docs['specialDiscountOffer'];
+    if (special != null) {
+      Constant.specialDiscountOffer = special['isEnable'] ?? false;
+    }
+    final adminCommission = docs['AdminCommission'];
+    if (adminCommission != null) {
+      Constant.adminCommission = AdminCommission.fromJson(adminCommission);
+    }
+    final notif = docs['notification_setting'];
+    if (notif != null) {
+      Constant.senderId = notif['projectId'];
+      Constant.jsonNotificationFileURL = notif['serviceJson'];
+    }
+    final localisation = docs['localisationSettings'];
+    if (localisation != null) {
+      Constant.apiKeyOfDeepl = localisation['apiKeyOfDeepl'] ?? '';
+      Constant.localisationType = localisation['localisationType'] ?? '';
+    }
+  }
+
+  static void _attachCustomerLiveSettings() {
+    for (final sub in _settingsLiveSubs) {
+      sub.cancel();
+    }
+    _settingsLiveSubs.clear();
+
+    void listen(String docId, void Function(Map<String, dynamic> data) apply) {
+      _settingsLiveSubs.add(
+        fireStore
+            .collection(CollectionName.settings)
+            .doc(docId)
+            .snapshots()
+            .listen((event) {
+          if (event.exists && event.data() != null) {
+            apply(event.data()!);
+          }
+        }),
+      );
+    }
+
+    listen('localisationSettings', (data) {
+      Constant.apiKeyOfDeepl = data['apiKeyOfDeepl'] ?? '';
+      Constant.localisationType = data['localisationType'] ?? '';
+    });
+    listen('googleMapKey', (data) {
+      Constant.mapAPIKey = data['key'];
+      Constant.placeHolderImage = data['placeHolderImage'];
+    });
+    listen('Version', (data) {
+      Constant.googlePlayLink = data['googlePlayLink'] ?? '';
+      Constant.appStoreLink = data['appStoreLink'] ?? '';
+      Constant.appVersion = data['app_version'] ?? '';
+      Constant.websiteUrl = data['websiteUrl'] ?? '';
+    });
+    listen('RestaurantNearBy', (data) {
+      Constant.radius = data['radios'];
+      Constant.driverRadios = data['driverRadios'];
+      Constant.distanceType = data['distanceType'];
+    });
+  }
+
   static Future<void> getSettings() async {
     try {
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("localisationSettings")
-          .snapshots()
-          .listen((event) async {
-        if (event.exists) {
-          Constant.apiKeyOfDeepl = event.data()?["apiKeyOfDeepl"] ?? '';
-          Constant.localisationType = event.data()?["localisationType"] ?? '';
-        }
-      });
+      // Fast path: disk prefs → else Firestore. Never block boot on CF (high latency).
+      final bundle = await SettingsApi.getBundle();
+      if (bundle != null && bundle.docs.isNotEmpty) {
+        _applyCustomerSettingsDocs(bundle.docs);
+      } else {
+        await _loadCustomerSettingsFromFirestore();
+      }
+      // Warm Redis/prefs for next launch without delaying UI.
+      // ignore: unawaited_futures
+      SettingsApi.refreshInBackground();
+
       await FireStoreUtils.fireStore
           .collection(CollectionName.currencies)
           .where("code", isEqualTo: "INR")
@@ -343,224 +532,44 @@ class FireStoreUtils {
         }
       });
 
-      fireStore
-          .collection(CollectionName.settings)
-          .doc('restaurant')
-          .get()
-          .then((value) {
-        Constant.isSubscriptionModelApplied =
-            value.data()!['subscription_model'];
-        Constant.packagingChargeEnable = value.data()!['packagingChargeEnable'];
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("RestaurantNearBy")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.radius = event.data()!["radios"];
-          Constant.driverRadios = event.data()!["driverRadios"];
-          Constant.distanceType = event.data()!["distanceType"];
-        }
-      });
-
-      await fireStore
-          .collection(CollectionName.settings)
-          .doc("globalSettings")
-          .get()
-          .then((value) async {
-        Constant.defaultCountryCode = value.data()?["defaultCountryCode"] ?? '';
-        Constant.isEnableAdsFeature =
-            value.data()?['isEnableAdsFeature'] ?? false;
-        Constant.isSelfDeliveryFeature =
-            value.data()!['isSelfDelivery'] ?? false;
-        AppThemeData.primary300 = Color(int.parse(
-            value.data()!['app_customer_color'].replaceFirst("#", "0xff")));
-        Constant.taxScope = value.data()?['taxScope'] ?? "";
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("DineinForRestaurant")
-          .get()
-          .then((dineinresult) {
-        if (dineinresult.exists) {
-          Constant.isDineInEnable = dineinresult.data()!["isEnabled"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("googleMapKey")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.mapAPIKey = event.data()!["key"];
-          Constant.placeHolderImage = event.data()!["placeHolderImage"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("home_page_theme")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.theme = event.data()!["theme"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("cashbackOffer")
-          .get()
-          .then((event) {
-        if (event.exists) {
-          Constant.isCashbackActive = event.data()?["isEnable"] ?? false;
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("DriverNearBy")
-          .get()
-          .then((event) {
-        if (event.exists) {
-          Constant.selectedMapType = event.data()!["selectedMapType"];
-          Constant.mapType = event.data()!["mapType"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("privacyPolicy")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.privacyPolicy = event.data()!["privacy_policy"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("termsAndConditions")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.termsAndConditions = event.data()!["termsAndConditions"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("walletSettings")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.walletSetting = event.data()!["isEnabled"];
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("Version")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.googlePlayLink = event.data()!["googlePlayLink"] ?? '';
-          Constant.appStoreLink = event.data()!["appStoreLink"] ?? '';
-          Constant.appVersion = event.data()!["app_version"] ?? '';
-          Constant.websiteUrl = event.data()!["websiteUrl"] ?? '';
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc('story')
-          .get()
-          .then((value) {
-        Constant.storyEnable = value.data()?['isEnabled'] ?? false;
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc('adminSettings')
-          .get()
-          .then((value) {
-        if (value.data() != null) {
-          Constant.platformFeeModel = PlatformFeeModel.fromJson(value.data()!);
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc('referral_amount')
-          .get()
-          .then((value) {
-        Constant.referralAmount = '${value.data()?['referralAmount'] ?? '0.0'}';
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc('placeHolderImage')
-          .get()
-          .then((value) {
-        Constant.placeholderImage = value.data()?['image'] ?? '';
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("emailSetting")
-          .get()
-          .then((value) {
-        if (value.exists) {
-          Constant.mailSettings = MailSettings.fromJson(value.data()!);
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("specialDiscountOffer")
-          .get()
-          .then((dineinresult) {
-        if (dineinresult.exists) {
-          Constant.specialDiscountOffer =
-              dineinresult.data()?["isEnable"] ?? false;
-        }
-      });
-
-      await fireStore
-          .collection(CollectionName.settings)
-          .doc("DineinForRestaurant")
-          .get()
-          .then((value) {
-        Constant.isEnabledForCustomer = value['isEnabledForCustomer'] ?? false;
-      });
-
-      await fireStore
-          .collection(CollectionName.settings)
-          .doc("AdminCommission")
-          .get()
-          .then((value) {
-        if (value.data() != null) {
-          Constant.adminCommission = AdminCommission.fromJson(value.data()!);
-        }
-      });
-
-      fireStore
-          .collection(CollectionName.settings)
-          .doc("notification_setting")
-          .snapshots()
-          .listen((event) {
-        if (event.exists) {
-          Constant.senderId = event.data()?["projectId"];
-          Constant.jsonNotificationFileURL = event.data()?["serviceJson"];
-        }
-      });
+      _attachCustomerLiveSettings();
     } catch (e) {
       log(e.toString());
     }
+  }
+
+  static Future<void> _loadCustomerSettingsFromFirestore() async {
+    final ids = [
+      'restaurant',
+      'RestaurantNearBy',
+      'globalSettings',
+      'DineinForRestaurant',
+      'googleMapKey',
+      'home_page_theme',
+      'cashbackOffer',
+      'DriverNearBy',
+      'privacyPolicy',
+      'termsAndConditions',
+      'walletSettings',
+      'Version',
+      'story',
+      'adminSettings',
+      'referral_amount',
+      'placeHolderImage',
+      'emailSetting',
+      'specialDiscountOffer',
+      'AdminCommission',
+      'notification_setting',
+      'localisationSettings',
+    ];
+    final snaps = await Future.wait(
+      ids.map((id) => fireStore.collection(CollectionName.settings).doc(id).get()),
+    );
+    final docs = <String, Map<String, dynamic>?>{};
+    for (var i = 0; i < ids.length; i++) {
+      docs[ids[i]] = snaps[i].data();
+    }
+    _applyCustomerSettingsDocs(docs);
   }
 
   static Future<bool?> checkReferralCodeValidOrNot(String referralCode) async {
@@ -618,6 +627,10 @@ class FireStoreUtils {
   }
 
   static Future<List<ZoneModel>?> getZone() async {
+    final cached = await FirestoreReadCache.getZones();
+    if (cached != null) return cached;
+
+    // Firestore on critical path — CF cold starts often exceed client timeouts.
     List<ZoneModel> airPortList = [];
     await fireStore
         .collection(CollectionName.zone)
@@ -630,6 +643,12 @@ class FireStoreUtils {
       }
     }).catchError((error) {
       log(error.toString());
+    });
+    FirestoreReadCache.putZones(airPortList);
+    CatalogApi.warmFamilyInBackground('zones', onSuccess: (items) {
+      FirestoreReadCache.putZones(
+        items.map((e) => ZoneModel.fromJson(e)).toList(),
+      );
     });
     return airPortList;
   }
@@ -1062,6 +1081,9 @@ class FireStoreUtils {
   }
 
   static Future<List<VendorCategoryModel>> getHomeVendorCategory() async {
+    final mem = await FirestoreReadCache.getHomeCategories();
+    if (mem != null) return mem;
+
     List<VendorCategoryModel> list = [];
     await fireStore
         .collection(CollectionName.vendorCategories)
@@ -1076,6 +1098,12 @@ class FireStoreUtils {
       }
     }).catchError((error) {
       log(error.toString());
+    });
+    FirestoreReadCache.putHomeCategories(list);
+    CatalogApi.warmFamilyInBackground('categories_home', onSuccess: (items) {
+      FirestoreReadCache.putHomeCategories(
+        items.map((e) => VendorCategoryModel.fromJson(e)).toList(),
+      );
     });
     return list;
   }
@@ -1095,10 +1123,14 @@ class FireStoreUtils {
     }).catchError((error) {
       log(error.toString());
     });
+    CatalogApi.warmFamilyInBackground('categories');
     return list;
   }
 
   static Future<List<BannerModel>> getHomeTopBanner() async {
+    final mem = await FirestoreReadCache.getTopBanners();
+    if (mem != null) return mem;
+
     List<BannerModel> bannerList = [];
     await fireStore
         .collection(CollectionName.menuItems)
@@ -1114,10 +1146,19 @@ class FireStoreUtils {
         }
       },
     );
+    FirestoreReadCache.putTopBanners(bannerList);
+    CatalogApi.warmFamilyInBackground('banners_top', onSuccess: (items) {
+      FirestoreReadCache.putTopBanners(
+        items.map((e) => BannerModel.fromJson(e)).toList(),
+      );
+    });
     return bannerList;
   }
 
   static Future<List<BannerModel>> getHomeBottomBanner() async {
+    final mem = await FirestoreReadCache.getMiddleBanners();
+    if (mem != null) return mem;
+
     List<BannerModel> bannerList = [];
     await fireStore
         .collection(CollectionName.menuItems)
@@ -1133,6 +1174,12 @@ class FireStoreUtils {
         }
       },
     );
+    FirestoreReadCache.putMiddleBanners(bannerList);
+    CatalogApi.warmFamilyInBackground('banners_middle', onSuccess: (items) {
+      FirestoreReadCache.putMiddleBanners(
+        items.map((e) => BannerModel.fromJson(e)).toList(),
+      );
+    });
     return bannerList;
   }
 
@@ -1310,6 +1357,11 @@ class FireStoreUtils {
         }
       },
     );
+    CatalogApi.warmFamilyInBackground('attributes', onSuccess: (items) {
+      FirestoreReadCache.putAttributes(
+        items.map((e) => AttributesModel.fromJson(e)).toList(),
+      );
+    });
     return attributeList;
   }
 
@@ -1478,25 +1530,43 @@ class FireStoreUtils {
     return isAdded;
   }
 
-  static Future<List<OrderModel>> getAllOrder() async {
-    List<OrderModel> list = [];
+  static const int orderPageSize = 20;
+  static DocumentSnapshot? _lastOrderDoc;
 
-    await fireStore
-        .collection(CollectionName.restaurantOrders)
-        .where("authorID", isEqualTo: FireStoreUtils.getCurrentUid())
-        .orderBy("createdAt", descending: true)
-        .get()
-        .then((value) {
+  /// Paginated customer order history (newest first).
+  /// Pass [reset]: true to start from the first page.
+  static Future<List<OrderModel>> getAllOrder({bool reset = true}) async {
+    List<OrderModel> list = [];
+    if (reset) {
+      _lastOrderDoc = null;
+    }
+
+    try {
+      Query query = fireStore
+          .collection(CollectionName.restaurantOrders)
+          .where("authorID", isEqualTo: FireStoreUtils.getCurrentUid())
+          .orderBy("createdAt", descending: true)
+          .limit(orderPageSize);
+      if (!reset && _lastOrderDoc != null) {
+        query = query.startAfterDocument(_lastOrderDoc!);
+      }
+      final value = await query.get();
       log("FireStoreUtils.getCurrentUid() :: ${FireStoreUtils.getCurrentUid()}");
       for (var element in value.docs) {
-        OrderModel taxModel = OrderModel.fromJson(element.data());
+        OrderModel taxModel =
+            OrderModel.fromJson(element.data() as Map<String, dynamic>);
         list.add(taxModel);
       }
-    }).catchError((e) {
+      if (value.docs.isNotEmpty) {
+        _lastOrderDoc = value.docs.last;
+      }
+    } catch (e) {
       log("FireStoreUtils.getCurrentUid() :: getAllOrder :: $e");
-    });
+    }
     return list;
   }
+
+  static Future<List<OrderModel>> getMoreOrders() => getAllOrder(reset: false);
 
   static Future<OrderModel?> getOrderByOrderId(String orderId) async {
     OrderModel? orderModel;

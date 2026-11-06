@@ -9,12 +9,12 @@ class Cashfree {
   Cashfree({this.clientId, this.clientSecret, this.image, this.name, this.enable, this.isSandbox});
 
   Cashfree.fromJson(Map<String, dynamic> json) {
-    clientId = json['clientId'];
-    clientSecret = json['clientSecret'];
+    clientId = json['clientId'] ?? json['appId'] ?? json['appID'];
+    clientSecret = json['clientSecret'] ?? json['secretKey'] ?? json['secret'];
     image = json['image'];
     name = json['name'];
-    enable = json['enable'];
-    isSandbox = json['isSandbox'];
+    enable = json['enable'] ?? json['isEnabled'] ?? json['isEnable'];
+    isSandbox = json['isSandbox'] ?? json['sandbox'];
   }
 
   Map<String, dynamic> toJson() {

@@ -39,6 +39,24 @@
 		<string>$(CURRENT_PROJECT_VERSION)</string>
 		<key>GIDClientID</key>
 		<string>728732933030-uqggdqdn74300ov6n6f48fi5hhrpqddt.apps.googleusercontent.com</string>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>amazonpay</string>
+			<string>upi</string>
+			<string>credpay</string>
+			<string>bhim</string>
+			<string>paytmmp</string>
+			<string>phonepe</string>
+			<string>tez</string>
+			<string>navipay</string>
+			<string>mobikwik</string>
+			<string>myairtel</string>
+			<string>popclubapp</string>
+			<string>super</string>
+			<string>kiwi</string>
+			<string>simplypayupi</string>
+			<string>whatsapp</string>
+		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true />
 		<key>NSAppTransportSecurity</key>

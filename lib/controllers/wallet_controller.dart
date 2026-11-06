@@ -95,11 +95,43 @@ class WalletController extends GetxController {
 
   Future<void> getPaymentSettings() async {
     await FireStoreUtils.getPaymentSettingsData();
-    final cashFreePref = Preferences.getString(Preferences.cashFreeSettings);
-    if (cashFreePref.isNotEmpty) {
-      cashfreeModel.value = Cashfree.fromJson(jsonDecode(cashFreePref));
+    void load(String key, void Function(Map<String, dynamic> json) apply) {
+      final raw = Preferences.getString(key);
+      if (raw.isEmpty) return;
+      try {
+        apply(jsonDecode(raw) as Map<String, dynamic>);
+      } catch (_) {}
     }
-    selectedPaymentMethod.value = PaymentGateway.cashfree.name;
+
+    load(Preferences.payFastSettings, (j) => payFastModel.value = PayFastModel.fromJson(j));
+    load(Preferences.mercadoPago, (j) => mercadoPagoModel.value = MercadoPagoModel.fromJson(j));
+    load(Preferences.paypalSettings, (j) => payPalModel.value = PayPalModel.fromJson(j));
+    load(Preferences.stripeSettings, (j) => stripeModel.value = StripeModel.fromJson(j));
+    load(Preferences.flutterWave, (j) => flutterWaveModel.value = FlutterWaveModel.fromJson(j));
+    load(Preferences.payStack, (j) => payStackModel.value = PayStackModel.fromJson(j));
+    load(Preferences.paytmSettings, (j) => paytmModel.value = PaytmModel.fromJson(j));
+    load(Preferences.razorpaySettings, (j) => razorPayModel.value = RazorPayModel.fromJson(j));
+    load(Preferences.midTransSettings, (j) => midTransModel.value = MidTrans.fromJson(j));
+    load(Preferences.orangeMoneySettings, (j) => orangeMoneyModel.value = OrangeMoney.fromJson(j));
+    load(Preferences.xenditSettings, (j) => xenditModel.value = Xendit.fromJson(j));
+    load(Preferences.mtnMomoSettings, (j) => mtnMomoModel.value = MtnMomo.fromJson(j));
+    load(Preferences.phonePaySettings, (j) => phonePeModel.value = PhonePe.fromJson(j));
+    load(Preferences.instamojoSettings, (j) => instamojoModel.value = Instamojo.fromJson(j));
+    load(Preferences.foloosiSettings, (j) => foloosiModel.value = Foloosi.fromJson(j));
+    load(Preferences.payMongoSettings, (j) => payMongoModel.value = PayMongo.fromJson(j));
+    load(Preferences.cashFreeSettings, (j) => cashfreeModel.value = Cashfree.fromJson(j));
+
+    if (cashfreeModel.value.enable == true) {
+      selectedPaymentMethod.value = PaymentGateway.cashfree.name;
+    } else if (payStackModel.value.isEnable == true) {
+      selectedPaymentMethod.value = PaymentGateway.payStack.name;
+    } else if (stripeModel.value.isEnabled == true) {
+      selectedPaymentMethod.value = PaymentGateway.stripe.name;
+    } else if (razorPayModel.value.isEnabled == true) {
+      selectedPaymentMethod.value = PaymentGateway.razorpay.name;
+    } else {
+      selectedPaymentMethod.value = '';
+    }
     isLoadingPayment.value = false;
   }
 
@@ -824,27 +856,25 @@ class WalletController extends GetxController {
 
   Future<void> cashFreeMakePayment({required BuildContext context, required String amount, required String paymentDesc}) async {
     ShowToastDialog.showLoader("Please wait");
-    await CashfreeService()
-        .createPaymentLink(cashfree: cashfreeModel.value, userModel: userModel.value, amount: double.parse(double.parse(amount).toStringAsFixed(2)), paymentDesc: paymentDesc)
-        .then((result) {
-      if (result != null) {
-        Get.to(WebUrlServiceScreen(initialURl: result))?.then((value) {
-          ShowToastDialog.closeLoader();
-          if (value) {
-            ShowToastDialog.showToast("Payment Successful!!");
-            walletTopUp();
-            Get.back();
-          } else {
-            ShowToastDialog.closeLoader();
-            ShowToastDialog.showToast("Payment UnSuccessful!!");
-          }
-        });
-        // final bool isDone = await Navigator.push(context, MaterialPageRoute(builder: (context) => MercadoPagoScreen(initialURl: result['response']['init_point'])));
-      } else {
+    final started = await CashfreeService().startCheckoutPayment(
+      cashfree: cashfreeModel.value,
+      userModel: userModel.value,
+      amount: double.parse(double.parse(amount).toStringAsFixed(2)),
+      paymentDesc: paymentDesc,
+      onSuccess: (orderId) {
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("Error while transaction!");
-      }
-    });
+        ShowToastDialog.showToast("Payment Successful!!");
+        walletTopUp();
+        Get.back();
+      },
+      onError: (message) {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast(message);
+      },
+    );
+    if (started) {
+      ShowToastDialog.closeLoader();
+    }
   }
 
   Future<void> makeInstamojoPayment({required String amount, required String paymentDesc}) async {

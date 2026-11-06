@@ -348,19 +348,22 @@ class Constant {
   }
 
   static String getDistance({required String lat1, required String lng1, required String lat2, required String lng2}) {
-    double distance;
-    double distanceInMeters = Geolocator.distanceBetween(
+    return getDistanceKm(lat1: lat1, lng1: lng1, lat2: lat2, lng2: lng2).toStringAsFixed(2);
+  }
+
+  /// Full-precision distance in km (or miles). Prefer this for billing so short
+  /// trips are not collapsed to 0.00 by [toStringAsFixed].
+  static double getDistanceKm({required String lat1, required String lng1, required String lat2, required String lng2}) {
+    final double distanceInMeters = Geolocator.distanceBetween(
       double.parse(lat1),
       double.parse(lng1),
       double.parse(lat2),
       double.parse(lng2),
     );
     if (distanceType == "miles") {
-      distance = distanceInMeters / 1609;
-    } else {
-      distance = distanceInMeters / 1000;
+      return distanceInMeters / 1609;
     }
-    return distance.toStringAsFixed(2);
+    return distanceInMeters / 1000;
   }
 
   bool hasValidUrl(String? value) {

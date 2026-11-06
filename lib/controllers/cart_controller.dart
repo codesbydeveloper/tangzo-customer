@@ -182,17 +182,19 @@ class CartController extends GetxController {
     );
   }
 
-  /// Per-km rate always applies. Within [minimumDeliveryChargesWithinKm],
-  /// [minimumDeliveryCharges] is only a floor (not a flat fee).
-  /// Distance is rounded to nearest km first (e.g. 4.4 → 4, 4.6 → 5).
+  /// Formula: delivery_charges_per_km × ceil(km).
+  /// Any delivery bills at least 1 km. Within [minimumDeliveryChargesWithinKm],
+  /// [minimumDeliveryCharges] is applied as a floor (e.g. 0.4 km → ₹20 min).
   double _calculateDeliveryCharges({required double distance, required DeliveryCharge charge}) {
-    final double roundedDistance = distance.roundToDouble();
+    final double safeDistance = (!distance.isFinite || distance < 0) ? 0.0 : distance;
+    // Round UP; never bill 0 km for a delivery order (0.01 km → 1 km).
+    final int billableKm = maths.max(1, safeDistance.ceil());
     final double perKmRate = (charge.deliveryChargesPerKm ?? 0).toDouble();
     final double minimumCharge = (charge.minimumDeliveryCharges ?? 0).toDouble();
     final double withinKm = (charge.minimumDeliveryChargesWithinKm ?? 0).toDouble();
-    final double calculatedCharge = roundedDistance * perKmRate;
+    final double calculatedCharge = billableKm * perKmRate;
 
-    if (roundedDistance <= withinKm) {
+    if (withinKm <= 0 || safeDistance <= withinKm || billableKm <= withinKm) {
       return maths.max(minimumCharge, calculatedCharge);
     }
     return calculatedCharge;
@@ -219,19 +221,29 @@ class CartController extends GetxController {
     /// ---------------- DELIVERY CHARGES ----------------
     if (cartItem.isNotEmpty) {
       if (selectedFoodType.value == "Delivery") {
-        totalDistance.value = double.parse(Constant.getDistance(
+        // Use full precision (avoid toStringAsFixed(2) collapsing short trips to 0.00).
+        totalDistance.value = Constant.getDistanceKm(
           lat1: selectedAddress.value.location!.latitude.toString(),
           lng1: selectedAddress.value.location!.longitude.toString(),
           lat2: vendorModel.value.latitude.toString(),
           lng2: vendorModel.value.longitude.toString(),
-        )).roundToDouble();
+        );
 
         if (vendorModel.value.isSelfDelivery == true && Constant.isSelfDeliveryFeature == true) {
           deliveryCharges.value = 0.0;
         } else {
-          final charge = deliveryChargeModel.value.vendorCanModify == true
-              ? (vendorModel.value.deliveryCharge ?? deliveryChargeModel.value)
-              : deliveryChargeModel.value;
+          // Prefer global settings; fall back if vendor override is incomplete.
+          DeliveryCharge charge = deliveryChargeModel.value;
+          if (deliveryChargeModel.value.vendorCanModify == true && vendorModel.value.deliveryCharge != null) {
+            final vendorCharge = vendorModel.value.deliveryCharge!;
+            charge = DeliveryCharge(
+              deliveryChargesPerKm: vendorCharge.deliveryChargesPerKm ?? charge.deliveryChargesPerKm,
+              minimumDeliveryCharges: vendorCharge.minimumDeliveryCharges ?? charge.minimumDeliveryCharges,
+              minimumDeliveryChargesWithinKm:
+                  vendorCharge.minimumDeliveryChargesWithinKm ?? charge.minimumDeliveryChargesWithinKm,
+              vendorCanModify: true,
+            );
+          }
           deliveryCharges.value = _calculateDeliveryCharges(
             distance: totalDistance.value,
             charge: charge,
@@ -839,16 +851,58 @@ class CartController extends GetxController {
 
   Future<void> getPaymentSettings() async {
     await FireStoreUtils.getPaymentSettingsData();
-    final cashFreePref = Preferences.getString(Preferences.cashFreeSettings);
-    if (cashFreePref.isNotEmpty) {
-      cashfreeModel.value = Cashfree.fromJson(jsonDecode(cashFreePref));
-    }
-    final codPref = Preferences.getString(Preferences.codSettings);
-    if (codPref.isNotEmpty) {
-      cashOnDeliverySettingModel.value = CodSettingModel.fromJson(jsonDecode(codPref));
-    }
-    selectedPaymentMethod.value = PaymentGateway.cashfree.name;
+    _loadPref(Preferences.payFastSettings, (j) => payFastModel.value = PayFastModel.fromJson(j));
+    _loadPref(Preferences.mercadoPago, (j) => mercadoPagoModel.value = MercadoPagoModel.fromJson(j));
+    _loadPref(Preferences.paypalSettings, (j) => payPalModel.value = PayPalModel.fromJson(j));
+    _loadPref(Preferences.stripeSettings, (j) => stripeModel.value = StripeModel.fromJson(j));
+    _loadPref(Preferences.flutterWave, (j) => flutterWaveModel.value = FlutterWaveModel.fromJson(j));
+    _loadPref(Preferences.payStack, (j) => payStackModel.value = PayStackModel.fromJson(j));
+    _loadPref(Preferences.paytmSettings, (j) => paytmModel.value = PaytmModel.fromJson(j));
+    _loadPref(Preferences.razorpaySettings, (j) => razorPayModel.value = RazorPayModel.fromJson(j));
+    _loadPref(Preferences.midTransSettings, (j) => midTransModel.value = MidTrans.fromJson(j));
+    _loadPref(Preferences.orangeMoneySettings, (j) => orangeMoneyModel.value = OrangeMoney.fromJson(j));
+    _loadPref(Preferences.xenditSettings, (j) => xenditModel.value = Xendit.fromJson(j));
+    _loadPref(Preferences.mtnMomoSettings, (j) => mtnMomoModel.value = MtnMomo.fromJson(j));
+    _loadPref(Preferences.phonePaySettings, (j) => phonePeModel.value = PhonePe.fromJson(j));
+    _loadPref(Preferences.instamojoSettings, (j) => instamojoModel.value = Instamojo.fromJson(j));
+    _loadPref(Preferences.foloosiSettings, (j) => foloosiModel.value = Foloosi.fromJson(j));
+    _loadPref(Preferences.payMongoSettings, (j) => payMongoModel.value = PayMongo.fromJson(j));
+    _loadPref(Preferences.cashFreeSettings, (j) => cashfreeModel.value = Cashfree.fromJson(j));
+    _loadPref(Preferences.walletSettings, (j) => walletSettingModel.value = WalletSettingModel.fromJson(j));
+    _loadPref(Preferences.codSettings, (j) => cashOnDeliverySettingModel.value = CodSettingModel.fromJson(j));
+    selectedPaymentMethod.value = _defaultEnabledPaymentMethod();
     isLoading.value = false;
+  }
+
+  void _loadPref(String key, void Function(Map<String, dynamic> json) apply) {
+    final raw = Preferences.getString(key);
+    if (raw.isEmpty) return;
+    try {
+      apply(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {}
+  }
+
+  String _defaultEnabledPaymentMethod() {
+    if (cashfreeModel.value.enable == true) return PaymentGateway.cashfree.name;
+    if (cashOnDeliverySettingModel.value.isEnabled == true) return PaymentGateway.cod.name;
+    if (walletSettingModel.value.isEnabled == true) return PaymentGateway.wallet.name;
+    if (payStackModel.value.isEnable == true) return PaymentGateway.payStack.name;
+    if (stripeModel.value.isEnabled == true) return PaymentGateway.stripe.name;
+    if (razorPayModel.value.isEnabled == true) return PaymentGateway.razorpay.name;
+    if (payPalModel.value.isEnabled == true) return PaymentGateway.paypal.name;
+    if (flutterWaveModel.value.isEnable == true) return PaymentGateway.flutterWave.name;
+    if (payFastModel.value.isEnable == true) return PaymentGateway.payFast.name;
+    if (paytmModel.value.isEnabled == true) return PaymentGateway.paytm.name;
+    if (mercadoPagoModel.value.isEnabled == true) return PaymentGateway.mercadoPago.name;
+    if (midTransModel.value.enable == true) return PaymentGateway.midTrans.name;
+    if (orangeMoneyModel.value.enable == true) return PaymentGateway.orangeMoney.name;
+    if (xenditModel.value.enable == true) return PaymentGateway.xendit.name;
+    if (mtnMomoModel.value.enable == true) return PaymentGateway.mtnMomo.name;
+    if (phonePeModel.value.enable == true) return PaymentGateway.phonePe.name;
+    if (instamojoModel.value.enable == true) return PaymentGateway.instamojo.name;
+    if (foloosiModel.value.enable == true) return PaymentGateway.foloosi.name;
+    if (payMongoModel.value.enable == true) return PaymentGateway.payMongo.name;
+    return '';
   }
 
   // Strip
@@ -1557,25 +1611,24 @@ class CartController extends GetxController {
 
   Future<void> cashFreeMakePayment({required BuildContext context, required String amount, required String paymentDesc}) async {
     ShowToastDialog.showLoader("Please wait");
-    await CashfreeService()
-        .createPaymentLink(cashfree: cashfreeModel.value, userModel: userModel.value, amount: double.parse(double.parse(amount).toStringAsFixed(2)), paymentDesc: paymentDesc)
-        .then((result) {
-      if (result != null) {
-        Get.to(WebUrlServiceScreen(initialURl: result))?.then((value) {
-          ShowToastDialog.closeLoader();
-          if (value) {
-            ShowToastDialog.showToast("Payment Successful!!");
-            placeOrder();
-          } else {
-            ShowToastDialog.showToast("Payment UnSuccessful!!");
-          }
-        });
-        // final bool isDone = await Navigator.push(context, MaterialPageRoute(builder: (context) => MercadoPagoScreen(initialURl: result['response']['init_point'])));
-      } else {
+    final started = await CashfreeService().startCheckoutPayment(
+      cashfree: cashfreeModel.value,
+      userModel: userModel.value,
+      amount: double.parse(double.parse(amount).toStringAsFixed(2)),
+      paymentDesc: paymentDesc,
+      onSuccess: (orderId) {
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("Error while transaction!");
-      }
-    });
+        ShowToastDialog.showToast("Payment Successful!!");
+        placeOrder();
+      },
+      onError: (message) {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast(message);
+      },
+    );
+    if (started) {
+      ShowToastDialog.closeLoader();
+    }
   }
 
   Future<void> makeInstamojoPayment({required String amount, required String paymentDesc}) async {

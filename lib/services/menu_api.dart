@@ -43,7 +43,7 @@ class MenuApi {
               },
             }),
           )
-          .timeout(const Duration(seconds: 25));
+          .timeout(const Duration(seconds: 8));
 
       final decoded = jsonDecode(response.body);
       if (decoded is Map && decoded['error'] != null) {

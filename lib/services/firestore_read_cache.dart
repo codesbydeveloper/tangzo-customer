@@ -1,6 +1,8 @@
 import 'package:customer/models/AttributesModel.dart';
+import 'package:customer/models/BannerModel.dart';
 import 'package:customer/models/vendor_category_model.dart';
 import 'package:customer/models/vendor_model.dart';
+import 'package:customer/models/zone_model.dart';
 import 'package:customer/services/firestore_cache_metrics.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 
@@ -20,6 +22,11 @@ class FirestoreReadCache {
 
   static List<AttributesModel>? _attributes;
   static Future<List<AttributesModel>?>? _attributesInFlight;
+
+  static List<ZoneModel>? _zones;
+  static List<VendorCategoryModel>? _homeCategories;
+  static List<BannerModel>? _topBanners;
+  static List<BannerModel>? _middleBanners;
 
   static const Duration vendorTtl = Duration(minutes: 10);
   static final Map<String, DateTime> _vendorCachedAt = {};
@@ -124,11 +131,61 @@ class FirestoreReadCache {
     return _attributesInFlight!;
   }
 
+  static void putAttributes(List<AttributesModel>? list) {
+    _attributes = list;
+  }
+
+  static Future<List<ZoneModel>?> getZones() async {
+    if (_zones != null) {
+      FirestoreCacheMetrics.categoryCacheHits++;
+      return _zones;
+    }
+    return null;
+  }
+
+  static void putZones(List<ZoneModel> zones) {
+    _zones = zones;
+  }
+
+  static Future<List<VendorCategoryModel>?> getHomeCategories() async {
+    if (_homeCategories != null) {
+      FirestoreCacheMetrics.categoryCacheHits++;
+      return _homeCategories;
+    }
+    return null;
+  }
+
+  static void putHomeCategories(List<VendorCategoryModel> list) {
+    _homeCategories = list;
+  }
+
+  static Future<List<BannerModel>?> getTopBanners() async {
+    if (_topBanners != null) return _topBanners;
+    return null;
+  }
+
+  static void putTopBanners(List<BannerModel> list) {
+    _topBanners = list;
+  }
+
+  static Future<List<BannerModel>?> getMiddleBanners() async {
+    if (_middleBanners != null) return _middleBanners;
+    return null;
+  }
+
+  static void putMiddleBanners(List<BannerModel> list) {
+    _middleBanners = list;
+  }
+
   static void clear() {
     _vendors.clear();
     _vendorCachedAt.clear();
     _categories.clear();
     _allPublishedCategories = null;
     _attributes = null;
+    _zones = null;
+    _homeCategories = null;
+    _topBanners = null;
+    _middleBanners = null;
   }
 }

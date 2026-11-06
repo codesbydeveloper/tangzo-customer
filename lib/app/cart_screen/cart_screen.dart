@@ -1359,14 +1359,42 @@ class CartScreen extends StatelessWidget {
                                       }
                                       controller.isOrderPlaced.value = true;
                                       await controller.getCashback();
-                                      if (controller.selectedPaymentMethod.value == PaymentGateway.cod.name) {
+                                      final amount = controller.totalAmount.value.toString();
+                                      final method = controller.selectedPaymentMethod.value;
+                                      if (method == PaymentGateway.cod.name || method == PaymentGateway.wallet.name) {
                                         await controller.placeOrder();
-                                      } else if (controller.selectedPaymentMethod.value == PaymentGateway.cashfree.name) {
-                                        await controller.cashFreeMakePayment(
-                                          context: context,
-                                          amount: controller.totalAmount.value.toString(),
-                                          paymentDesc: "Order Payment",
-                                        );
+                                      } else if (method == PaymentGateway.cashfree.name) {
+                                        await controller.cashFreeMakePayment(context: context, amount: amount, paymentDesc: "Order Payment");
+                                      } else if (method == PaymentGateway.stripe.name) {
+                                        await controller.stripeMakePayment(amount: amount);
+                                      } else if (method == PaymentGateway.paypal.name) {
+                                        controller.paypalPaymentSheet(amount, context);
+                                      } else if (method == PaymentGateway.payStack.name) {
+                                        await controller.payStackPayment(amount);
+                                      } else if (method == PaymentGateway.mercadoPago.name) {
+                                        await controller.mercadoPagoMakePayment(context: context, amount: amount);
+                                      } else if (method == PaymentGateway.flutterWave.name) {
+                                        await controller.flutterWaveInitiatePayment(context: context, amount: amount);
+                                      } else if (method == PaymentGateway.payFast.name) {
+                                        controller.payFastPayment(context: context, amount: amount);
+                                      } else if (method == PaymentGateway.paytm.name) {
+                                        await controller.getPaytmCheckSum(context, amount: double.parse(amount));
+                                      } else if (method == PaymentGateway.razorpay.name) {
+                                        ShowToastDialog.showLoader("Please wait");
+                                        // ignore: use_build_context_synchronously
+                                        controller.openCheckout(amount: amount, orderId: '');
+                                      } else if (method == PaymentGateway.midTrans.name) {
+                                        await controller.midtransMakePayment(context: context, amount: amount);
+                                      } else if (method == PaymentGateway.orangeMoney.name) {
+                                        await controller.orangeMakePayment(context: context, amount: amount);
+                                      } else if (method == PaymentGateway.xendit.name) {
+                                        await controller.xenditPayment(context, amount);
+                                      } else if (method == PaymentGateway.mtnMomo.name) {
+                                        await controller.mtnMomoMakePayment(amount: amount);
+                                      } else if (method == PaymentGateway.instamojo.name) {
+                                        await controller.makeInstamojoPayment(amount: amount, paymentDesc: "Order Payment");
+                                      } else if (method == PaymentGateway.payMongo.name) {
+                                        await controller.makePayMongoPayment(amount: amount, paymentDesc: "Order Payment");
                                       } else {
                                         ShowToastDialog.closeLoader();
                                         ShowToastDialog.showToast("Please select a payment method.");
