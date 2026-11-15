@@ -301,7 +301,10 @@ class OrderScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TranslatedText(
-                          orderModel.status.toString(),
+                          Constant.statusDisplayLabel(
+                            status: orderModel.status.toString(),
+                            deliveryPartner: orderModel.deliveryPartner,
+                          ),
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: Constant.statusColor(status: orderModel.status.toString()),

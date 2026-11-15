@@ -41,6 +41,9 @@ class OrderModel {
   bool? isPosOrder;
   String? taxScope;
   String? platformFee;
+  /// 'shadowfax' | 'shadowfax_pending' when handed to partner delivery
+  String? deliveryPartner;
+  Map<String, dynamic>? shadowfax;
 
   OrderModel(
       {this.address,
@@ -77,7 +80,9 @@ class OrderModel {
       this.platformTax,
       this.taxScope,
       this.platformFee,
-      this.isPosOrder});
+      this.isPosOrder,
+      this.deliveryPartner,
+      this.shadowfax});
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     address = json['address'] != null ? ShippingAddress.fromJson(json['address']) : null;
@@ -141,6 +146,8 @@ class OrderModel {
     taxScope = json['taxScope'];
     platformFee = json['platformFee'];
     isPosOrder = json['isPosOrder'] ?? false;
+    deliveryPartner = json['deliveryPartner']?.toString();
+    shadowfax = json['shadowfax'] is Map ? Map<String, dynamic>.from(json['shadowfax']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -198,6 +205,12 @@ class OrderModel {
     data['taxScope'] = taxScope;
     data['platformFee'] = platformFee;
     data['isPosOrder'] = isPosOrder ?? false;
+    if (deliveryPartner != null) {
+      data['deliveryPartner'] = deliveryPartner;
+    }
+    if (shadowfax != null) {
+      data['shadowfax'] = shadowfax;
+    }
     return data;
   }
 }

@@ -79,7 +79,10 @@ class OrderDetailsScreen extends StatelessWidget {
                                 ),
                               ),
                               RoundedButtonFill(
-                                title: controller.orderModel.value.status.toString(),
+                                title: Constant.statusDisplayLabel(
+                                  status: controller.orderModel.value.status.toString(),
+                                  deliveryPartner: controller.orderModel.value.deliveryPartner,
+                                ),
                                 color: Constant.statusColor(status: controller.orderModel.value.status.toString()),
                                 width: 32,
                                 height: 4.5,
@@ -89,6 +92,42 @@ class OrderDetailsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
+                          if (Constant.isShadowfaxPartner(controller.orderModel.value.deliveryPartner)) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: ShapeDecoration(
+                                color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TranslatedText(
+                                    "Delivered by our partner Shadowfax",
+                                    style: TextStyle(
+                                      fontFamily: AppThemeData.semiBold,
+                                      fontSize: 14,
+                                      color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
+                                    ),
+                                  ),
+                                  if ((controller.orderModel.value.shadowfax?['status'] ?? '').toString().isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: TranslatedText(
+                                        "Partner status: ${controller.orderModel.value.shadowfax!['status']}",
+                                        style: TextStyle(
+                                          fontFamily: AppThemeData.regular,
+                                          fontSize: 12,
+                                          color: themeChange.getThem() ? AppThemeData.grey300 : AppThemeData.grey600,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(
                             height: 14,
                           ),

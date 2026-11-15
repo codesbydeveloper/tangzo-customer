@@ -63,6 +63,9 @@ class AddressListScreen extends StatelessWidget {
                           addressModel.location = UserLocation(latitude: newLocalData.latitude, longitude: newLocalData.longitude);
                           String currentLocation = "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}";
                           addressModel.locality = currentLocation;
+                          if (placeMark.postalCode != null && placeMark.postalCode!.isNotEmpty) {
+                            addressModel.pincode = placeMark.postalCode;
+                          }
                         });
 
                         ShowToastDialog.closeLoader();
@@ -74,6 +77,9 @@ class AddressListScreen extends StatelessWidget {
                           addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
                           String currentLocation = "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}";
                           addressModel.locality = currentLocation;
+                          if (placeMark.postalCode != null && placeMark.postalCode!.isNotEmpty) {
+                            addressModel.pincode = placeMark.postalCode;
+                          }
                         });
                         ShowToastDialog.closeLoader();
 

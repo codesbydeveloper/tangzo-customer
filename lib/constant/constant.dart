@@ -100,6 +100,15 @@ class Constant {
   static const String orderShipped = "Order Shipped";
   static const String orderInTransit = "In Transit";
   static const String orderCompleted = "Order Completed";
+  static const String noRiderAvailable = "No Rider Available";
+
+  static const String deliveryPartnerShadowfax = "shadowfax";
+  static const String deliveryPartnerShadowfaxPending = "shadowfax_pending";
+
+  static bool isShadowfaxPartner(String? deliveryPartner) {
+    return deliveryPartner == deliveryPartnerShadowfax ||
+        deliveryPartner == deliveryPartnerShadowfaxPending;
+  }
 
   static String currentLangCode = 'en';
   static String localisationType = "Deepl"; // AI/ML or Deepl
@@ -217,6 +226,8 @@ class Constant {
       return AppThemeData.success400;
     } else if (status == orderRejected || status == orderCancelled) {
       return AppThemeData.danger300;
+    } else if (status == noRiderAvailable) {
+      return AppThemeData.warning300;
     } else {
       return AppThemeData.warning300;
     }
@@ -229,9 +240,21 @@ class Constant {
       return AppThemeData.grey50;
     } else if (status == orderRejected) {
       return AppThemeData.grey50;
+    } else if (status == noRiderAvailable) {
+      return AppThemeData.grey900;
     } else {
       return AppThemeData.grey900;
     }
+  }
+
+  static String statusDisplayLabel({required String? status, String? deliveryPartner}) {
+    if (status == noRiderAvailable || deliveryPartner == deliveryPartnerShadowfaxPending) {
+      return "Finding a delivery partner for you…";
+    }
+    if (deliveryPartner == deliveryPartnerShadowfax) {
+      return status ?? "";
+    }
+    return status ?? "";
   }
 
   static String productCommissionPrice(VendorModel vendorModel, String price) {

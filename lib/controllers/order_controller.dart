@@ -27,8 +27,15 @@ class OrderController extends GetxController {
         allList.value = value;
 
         rejectedList.value = allList.where((p0) => p0.status == Constant.orderRejected).toList();
-        inProgressList.value =
-            allList.where((p0) => p0.status == Constant.orderAccepted || p0.status == Constant.driverPending || p0.status == Constant.orderShipped || p0.status == Constant.orderInTransit).toList();
+        inProgressList.value = allList
+            .where((p0) =>
+                p0.status == Constant.orderAccepted ||
+                p0.status == Constant.driverPending ||
+                p0.status == Constant.orderShipped ||
+                p0.status == Constant.orderInTransit ||
+                p0.status == Constant.noRiderAvailable ||
+                Constant.isShadowfaxPartner(p0.deliveryPartner))
+            .toList();
 
         deliveredList.value = allList.where((p0) => p0.status == Constant.orderCompleted).toList();
         cancelledList.value = allList.where((p0) => p0.status == Constant.orderCancelled).toList();

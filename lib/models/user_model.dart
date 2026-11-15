@@ -187,10 +187,12 @@ class ShippingAddress {
   String? addressAs;
   String? landmark;
   String? locality;
+  /// Optional Indian pincode (6 digits). Not mandatory for older addresses.
+  String? pincode;
   UserLocation? location;
   bool? isDefault;
 
-  ShippingAddress({this.address, this.landmark, this.locality, this.location, this.isDefault, this.addressAs, this.id});
+  ShippingAddress({this.address, this.landmark, this.locality, this.location, this.isDefault, this.addressAs, this.id, this.pincode});
 
   ShippingAddress.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -199,6 +201,7 @@ class ShippingAddress {
     locality = json['locality'];
     isDefault = json['isDefault'];
     addressAs = json['addressAs'];
+    pincode = json['pincode']?.toString() ?? json['postalCode']?.toString();
     location = json['location'] == null ? null : UserLocation.fromJson(json['location']);
   }
 
@@ -210,6 +213,9 @@ class ShippingAddress {
     data['locality'] = locality;
     data['isDefault'] = isDefault;
     data['addressAs'] = addressAs;
+    if (pincode != null && pincode!.isNotEmpty) {
+      data['pincode'] = pincode;
+    }
     if (location != null) {
       data['location'] = location!.toJson();
     }
