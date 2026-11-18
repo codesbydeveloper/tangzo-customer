@@ -102,14 +102,6 @@ class Constant {
   static const String orderCompleted = "Order Completed";
   static const String noRiderAvailable = "No Rider Available";
 
-  static const String deliveryPartnerShadowfax = "shadowfax";
-  static const String deliveryPartnerShadowfaxPending = "shadowfax_pending";
-
-  static bool isShadowfaxPartner(String? deliveryPartner) {
-    return deliveryPartner == deliveryPartnerShadowfax ||
-        deliveryPartner == deliveryPartnerShadowfaxPending;
-  }
-
   static String currentLangCode = 'en';
   static String localisationType = "Deepl"; // AI/ML or Deepl
   static String apiKeyOfDeepl = ""; // AI/ML or Deepl
@@ -247,12 +239,9 @@ class Constant {
     }
   }
 
-  static String statusDisplayLabel({required String? status, String? deliveryPartner}) {
-    if (status == noRiderAvailable || deliveryPartner == deliveryPartnerShadowfaxPending) {
+  static String statusDisplayLabel({required String? status}) {
+    if (status == noRiderAvailable) {
       return "Finding a delivery partner for you…";
-    }
-    if (deliveryPartner == deliveryPartnerShadowfax) {
-      return status ?? "";
     }
     return status ?? "";
   }

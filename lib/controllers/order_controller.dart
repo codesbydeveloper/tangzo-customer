@@ -33,8 +33,7 @@ class OrderController extends GetxController {
                 p0.status == Constant.driverPending ||
                 p0.status == Constant.orderShipped ||
                 p0.status == Constant.orderInTransit ||
-                p0.status == Constant.noRiderAvailable ||
-                Constant.isShadowfaxPartner(p0.deliveryPartner))
+                p0.status == Constant.noRiderAvailable)
             .toList();
 
         deliveredList.value = allList.where((p0) => p0.status == Constant.orderCompleted).toList();

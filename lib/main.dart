@@ -7,6 +7,7 @@ import 'package:customer/firebase_options.dart';
 import 'package:customer/models/language_model.dart';
 import 'package:customer/services/database_helper.dart';
 import 'package:customer/services/localization_service.dart';
+import 'package:customer/services/settings_api.dart';
 import 'package:customer/themes/safe_bottom_app_builder.dart';
 import 'package:customer/themes/styles.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
@@ -51,6 +52,7 @@ void main() async {
 
   DatabaseHelper.instance;
   await Preferences.initPref();
+  SettingsApi.prefetch();
   // _initLanguage();
   runApp(
     const MyApp(),

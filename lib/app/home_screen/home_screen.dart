@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX(
-      init: HomeController(),
+      init: Get.put(HomeController(), permanent: true),
       builder: (controller) {
         return Scaffold(
           backgroundColor: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
@@ -572,34 +572,6 @@ class HomeScreen extends StatelessWidget {
                                                     Expanded(
                                                       child: InkWell(
                                                         onTap: () {
-                                                          controller.isPopular.value = true;
-                                                        },
-                                                        child: Container(
-                                                          decoration: controller.isPopular.value == false
-                                                              ? null
-                                                              : ShapeDecoration(
-                                                                  color: AppThemeData.grey900,
-                                                                  shape: RoundedRectangleBorder(
-                                                                    borderRadius: BorderRadius.circular(120),
-                                                                  ),
-                                                                ),
-                                                          child: Padding(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                            child: TranslatedText(
-                                                              "Popular Restaurants",
-                                                              textAlign: TextAlign.center,
-                                                              style: TextStyle(
-                                                                fontFamily: AppThemeData.semiBold,
-                                                                color: themeChange.getThem() ? AppThemeData.primary300 : AppThemeData.primary300,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: InkWell(
-                                                        onTap: () {
                                                           controller.isPopular.value = false;
                                                         },
                                                         child: Container(
@@ -622,9 +594,39 @@ class HomeScreen extends StatelessWidget {
                                                                     ? themeChange.getThem()
                                                                         ? AppThemeData.grey400
                                                                         : AppThemeData.grey500
-                                                                    : themeChange.getThem()
-                                                                        ? AppThemeData.primary300
-                                                                        : AppThemeData.primary300,
+                                                                    : AppThemeData.primary300,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          controller.isPopular.value = true;
+                                                        },
+                                                        child: Container(
+                                                          decoration: controller.isPopular.value == false
+                                                              ? null
+                                                              : ShapeDecoration(
+                                                                  color: AppThemeData.grey900,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(120),
+                                                                  ),
+                                                                ),
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                            child: TranslatedText(
+                                                              "Popular Restaurants",
+                                                              textAlign: TextAlign.center,
+                                                              style: TextStyle(
+                                                                fontFamily: AppThemeData.semiBold,
+                                                                color: controller.isPopular.value == false
+                                                                    ? themeChange.getThem()
+                                                                        ? AppThemeData.grey400
+                                                                        : AppThemeData.grey500
+                                                                    : AppThemeData.primary300,
                                                               ),
                                                             ),
                                                           ),

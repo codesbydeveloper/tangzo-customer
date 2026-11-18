@@ -57,7 +57,7 @@ class HomeScreenTwo extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX(
-      init: HomeController(),
+      init: Get.put(HomeController(), permanent: true),
       builder: (controller) {
         return Scaffold(
           backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,

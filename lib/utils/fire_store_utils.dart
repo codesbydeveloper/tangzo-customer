@@ -298,6 +298,27 @@ class FireStoreUtils {
     return isUpdate;
   }
 
+  /// Avoid full-document set() on every splash when FCM token is unchanged.
+  static Future<void> updateFcmTokenIfChanged({
+    required String userId,
+    required String? token,
+  }) async {
+    if (userId.isEmpty || token == null || token.isEmpty) return;
+    try {
+      final ref = fireStore.collection(CollectionName.users).doc(userId);
+      final snap = await ref.get();
+      if (!snap.exists) return;
+      final current = snap.data()?['fcmToken']?.toString();
+      if (current == token) return;
+      await ref.update({'fcmToken': token});
+      if (Constant.userModel?.id == userId) {
+        Constant.userModel!.fcmToken = token;
+      }
+    } catch (e) {
+      log('updateFcmTokenIfChanged: $e');
+    }
+  }
+
   static Future<List<OnBoardingModel>> getOnBoardingList() async {
     List<OnBoardingModel> onBoardingModel = [];
     await fireStore
@@ -465,80 +486,62 @@ class FireStoreUtils {
     }
     _settingsLiveSubs.clear();
 
-    void listen(String docId, void Function(Map<String, dynamic> data) apply) {
-      _settingsLiveSubs.add(
-        fireStore
-            .collection(CollectionName.settings)
-            .doc(docId)
-            .snapshots()
-            .listen((event) {
-          if (event.exists && event.data() != null) {
-            apply(event.data()!);
-          }
-        }),
-      );
-    }
-
-    listen('localisationSettings', (data) {
-      Constant.apiKeyOfDeepl = data['apiKeyOfDeepl'] ?? '';
-      Constant.localisationType = data['localisationType'] ?? '';
-    });
-    listen('googleMapKey', (data) {
-      Constant.mapAPIKey = data['key'];
-      Constant.placeHolderImage = data['placeHolderImage'];
-    });
-    listen('Version', (data) {
-      Constant.googlePlayLink = data['googlePlayLink'] ?? '';
-      Constant.appStoreLink = data['appStoreLink'] ?? '';
-      Constant.appVersion = data['app_version'] ?? '';
-      Constant.websiteUrl = data['websiteUrl'] ?? '';
-    });
-    listen('RestaurantNearBy', (data) {
-      Constant.radius = data['radios'];
-      Constant.driverRadios = data['driverRadios'];
-      Constant.distanceType = data['distanceType'];
-    });
+    // Only live-listen flags that affect in-session geo radius.
+    // googleMapKey / Version / localisation mirror the Redis bundle + refresh.
+    _settingsLiveSubs.add(
+      fireStore
+          .collection(CollectionName.settings)
+          .doc('RestaurantNearBy')
+          .snapshots()
+          .listen((event) {
+        final data = event.data();
+        if (data == null) return;
+        Constant.radius = data['radios'];
+        Constant.driverRadios = data['driverRadios'];
+        Constant.distanceType = data['distanceType'];
+      }),
+    );
   }
 
   static Future<void> getSettings() async {
     try {
-      // Fast path: disk prefs → else Firestore. Never block boot on CF (high latency).
-      final bundle = await SettingsApi.getBundle();
+      final prefsHit = await SettingsApi.getBundle();
+      SettingsBundleResult? bundle = prefsHit;
+      if (bundle == null || bundle.docs.isEmpty) {
+        bundle = await SettingsApi.raceBundle(
+          firestoreLoader: _fetchCustomerSettingsDocs,
+        );
+      }
       if (bundle != null && bundle.docs.isNotEmpty) {
         _applyCustomerSettingsDocs(bundle.docs);
-      } else {
-        await _loadCustomerSettingsFromFirestore();
+        SettingsApi.markApplied(bundle);
       }
-      // Warm Redis/prefs for next launch without delaying UI.
+
       // ignore: unawaited_futures
-      SettingsApi.refreshInBackground();
+      SettingsApi.refreshInBackground(
+        onFresh: (fresh) {
+          _applyCustomerSettingsDocs(fresh.docs);
+          SettingsApi.markApplied(fresh);
+        },
+      );
 
-      await FireStoreUtils.fireStore
-          .collection(CollectionName.currencies)
-          .where("code", isEqualTo: "INR")
-          .limit(1)
-          .get()
-          .then((value) async {
-        if (value.docs.isNotEmpty) {
-          Constant.currencyModel =
-              CurrencyModel.fromJson(value.docs.first.data());
-          Constant.currencyModel!.symbol = "₹";
-          Constant.currencyModel!.code = "INR";
-          Constant.currencyModel!.name = "Indian Rupee";
-          Constant.currencyModel!.symbolAtRight = false;
-          Constant.currencyModel!.decimalDigits = Constant.amountDecimalDigits;
-        } else {
-          Constant.currencyModel = Constant.inrCurrency;
-        }
-      });
+      // INR currency: fail-safe default; warm currencies family for next launch.
+      Constant.currencyModel ??= Constant.inrCurrency;
+      Constant.currencyModel!.symbol = "₹";
+      Constant.currencyModel!.code = "INR";
+      Constant.currencyModel!.name = "Indian Rupee";
+      Constant.currencyModel!.symbolAtRight = false;
+      Constant.currencyModel!.decimalDigits = Constant.amountDecimalDigits;
+      CatalogApi.warmFamilyInBackground('currencies');
 
-      _attachCustomerLiveSettings();
+      // Live settings deferred — see ensureCustomerLiveSettingsAttached().
     } catch (e) {
       log(e.toString());
     }
   }
 
-  static Future<void> _loadCustomerSettingsFromFirestore() async {
+  static Future<Map<String, Map<String, dynamic>?>>
+      _fetchCustomerSettingsDocs() async {
     final ids = [
       'restaurant',
       'RestaurantNearBy',
@@ -569,7 +572,16 @@ class FireStoreUtils {
     for (var i = 0; i < ids.length; i++) {
       docs[ids[i]] = snaps[i].data();
     }
-    _applyCustomerSettingsDocs(docs);
+    return docs;
+  }
+
+  static bool _customerLiveSettingsAttached = false;
+
+  /// Call after first home/dashboard frame to avoid duplicate boot reads.
+  static void ensureCustomerLiveSettingsAttached() {
+    if (_customerLiveSettingsAttached) return;
+    _customerLiveSettingsAttached = true;
+    _attachCustomerLiveSettings();
   }
 
   static Future<bool?> checkReferralCodeValidOrNot(String referralCode) async {
@@ -627,10 +639,16 @@ class FireStoreUtils {
   }
 
   static Future<List<ZoneModel>?> getZone() async {
-    final cached = await FirestoreReadCache.getZones();
-    if (cached != null) return cached;
+    final mem = await FirestoreReadCache.getZones();
+    if (mem != null) return mem;
 
-    // Firestore on critical path — CF cold starts often exceed client timeouts.
+    final cached = await CatalogApi.getFamilyPreferCache('zones');
+    if (cached != null) {
+      final list = cached.map((e) => ZoneModel.fromJson(e)).toList();
+      FirestoreReadCache.putZones(list);
+      return list;
+    }
+
     List<ZoneModel> airPortList = [];
     await fireStore
         .collection(CollectionName.zone)
@@ -645,10 +663,25 @@ class FireStoreUtils {
       log(error.toString());
     });
     FirestoreReadCache.putZones(airPortList);
+    // ignore: unawaited_futures
+    CatalogApi.writeDisk(
+      'zones',
+      airPortList.map((e) {
+        final m = e.toJson();
+        if (e.area != null) {
+          m['area'] = e.area!
+              .map((g) => {
+                    'latitude': g.latitude,
+                    'longitude': g.longitude,
+                  })
+              .toList();
+        }
+        return m;
+      }).toList(),
+    );
     CatalogApi.warmFamilyInBackground('zones', onSuccess: (items) {
-      FirestoreReadCache.putZones(
-        items.map((e) => ZoneModel.fromJson(e)).toList(),
-      );
+      final list = items.map((e) => ZoneModel.fromJson(e)).toList();
+      FirestoreReadCache.putZones(list);
     });
     return airPortList;
   }
@@ -918,9 +951,73 @@ class FireStoreUtils {
 
   static StreamController<List<VendorModel>>? getNearestVendorController;
 
+  /// One-shot zone vendors + client radius filter (fast first paint).
+  static Future<List<VendorModel>> getNearestRestaurantsOnce({
+    bool? isDining,
+  }) async {
+    final List<VendorModel> vendorList = [];
+    try {
+      Query<Map<String, dynamic>> query = isDining == true
+          ? fireStore
+              .collection(CollectionName.vendors)
+              .where('zoneId', isEqualTo: Constant.selectedZone?.id.toString())
+              .where("enabledDiveInFuture", isEqualTo: true)
+          : fireStore
+              .collection(CollectionName.vendors)
+              .where('zoneId', isEqualTo: Constant.selectedZone?.id.toString());
+
+      final snap = await query.get();
+      final userLat = Constant.selectedLocation.location?.latitude;
+      final userLng = Constant.selectedLocation.location?.longitude;
+      final radiusKm = double.tryParse(Constant.radius.toString()) ?? 50.0;
+
+      for (final document in snap.docs) {
+        final vendorModel = VendorModel.fromJson(document.data());
+        if (!_vendorPassesSubscription(vendorModel)) continue;
+
+        if (userLat != null &&
+            userLng != null &&
+            vendorModel.latitude != null &&
+            vendorModel.longitude != null) {
+          final km = Constant.getDistanceKm(
+            lat1: userLat.toString(),
+            lng1: userLng.toString(),
+            lat2: vendorModel.latitude.toString(),
+            lng2: vendorModel.longitude.toString(),
+          );
+          if (km > radiusKm) continue;
+        }
+        vendorList.add(vendorModel);
+      }
+    } catch (e) {
+      log('getNearestRestaurantsOnce: $e');
+    }
+    return vendorList;
+  }
+
+  static bool _vendorPassesSubscription(VendorModel vendorModel) {
+    if ((Constant.isSubscriptionModelApplied == true ||
+            Constant.adminCommission?.isEnabled == true) &&
+        vendorModel.subscriptionPlan != null) {
+      if (vendorModel.subscriptionTotalOrders == "-1") {
+        return true;
+      }
+      return (vendorModel.subscriptionExpiryDate != null &&
+              vendorModel.subscriptionExpiryDate!
+                      .toDate()
+                      .isBefore(DateTime.now()) ==
+                  false) ||
+          vendorModel.subscriptionPlan?.expiryDay == "-1";
+    }
+    return true;
+  }
+
+  static StreamSubscription? _nearestRestaurantGeoSub;
+
   static Stream<List<VendorModel>> getAllNearestRestaurant(
       {bool? isDining}) async* {
     try {
+      await getNearestVendorController?.close();
       getNearestVendorController =
           StreamController<List<VendorModel>>.broadcast();
       List<VendorModel> vendorList = [];
@@ -946,37 +1043,33 @@ class FireStoreUtils {
               field: field,
               strictMode: true);
 
-      stream.listen((List<DocumentSnapshot> documentList) async {
+      await _nearestRestaurantGeoSub?.cancel();
+      _nearestRestaurantGeoSub =
+          stream.listen((List<DocumentSnapshot> documentList) async {
         vendorList.clear();
         for (var document in documentList) {
           final data = document.data() as Map<String, dynamic>;
           VendorModel vendorModel = VendorModel.fromJson(data);
-          if ((Constant.isSubscriptionModelApplied == true ||
-                  Constant.adminCommission?.isEnabled == true) &&
-              vendorModel.subscriptionPlan != null) {
-            if (vendorModel.subscriptionTotalOrders == "-1") {
-              vendorList.add(vendorModel);
-            } else {
-              if ((vendorModel.subscriptionExpiryDate != null &&
-                      vendorModel.subscriptionExpiryDate!
-                              .toDate()
-                              .isBefore(DateTime.now()) ==
-                          false) ||
-                  vendorModel.subscriptionPlan?.expiryDay == "-1") {
-                vendorList.add(vendorModel);
-              }
-            }
-          } else {
+          if (_vendorPassesSubscription(vendorModel)) {
             vendorList.add(vendorModel);
           }
         }
-        getNearestVendorController!.sink.add(vendorList);
+        if (!(getNearestVendorController?.isClosed ?? true)) {
+          getNearestVendorController!.sink.add(List<VendorModel>.from(vendorList));
+        }
       });
 
       yield* getNearestVendorController!.stream;
     } catch (e) {
       print(e);
     }
+  }
+
+  static Future<void> cancelNearestRestaurantListeners() async {
+    await _nearestRestaurantGeoSub?.cancel();
+    _nearestRestaurantGeoSub = null;
+    await getNearestVendorController?.close();
+    getNearestVendorController = null;
   }
 
   static StreamController<List<VendorModel>>?
@@ -1084,6 +1177,14 @@ class FireStoreUtils {
     final mem = await FirestoreReadCache.getHomeCategories();
     if (mem != null) return mem;
 
+    final cached = await CatalogApi.getFamilyPreferCache('categories_home');
+    if (cached != null) {
+      final list =
+          cached.map((e) => VendorCategoryModel.fromJson(e)).toList();
+      FirestoreReadCache.putHomeCategories(list);
+      return list;
+    }
+
     List<VendorCategoryModel> list = [];
     await fireStore
         .collection(CollectionName.vendorCategories)
@@ -1100,6 +1201,11 @@ class FireStoreUtils {
       log(error.toString());
     });
     FirestoreReadCache.putHomeCategories(list);
+    // ignore: unawaited_futures
+    CatalogApi.writeDisk(
+      'categories_home',
+      list.map((e) => e.toJson()).toList(),
+    );
     CatalogApi.warmFamilyInBackground('categories_home', onSuccess: (items) {
       FirestoreReadCache.putHomeCategories(
         items.map((e) => VendorCategoryModel.fromJson(e)).toList(),
@@ -1131,6 +1237,13 @@ class FireStoreUtils {
     final mem = await FirestoreReadCache.getTopBanners();
     if (mem != null) return mem;
 
+    final cached = await CatalogApi.getFamilyPreferCache('banners_top');
+    if (cached != null) {
+      final bannerList = cached.map((e) => BannerModel.fromJson(e)).toList();
+      FirestoreReadCache.putTopBanners(bannerList);
+      return bannerList;
+    }
+
     List<BannerModel> bannerList = [];
     await fireStore
         .collection(CollectionName.menuItems)
@@ -1147,6 +1260,11 @@ class FireStoreUtils {
       },
     );
     FirestoreReadCache.putTopBanners(bannerList);
+    // ignore: unawaited_futures
+    CatalogApi.writeDisk(
+      'banners_top',
+      bannerList.map((e) => e.toJson()).toList(),
+    );
     CatalogApi.warmFamilyInBackground('banners_top', onSuccess: (items) {
       FirestoreReadCache.putTopBanners(
         items.map((e) => BannerModel.fromJson(e)).toList(),
@@ -1158,6 +1276,13 @@ class FireStoreUtils {
   static Future<List<BannerModel>> getHomeBottomBanner() async {
     final mem = await FirestoreReadCache.getMiddleBanners();
     if (mem != null) return mem;
+
+    final cached = await CatalogApi.getFamilyPreferCache('banners_middle');
+    if (cached != null) {
+      final bannerList = cached.map((e) => BannerModel.fromJson(e)).toList();
+      FirestoreReadCache.putMiddleBanners(bannerList);
+      return bannerList;
+    }
 
     List<BannerModel> bannerList = [];
     await fireStore
@@ -1175,6 +1300,11 @@ class FireStoreUtils {
       },
     );
     FirestoreReadCache.putMiddleBanners(bannerList);
+    // ignore: unawaited_futures
+    CatalogApi.writeDisk(
+      'banners_middle',
+      bannerList.map((e) => e.toJson()).toList(),
+    );
     CatalogApi.warmFamilyInBackground('banners_middle', onSuccess: (items) {
       FirestoreReadCache.putMiddleBanners(
         items.map((e) => BannerModel.fromJson(e)).toList(),
@@ -1405,25 +1535,54 @@ class FireStoreUtils {
   }
 
   static Future<List<TaxModel>?> getTaxList() async {
+    String? country;
+    try {
+      if (Constant.selectedLocation.location?.latitude != null &&
+          Constant.selectedLocation.location?.longitude != null) {
+        final placeMarks = await placemarkFromCoordinates(
+          Constant.selectedLocation.location!.latitude!,
+          Constant.selectedLocation.location!.longitude!,
+        );
+        country = placeMarks.isNotEmpty ? placeMarks.first.country : null;
+      }
+    } catch (e) {
+      log('getTaxList geocode: $e');
+    }
+
+    final cached = await CatalogApi.getFamilyPreferCache('tax');
+    if (cached != null) {
+      var taxList = cached.map((e) => TaxModel.fromJson(e)).toList();
+      if (country != null && country.isNotEmpty) {
+        taxList = taxList
+            .where((t) =>
+                t.country == null ||
+                t.country!.isEmpty ||
+                t.country == country)
+            .toList();
+      }
+      return taxList;
+    }
+
     List<TaxModel> taxList = [];
-    List<Placemark> placeMarks = await placemarkFromCoordinates(
-        Constant.selectedLocation.location!.latitude!,
-        Constant.selectedLocation.location!.longitude!);
-    log("placeMarks.first.country :: ${placeMarks.first.country}");
-    await fireStore
+    Query<Map<String, dynamic>> q = fireStore
         .collection(CollectionName.tax)
-        .where('country', isEqualTo: placeMarks.first.country)
-        .where('enable', isEqualTo: true)
-        .get()
-        .then((value) {
+        .where('enable', isEqualTo: true);
+    if (country != null && country.isNotEmpty) {
+      q = q.where('country', isEqualTo: country);
+    }
+    await q.get().then((value) {
       for (var element in value.docs) {
-        TaxModel taxModel = TaxModel.fromJson(element.data());
-        taxList.add(taxModel);
+        taxList.add(TaxModel.fromJson(element.data()));
       }
     }).catchError((error) {
       log(error.toString());
     });
-
+    // ignore: unawaited_futures
+    CatalogApi.writeDisk(
+      'tax',
+      taxList.map((e) => e.toJson()).toList(),
+    );
+    CatalogApi.warmFamilyInBackground('tax');
     return taxList;
   }
 

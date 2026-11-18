@@ -1,4 +1,5 @@
-/// DEPRECATED (Phase 5): WhatsApp OTP is sent by Cloud Functions only.
+/// DEPRECATED: WhatsApp OTP is sent only by Cloud Functions
+/// (`sendWhatsAppOtp` → MSG91 `api.msg91.com` bulk template API).
 /// Do not call this from the Flutter apps — credentials must not ship in clients.
 /// Kept as a stub so accidental imports fail loudly.
 class Msg91WhatsappService {

@@ -303,7 +303,6 @@ class OrderScreen extends StatelessWidget {
                         TranslatedText(
                           Constant.statusDisplayLabel(
                             status: orderModel.status.toString(),
-                            deliveryPartner: orderModel.deliveryPartner,
                           ),
                           textAlign: TextAlign.right,
                           style: TextStyle(
