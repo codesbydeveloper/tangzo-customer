@@ -45,7 +45,27 @@ class SendNotification {
             'message': {
               'token': token,
               'notification': {'body': notificationModel?.message ?? '', 'title': notificationModel?.subject ?? ''},
-              'data': payload,
+              'data': {
+                ...?payload,
+                'play_ringtone': 'true',
+                'type': type,
+                'title': notificationModel?.subject ?? '',
+                'body': notificationModel?.message ?? '',
+              },
+              'android': {
+                'priority': 'high',
+                'notification': {
+                  'channel_id': 'tangzo_order_alerts',
+                  'sound': 'default',
+                  'default_sound': true,
+                  'notification_priority': 'PRIORITY_MAX',
+                },
+              },
+              'apns': {
+                'payload': {
+                  'aps': {'sound': 'default'},
+                },
+              },
             }
           },
         ),

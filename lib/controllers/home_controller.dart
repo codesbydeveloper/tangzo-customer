@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:customer/constant/constant.dart';
-import 'package:customer/controllers/dash_board_controller.dart';
 import 'package:customer/models/BannerModel.dart';
 import 'package:customer/models/advertisement_model.dart';
 import 'package:customer/models/coupon_model.dart';
@@ -19,8 +18,6 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeController extends GetxController {
-  final DashBoardController dashBoardController =
-      Get.find<DashBoardController>();
   final CartProvider cartProvider = CartProvider();
 
   RxBool isLoading = true.obs;

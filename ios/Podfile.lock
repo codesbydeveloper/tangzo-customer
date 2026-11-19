@@ -1208,6 +1208,15 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.37)
   - camera_avfoundation (0.0.1):
     - Flutter
+  - CashfreeAnalyticsSDK (2.5.2):
+    - CFNetworkSDK (= 2.5.2)
+  - CashfreePG (2.5.3):
+    - CashfreePGUISDK (= 2.5.3)
+  - CashfreePGCoreSDK (2.5.3):
+    - CashfreeAnalyticsSDK (= 2.5.2)
+  - CashfreePGUISDK (2.5.3):
+    - CashfreePGCoreSDK (= 2.5.3)
+  - CFNetworkSDK (2.5.2)
   - clipboard (3.0.9):
     - Flutter
   - cloud_firestore (6.5.0):
@@ -1332,6 +1341,9 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - Flutter (1.0.0)
+  - flutter_cashfree_pg_sdk (2.6.0):
+    - CashfreePG (= 2.5.3)
+    - Flutter
   - flutter_email_sender (8.0.0):
     - Flutter
   - flutter_local_notifications (0.0.1):
@@ -1614,6 +1626,7 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
+  - flutter_cashfree_pg_sdk (from `.symlinks/plugins/flutter_cashfree_pg_sdk/ios`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
@@ -1644,6 +1657,11 @@ SPEC REPOS:
     - AppAuth
     - AppCheckCore
     - BoringSSL-GRPC
+    - CashfreeAnalyticsSDK
+    - CashfreePG
+    - CashfreePGCoreSDK
+    - CashfreePGUISDK
+    - CFNetworkSDK
     - CwlCatchException
     - CwlCatchExceptionSupport
     - Firebase
@@ -1709,6 +1727,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
+  flutter_cashfree_pg_sdk:
+    :path: ".symlinks/plugins/flutter_cashfree_pg_sdk/ios"
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
   flutter_local_notifications:
@@ -1762,6 +1782,11 @@ SPEC CHECKSUMS:
   AppCheckCore: e215d35177a9cf469927863e69c13e220df32a8b
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   camera_avfoundation: 5675ca25298b6f81fa0a325188e7df62cc217741
+  CashfreeAnalyticsSDK: d628c6cbdc73c6575a69060785e01634b70f6b48
+  CashfreePG: 8855f9092c3520861a7966529631afde8f3459a7
+  CashfreePGCoreSDK: 3880e82872a84e759b2381ed18e5bea741260028
+  CashfreePGUISDK: bdb5a927507f3053dcbcea62d968a6887ca83941
+  CFNetworkSDK: a22324ee71e9875f8251c08d18aebdabefef8dbd
   clipboard: 85f02e190f24debf05943aff98c26644b2a90245
   cloud_firestore: 0b00f29ae2bb05adf7b0624b4aa883861a59761d
   CwlCatchException: 7acc161b299a6de7f0a46a6ed741eae2c8b4d75a
@@ -1788,6 +1813,7 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 7c659ebf23afdc1e60a05df72a07ad7349f5758f
   FirebaseStorage: 84d86cc0c0451e56e30f235fce26a264f1de13dc
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_cashfree_pg_sdk: 071c5d0c9f8e031e1ad1a69aac16c5ff586afa95
   flutter_email_sender: 27d9b984f1eebb0fb5519eb7e924eb86718cd534
   flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
   geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e

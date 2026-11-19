@@ -18,7 +18,7 @@ class DashBoardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX(
-        init: DashBoardController(),
+        init: Get.put(DashBoardController()),
         builder: (controller) {
           return PopScope(
             canPop: controller.canPopNow.value,
