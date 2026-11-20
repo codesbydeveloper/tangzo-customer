@@ -43,6 +43,9 @@ class OrderModel {
   bool? isPosOrder;
   String? taxScope;
   String? platformFee;
+  /// e.g. shiprocket / shiprocket_pending
+  String? deliveryPartner;
+  ShiprocketInfo? shiprocket;
   OrderModel(
       {this.address,
       this.status,
@@ -79,7 +82,14 @@ class OrderModel {
       this.platformTax,
       this.taxScope,
       this.platformFee,
-      this.isPosOrder});
+      this.isPosOrder,
+      this.deliveryPartner,
+      this.shiprocket});
+
+  bool get isShiprocketPartner {
+    final p = deliveryPartner ?? '';
+    return p == 'shiprocket' || p == 'shiprocket_pending' || p.startsWith('shiprocket');
+  }
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     address = json['address'] != null ? ShippingAddress.fromJson(json['address']) : null;
@@ -144,6 +154,8 @@ class OrderModel {
     taxScope = json['taxScope'];
     platformFee = json['platformFee'];
     isPosOrder = json['isPosOrder'] ?? false;
+    deliveryPartner = json['deliveryPartner']?.toString();
+    shiprocket = json['shiprocket'] != null ? ShiprocketInfo.fromJson(Map<String, dynamic>.from(json['shiprocket'] as Map)) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -202,6 +214,100 @@ class OrderModel {
     data['taxScope'] = taxScope;
     data['platformFee'] = platformFee;
     data['isPosOrder'] = isPosOrder ?? false;
+    data['deliveryPartner'] = deliveryPartner;
+    if (shiprocket != null) {
+      data['shiprocket'] = shiprocket!.toJson();
+    }
     return data;
+  }
+}
+
+class ShiprocketInfo {
+  String? status;
+  String? mode;
+  dynamic shipmentId;
+  dynamic srOrderId;
+  String? awb;
+  String? trackingUrl;
+  String? pickupOtp;
+  String? dropOtp;
+  String? currentStatus;
+  String? courierHint;
+  ShiprocketRider? rider;
+
+  ShiprocketInfo({
+    this.status,
+    this.mode,
+    this.shipmentId,
+    this.srOrderId,
+    this.awb,
+    this.trackingUrl,
+    this.pickupOtp,
+    this.dropOtp,
+    this.currentStatus,
+    this.courierHint,
+    this.rider,
+  });
+
+  factory ShiprocketInfo.fromJson(Map<String, dynamic> json) {
+    return ShiprocketInfo(
+      status: json['status']?.toString(),
+      mode: json['mode']?.toString(),
+      shipmentId: json['shipmentId'],
+      srOrderId: json['srOrderId'],
+      awb: json['awb']?.toString(),
+      trackingUrl: json['trackingUrl']?.toString() ?? json['tracking_url']?.toString(),
+      pickupOtp: json['pickupOtp']?.toString() ?? json['pickup_otp']?.toString(),
+      dropOtp: json['dropOtp']?.toString() ?? json['drop_otp']?.toString(),
+      currentStatus: json['currentStatus']?.toString() ?? json['current_status']?.toString(),
+      courierHint: json['courierHint']?.toString() ?? json['courierName']?.toString(),
+      rider: json['rider'] != null ? ShiprocketRider.fromJson(Map<String, dynamic>.from(json['rider'] as Map)) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status,
+      'mode': mode,
+      'shipmentId': shipmentId,
+      'srOrderId': srOrderId,
+      'awb': awb,
+      'trackingUrl': trackingUrl,
+      'pickupOtp': pickupOtp,
+      'dropOtp': dropOtp,
+      'currentStatus': currentStatus,
+      'courierHint': courierHint,
+      if (rider != null) 'rider': rider!.toJson(),
+    };
+  }
+}
+
+class ShiprocketRider {
+  String? name;
+  String? phone;
+  double? lat;
+  double? lng;
+  String? vehicleNumber;
+
+  ShiprocketRider({this.name, this.phone, this.lat, this.lng, this.vehicleNumber});
+
+  factory ShiprocketRider.fromJson(Map<String, dynamic> json) {
+    return ShiprocketRider(
+      name: json['name']?.toString(),
+      phone: json['phone']?.toString(),
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
+      vehicleNumber: json['vehicleNumber']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'phone': phone,
+      'lat': lat,
+      'lng': lng,
+      'vehicleNumber': vehicleNumber,
+    };
   }
 }

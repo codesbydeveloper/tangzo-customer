@@ -98,16 +98,22 @@ class LiveTrackingController extends GetxController {
         final OrderModel orderModelStream = OrderModel.fromJson(event.data()!);
         orderModel.value = orderModelStream;
 
-        final String? driverId = orderModel.value.driverID;
-        if (driverId != null && driverId.isNotEmpty) {
-          if (Constant.useRedisDriverTracking) {
-            _ensureDriverLocationPolling(driverId);
-          } else {
-            _startLegacyDriverUserListener(driverId);
-          }
-        } else {
+        if (orderModel.value.isShiprocketPartner) {
+          // Partner rider location comes from order.shiprocket.rider (webhook updates).
           _stopDriverLocationPolling();
-          driverLocationAvailable.value = false;
+          _applyShiprocketRiderFromOrder();
+        } else {
+          final String? driverId = orderModel.value.driverID;
+          if (driverId != null && driverId.isNotEmpty) {
+            if (Constant.useRedisDriverTracking) {
+              _ensureDriverLocationPolling(driverId);
+            } else {
+              _startLegacyDriverUserListener(driverId);
+            }
+          } else {
+            _stopDriverLocationPolling();
+            driverLocationAvailable.value = false;
+          }
         }
 
         if (orderModel.value.status == Constant.orderCompleted) {
@@ -117,10 +123,60 @@ class LiveTrackingController extends GetxController {
           Get.back();
         }
       });
+
+      // First paint for Shiprocket before next snapshot.
+      if (orderModel.value.isShiprocketPartner) {
+        _applyShiprocketRiderFromOrder();
+      }
     }
 
     isLoading.value = false;
     update();
+  }
+
+  void _applyShiprocketRiderFromOrder() {
+    final sr = orderModel.value.shiprocket;
+    final rider = sr?.rider;
+    final lat = rider?.lat;
+    final lng = rider?.lng;
+
+    final nameParts = (rider?.name ?? orderModel.value.driver?.fullName() ?? 'Delivery partner').trim().split(RegExp(r'\s+'));
+    driverUserModel.value = UserModel(
+      firstName: nameParts.isNotEmpty ? nameParts.first : 'Delivery',
+      lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'Partner',
+      phoneNumber: rider?.phone ?? orderModel.value.driver?.phoneNumber,
+      role: 'driver',
+      provider: 'shiprocket',
+    );
+
+    if (lat != null && lng != null && lat != 0 && lng != 0) {
+      driverLocationAvailable.value = true;
+      driverUserModel.value.location = UserLocation(latitude: lat, longitude: lng);
+      _applyDriverLiveLocation(latitude: lat, longitude: lng, heading: 0);
+    } else {
+      // Fall back to restaurant → customer route so map is still useful.
+      driverLocationAvailable.value = false;
+      final vLat = orderModel.value.vendor?.latitude;
+      final vLng = orderModel.value.vendor?.longitude;
+      final dLat = orderModel.value.address?.location?.latitude;
+      final dLng = orderModel.value.address?.location?.longitude;
+      if (vLat != null && vLng != null && dLat != null && dLng != null) {
+        if (Constant.selectedMapType != 'osm') {
+          getPolyline(
+            sourceLatitude: vLat,
+            sourceLongitude: vLng,
+            destinationLatitude: dLat,
+            destinationLongitude: dLng,
+          );
+        } else {
+          source.value = location.LatLng(vLat, vLng);
+          destination.value = location.LatLng(dLat, dLng);
+          current.value = source.value;
+          awaitFetchRouteAndAnimateOSM(source.value, destination.value);
+        }
+      }
+      update();
+    }
   }
 
   void _ensureDriverLocationPolling(String driverId) {

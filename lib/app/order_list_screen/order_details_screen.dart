@@ -8,9 +8,11 @@ import 'package:customer/constant/send_notification.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/order_details_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
+import 'package:customer/models/order_model.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/models/vendor_model.dart';
 import 'package:customer/models/wallet_transaction_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/themes/round_button_fill.dart';
@@ -449,7 +451,9 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                     ),
                                                                   ],
                                                                 )
-                                                              : controller.orderModel.value.driver != null
+                                                              : (controller.orderModel.value.driver != null ||
+                                                                      (controller.orderModel.value.isShiprocketPartner &&
+                                                                          (controller.orderModel.value.shiprocket?.rider?.name ?? '').isNotEmpty))
                                                                   ? Row(
                                                                       children: [
                                                                         ClipOval(
@@ -468,7 +472,11 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                                             children: [
                                                                               TranslatedText(
-                                                                                controller.orderModel.value.driver!.fullName().toString(),
+                                                                                controller.orderModel.value.isShiprocketPartner
+                                                                                    ? (controller.orderModel.value.shiprocket?.rider?.name ??
+                                                        controller.orderModel.value.driver?.fullName() ??
+                                                        'Delivery partner')
+                                                                                    : controller.orderModel.value.driver!.fullName().toString(),
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
                                                                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -478,7 +486,11 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                 ),
                                                                               ),
                                                                               TranslatedText(
-                                                                                controller.orderModel.value.driver!.email.toString(),
+                                                                                controller.orderModel.value.isShiprocketPartner
+                                                                                    ? (controller.orderModel.value.shiprocket?.currentStatus ??
+                                                        controller.orderModel.value.shiprocket?.status ??
+                                                        'Delivery partner')
+                                                                                    : controller.orderModel.value.driver!.email.toString(),
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
                                                                                   color: themeChange.getThem() ? AppThemeData.success400 : AppThemeData.success400,
@@ -492,7 +504,12 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                         ),
                                                                         InkWell(
                                                                           onTap: () {
-                                                                            Constant.makePhoneCall(controller.orderModel.value.driver!.phoneNumber.toString());
+                                                                            final phone = (controller.orderModel.value.shiprocket?.rider?.phone ??
+                                                                    controller.orderModel.value.driver?.phoneNumber ??
+                                                                    '')
+                                                                .toString();
+                                                            if (phone.isEmpty) return;
+                                                            Constant.makePhoneCall(phone);
                                                                           },
                                                                           child: Container(
                                                                             width: 42,
@@ -512,42 +529,46 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                         const SizedBox(
                                                                           width: 10,
                                                                         ),
-                                                                        InkWell(
-                                                                          onTap: () async {
-                                                                            ShowToastDialog.showLoader("Please wait");
+                                                                        if (!controller.orderModel.value.isShiprocketPartner &&
+                                                                            (controller.orderModel.value.driverID ?? '').isNotEmpty)
+                                                                          InkWell(
+                                                                            onTap: () async {
+                                                                              ShowToastDialog.showLoader("Please wait");
 
-                                                                            UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
-                                                                            UserModel? driverUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.driverID.toString());
+                                                                              UserModel? customer = await FireStoreUtils.getUserProfile(controller.orderModel.value.authorID.toString());
+                                                                              UserModel? driverUser = await FireStoreUtils.getUserProfile(controller.orderModel.value.driverID.toString());
 
-                                                                            ShowToastDialog.closeLoader();
+                                                                              ShowToastDialog.closeLoader();
 
-                                                                            Get.to(const ChatScreen(), arguments: {
-                                                                              "senderName": '${customer!.fullName()}',
-                                                                              "senderId": customer.id,
-                                                                              "senderProfileUrl": customer.profilePictureURL,
-                                                                              "receivedName": driverUser!.fullName(),
-                                                                              "receivedId": driverUser.id,
-                                                                              "receivedProfileUrl": driverUser.profilePictureURL,
-                                                                              "orderId": controller.orderModel.value.id,
-                                                                              "token": driverUser.fcmToken,
-                                                                              "chatType": Constant.userRoleDriver,
-                                                                            });
-                                                                          },
-                                                                          child: Container(
-                                                                            width: 42,
-                                                                            height: 42,
-                                                                            decoration: ShapeDecoration(
-                                                                              shape: RoundedRectangleBorder(
-                                                                                side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
-                                                                                borderRadius: BorderRadius.circular(120),
+                                                                              Get.to(const ChatScreen(), arguments: {
+                                                                                "senderName": '${customer!.fullName()}',
+                                                                                "senderId": customer.id,
+                                                                                "senderProfileUrl": customer.profilePictureURL,
+                                                                                "receivedName": driverUser!.fullName(),
+                                                                                "receivedId": driverUser.id,
+                                                                                "receivedProfileUrl": driverUser.profilePictureURL,
+                                                                                "orderId": controller.orderModel.value.id,
+                                                                                "token": driverUser.fcmToken,
+                                                                                "chatType": Constant.userRoleDriver,
+                                                                              });
+                                                                            },
+                                                                            child: Container(
+                                                                              width: 42,
+                                                                              height: 42,
+                                                                              decoration: ShapeDecoration(
+                                                                                shape: RoundedRectangleBorder(
+                                                                                  side: BorderSide(width: 1, color: themeChange.getThem() ? AppThemeData.grey700 : AppThemeData.grey200),
+                                                                                  borderRadius: BorderRadius.circular(120),
+                                                                                ),
+                                                                              ),
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(8.0),
+                                                                                child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
                                                                               ),
                                                                             ),
-                                                                            child: Padding(
-                                                                              padding: const EdgeInsets.all(8.0),
-                                                                              child: SvgPicture.asset("assets/icons/ic_wechat.svg"),
-                                                                            ),
-                                                                          ),
-                                                                        )
+                                                                          )
+                                                                        else
+                                                                          const SizedBox()
                                                                       ],
                                                                     )
                                                                   : const SizedBox(),
@@ -563,6 +584,13 @@ class OrderDetailsScreen extends StatelessWidget {
                           const SizedBox(
                             height: 14,
                           ),
+                          if (controller.orderModel.value.isShiprocketPartner)
+                            _ShiprocketDeliveryCard(
+                              order: controller.orderModel.value,
+                              isDark: themeChange.getThem(),
+                            ),
+                          if (controller.orderModel.value.isShiprocketPartner)
+                            const SizedBox(height: 14),
                           TranslatedText(
                             "Your Order",
                             textAlign: TextAlign.start,
@@ -1301,13 +1329,20 @@ class OrderDetailsScreen extends StatelessWidget {
                     ))
                 : controller.orderModel.value.status == Constant.orderShipped ||
                         controller.orderModel.value.status == Constant.orderInTransit ||
-                        controller.orderModel.value.status == Constant.orderCompleted
+                        controller.orderModel.value.status == Constant.orderCompleted ||
+                        (controller.orderModel.value.isShiprocketPartner &&
+                            controller.orderModel.value.shiprocket?.shipmentId != null &&
+                            controller.orderModel.value.status != Constant.orderRejected &&
+                            controller.orderModel.value.status != Constant.orderCancelled)
                     ? Container(
                         color: themeChange.getThem() ? AppThemeData.grey900 : AppThemeData.grey50,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: controller.orderModel.value.status == Constant.orderShipped || controller.orderModel.value.status == Constant.orderInTransit
+                          child: controller.orderModel.value.status == Constant.orderShipped ||
+                                  controller.orderModel.value.status == Constant.orderInTransit ||
+                                  (controller.orderModel.value.isShiprocketPartner &&
+                                      controller.orderModel.value.status != Constant.orderCompleted)
                               ? RoundedButtonFill(
                                   title: "Track Order",
                                   height: 5.5,
@@ -1571,6 +1606,181 @@ class OrderDetailsScreen extends StatelessWidget {
         MySeparator(color: isDark ? AppThemeData.grey700 : AppThemeData.grey200),
         const SizedBox(height: 10),
       ],
+    );
+  }
+}
+
+class _ShiprocketDeliveryCard extends StatelessWidget {
+  final OrderModel order;
+  final bool isDark;
+
+  const _ShiprocketDeliveryCard({required this.order, required this.isDark});
+
+  Future<void> _openTrackUrl(String? url) async {
+    if (url == null || url.trim().isEmpty) return;
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sr = order.shiprocket;
+    final riderName = sr?.rider?.name ?? order.driver?.fullName() ?? 'Delivery partner';
+    final riderPhone = sr?.rider?.phone ?? order.driver?.phoneNumber ?? '';
+    final dropOtp = sr?.dropOtp ?? '';
+    final trackUrl = sr?.trackingUrl;
+    final statusLabel = sr?.currentStatus ?? sr?.status ?? 'Searching';
+    final hasMapPoint = sr?.rider?.lat != null && sr?.rider?.lng != null;
+
+    return Container(
+      width: double.infinity,
+      decoration: ShapeDecoration(
+        color: isDark ? AppThemeData.grey900 : AppThemeData.grey50,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TranslatedText(
+            "Delivery partner",
+            style: TextStyle(
+              fontFamily: AppThemeData.semiBold,
+              fontSize: 16,
+              color: isDark ? AppThemeData.grey50 : AppThemeData.grey900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TranslatedText(
+            statusLabel,
+            style: TextStyle(
+              fontFamily: AppThemeData.medium,
+              fontSize: 13,
+              color: AppThemeData.success400,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TranslatedText(
+                      riderName,
+                      style: TextStyle(
+                        fontFamily: AppThemeData.semiBold,
+                        fontSize: 15,
+                        color: isDark ? AppThemeData.grey50 : AppThemeData.grey900,
+                      ),
+                    ),
+                    if (riderPhone.isNotEmpty)
+                      TranslatedText(
+                        riderPhone,
+                        style: TextStyle(
+                          fontFamily: AppThemeData.regular,
+                          fontSize: 13,
+                          color: isDark ? AppThemeData.grey300 : AppThemeData.grey600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (riderPhone.isNotEmpty)
+                InkWell(
+                  onTap: () => Constant.makePhoneCall(riderPhone),
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(width: 1, color: isDark ? AppThemeData.grey700 : AppThemeData.grey200),
+                        borderRadius: BorderRadius.circular(120),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SvgPicture.asset("assets/icons/ic_phone_call.svg"),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (dropOtp.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark ? AppThemeData.grey800 : AppThemeData.warning50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TranslatedText(
+                          "Share this OTP with the rider at delivery",
+                          style: TextStyle(
+                            fontFamily: AppThemeData.regular,
+                            fontSize: 12,
+                            color: isDark ? AppThemeData.grey300 : AppThemeData.grey700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          dropOtp,
+                          style: TextStyle(
+                            fontFamily: AppThemeData.semiBold,
+                            fontSize: 22,
+                            letterSpacing: 4,
+                            color: isDark ? AppThemeData.grey50 : AppThemeData.grey900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (hasMapPoint ||
+                  order.status == Constant.orderShipped ||
+                  order.status == Constant.orderInTransit ||
+                  sr?.shipmentId != null)
+                Expanded(
+                  child: RoundedButtonFill(
+                    title: "Track on map",
+                    height: 4.8,
+                    color: AppThemeData.warning300,
+                    textColor: AppThemeData.grey900,
+                    onPress: () {
+                      Get.to(const LiveTrackingScreen(), arguments: {"orderModel": order});
+                    },
+                  ),
+                ),
+              if ((trackUrl ?? '').isNotEmpty) ...[
+                if (hasMapPoint || sr?.shipmentId != null) const SizedBox(width: 10),
+                Expanded(
+                  child: RoundedButtonFill(
+                    title: "Track link",
+                    height: 4.8,
+                    color: AppThemeData.primary300,
+                    textColor: AppThemeData.grey50,
+                    onPress: () => _openTrackUrl(trackUrl),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
