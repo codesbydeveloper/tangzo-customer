@@ -21,26 +21,26 @@ class OrderController extends GetxController {
   }
 
   Future<void> getOrder() async {
+    isLoading.value = true;
     if (Constant.userModel != null) {
-      await FireStoreUtils.getAllOrder().then((value) {
-        isLoading.value = true;
-        allList.value = value;
+      final value = await FireStoreUtils.getAllOrder(reset: true);
+      allList.value = value;
 
-        rejectedList.value = allList.where((p0) => p0.status == Constant.orderRejected).toList();
-        inProgressList.value = allList
-            .where((p0) =>
-                p0.status == Constant.orderAccepted ||
-                p0.status == Constant.driverPending ||
-                p0.status == Constant.orderShipped ||
-                p0.status == Constant.orderInTransit ||
-                p0.status == Constant.noRiderAvailable)
-            .toList();
+      rejectedList.value = allList.where((p0) => p0.status == Constant.orderRejected).toList();
+      // Include "Order Placed" so a just-placed order appears immediately.
+      inProgressList.value = allList
+          .where((p0) =>
+              p0.status == Constant.orderPlaced ||
+              p0.status == Constant.orderAccepted ||
+              p0.status == Constant.driverPending ||
+              p0.status == Constant.orderShipped ||
+              p0.status == Constant.orderInTransit ||
+              p0.status == Constant.noRiderAvailable)
+          .toList();
 
-        deliveredList.value = allList.where((p0) => p0.status == Constant.orderCompleted).toList();
-        cancelledList.value = allList.where((p0) => p0.status == Constant.orderCancelled).toList();
-      });
+      deliveredList.value = allList.where((p0) => p0.status == Constant.orderCompleted).toList();
+      cancelledList.value = allList.where((p0) => p0.status == Constant.orderCancelled).toList();
     }
-
     isLoading.value = false;
   }
 

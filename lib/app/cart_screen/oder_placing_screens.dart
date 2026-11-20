@@ -1,6 +1,7 @@
 import 'package:customer/app/dash_board_screens/dash_board_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/controllers/dash_board_controller.dart';
+import 'package:customer/controllers/order_controller.dart';
 import 'package:customer/controllers/order_placing_controller.dart';
 import 'package:customer/models/cart_product_model.dart';
 import 'package:customer/themes/app_them_data.dart';
@@ -294,9 +295,19 @@ class OrderPlacingScreen extends StatelessWidget {
                         textColor: AppThemeData.grey50,
                         fontSizes: 16,
                         onPress: () async {
+                          // Drop stale OrderController so Track Order reloads the new order.
+                          if (Get.isRegistered<OrderController>()) {
+                            Get.delete<OrderController>(force: true);
+                          }
+                          final ordersTabIndex = Constant.walletSetting == false ? 2 : 3;
                           Get.offAll(const DashBoardScreen());
-                          DashBoardController controller = Get.put(DashBoardController());
-                          controller.selectedIndex.value = 3;
+                          final dash = Get.put(DashBoardController());
+                          dash.selectedIndex.value = ordersTabIndex;
+                          // Wait for OrderScreen to register, then force a fresh fetch.
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (Get.isRegistered<OrderController>()) {
+                            await Get.find<OrderController>().getOrder();
+                          }
                         },
                       )
                     : RoundedButtonFill(
