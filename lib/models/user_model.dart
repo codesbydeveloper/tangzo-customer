@@ -187,7 +187,7 @@ class ShippingAddress {
   String? addressAs;
   String? landmark;
   String? locality;
-  /// Optional Indian pincode (6 digits). Not mandatory for older addresses.
+  /// Indian pincode (6 digits). Required for Shiprocket hyperlocal assignment.
   String? pincode;
   UserLocation? location;
   bool? isDefault;

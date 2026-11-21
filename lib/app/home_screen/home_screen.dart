@@ -225,6 +225,8 @@ class HomeScreen extends StatelessWidget {
                                                                     addressModel.addressAs = "Home";
                                                                     addressModel.locality = address.toString();
                                                                     addressModel.location = UserLocation(latitude: lat, longitude: lng);
+                                                                    await Constant.fillPincodeFromCoordinates(addressModel, lat, lng);
+                                                                    addressModel.pincode ??= Constant.extractPincodeFromText(address.toString());
                                                                     Constant.selectedLocation = addressModel;
                                                                     controller.getData();
                                                                     Get.back();
@@ -239,6 +241,14 @@ class HomeScreen extends StatelessWidget {
                                                                       addressModel.locality = Constant.formatAddress(selectedLocation: selectedLocationModel);
                                                                       addressModel.location =
                                                                           UserLocation(latitude: selectedLocationModel.latLng!.latitude, longitude: selectedLocationModel.latLng!.longitude);
+                                                                      Constant.applyPincodeFromSelectedLocation(addressModel, selectedLocationModel);
+                                                                      if (!Constant.isValidIndianPincode(addressModel.pincode)) {
+                                                                        await Constant.fillPincodeFromCoordinates(
+                                                                          addressModel,
+                                                                          selectedLocationModel.latLng!.latitude,
+                                                                          selectedLocationModel.latLng!.longitude,
+                                                                        );
+                                                                      }
                                                                       Constant.selectedLocation = addressModel;
                                                                       controller.getData();
                                                                       Get.back();
@@ -252,6 +262,7 @@ class HomeScreen extends StatelessWidget {
                                                                   String currentLocation =
                                                                       "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}";
                                                                   addressModel.locality = currentLocation;
+                                                                  Constant.applyPincodeFromPlacemark(addressModel, placeMark);
                                                                 });
 
                                                                 Constant.selectedLocation = addressModel;

@@ -60,4 +60,9 @@ class DashBoardController extends GetxController {
 
   DateTime? currentBackPressTime;
   RxBool canPopNow = false.obs;
+
+  /// Bottom-nav index of Wallet when wallet is enabled (Home, Fav, Wallet, …).
+  int get walletTabIndex => Constant.walletSetting == false ? -1 : 2;
+
+  bool isWalletTab(int index) => walletTabIndex >= 0 && index == walletTabIndex;
 }

@@ -683,6 +683,17 @@ class CartController extends GetxController {
   List<CartProductModel> tempProduc = [];
 
   Future<void> placeOrder() async {
+    if (!Constant.isValidIndianPincode(selectedAddress.value.pincode)) {
+      // Recover pincode from locality text for older saved addresses when possible.
+      final recovered = Constant.extractPincodeFromText(selectedAddress.value.locality);
+      if (recovered != null) {
+        selectedAddress.value.pincode = recovered;
+      }
+    }
+    if (!Constant.isValidIndianPincode(selectedAddress.value.pincode)) {
+      ShowToastDialog.showToast("Please update your delivery address with a valid 6-digit pincode");
+      return;
+    }
     ShowToastDialog.showLoader("Please wait");
     if (selectedPaymentMethod.value == PaymentGateway.wallet.name) {
       if (double.parse(userModel.value.walletAmount.toString()) >= totalAmount.value) {

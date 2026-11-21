@@ -1,3 +1,4 @@
+import 'package:customer/constant/constant.dart';
 import 'package:customer/models/user_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class AddressListController extends GetxController {
   Rx<TextEditingController> houseBuildingTextEditingController = TextEditingController().obs;
   Rx<TextEditingController> localityEditingController = TextEditingController().obs;
   Rx<TextEditingController> landmarkEditingController = TextEditingController().obs;
+  Rx<TextEditingController> pincodeEditingController = TextEditingController().obs;
   Rx<UserLocation> location = UserLocation().obs;
   Rx<ShippingAddress> shippingModel = ShippingAddress().obs;
   RxBool isLoading = false.obs;
@@ -31,15 +33,22 @@ class AddressListController extends GetxController {
     houseBuildingTextEditingController.value.clear();
     localityEditingController.value.clear();
     landmarkEditingController.value.clear();
+    pincodeEditingController.value.clear();
     location.value = UserLocation();
     selectedSaveAs.value = "Home";
   }
 
   setData(ShippingAddress shippingAddress) {
     shippingModel.value = shippingAddress;
-    houseBuildingTextEditingController.value.text = shippingAddress.address.toString();
-    localityEditingController.value.text = shippingAddress.locality.toString();
-    landmarkEditingController.value.text = shippingAddress.landmark.toString();
+    houseBuildingTextEditingController.value.text = shippingAddress.address?.toString() ?? '';
+    localityEditingController.value.text = shippingAddress.locality?.toString() ?? '';
+    landmarkEditingController.value.text = shippingAddress.landmark?.toString() ?? '';
+    final pin = Constant.normalizePincode(shippingAddress.pincode) ??
+        Constant.extractPincodeFromText(shippingAddress.locality);
+    pincodeEditingController.value.text = pin ?? '';
+    if (pin != null) {
+      shippingModel.value.pincode = pin;
+    }
     selectedSaveAs.value = shippingAddress.addressAs.toString();
     location.value = shippingAddress.location!;
   }

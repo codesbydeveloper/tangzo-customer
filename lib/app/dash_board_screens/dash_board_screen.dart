@@ -1,6 +1,7 @@
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/dash_board_controller.dart';
+import 'package:customer/controllers/wallet_controller.dart';
 import 'package:customer/themes/app_them_data.dart';
 import 'package:customer/utils/dark_theme_provider.dart';
 import 'package:customer/utils/dynamic_traslator.dart';
@@ -70,6 +71,10 @@ class DashBoardScreen extends StatelessWidget {
                           Get.put(DashBoardController());
                         }
                         controller.selectedIndex.value = index;
+                        // Always refresh when visiting Wallet (including re-tap on same tab).
+                        if (controller.isWalletTab(index)) {
+                          Get.put(WalletController(), permanent: true).onWalletScreenVisited();
+                        }
                       },
                       items: Constant.walletSetting == false
                           ? [

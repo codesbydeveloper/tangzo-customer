@@ -30,6 +30,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -163,6 +164,51 @@ class Constant {
     if (selectedLocation.address!.isoCountryCode != null && selectedLocation.address!.isoCountryCode!.isNotEmpty) parts.add(selectedLocation.address!.isoCountryCode!);
 
     return parts.join(', ');
+  }
+
+  /// Indian PIN code: exactly 6 digits, first digit 1–9.
+  static final RegExp indianPincodeRegex = RegExp(r'^[1-9][0-9]{5}$');
+
+  static bool isValidIndianPincode(String? pincode) {
+    if (pincode == null) return false;
+    return indianPincodeRegex.hasMatch(pincode.trim());
+  }
+
+  static String? normalizePincode(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length < 6) return null;
+    final candidate = digits.length == 6 ? digits : digits.substring(0, 6);
+    return isValidIndianPincode(candidate) ? candidate : null;
+  }
+
+  static String? extractPincodeFromText(String? text) {
+    if (text == null || text.isEmpty) return null;
+    final match = RegExp(r'\b([1-9][0-9]{5})\b').firstMatch(text);
+    return match?.group(1);
+  }
+
+  static void applyPincodeFromPlacemark(ShippingAddress address, Placemark placeMark) {
+    final pin = normalizePincode(placeMark.postalCode) ?? extractPincodeFromText(
+      "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}",
+    );
+    if (pin != null) {
+      address.pincode = pin;
+    }
+  }
+
+  static void applyPincodeFromSelectedLocation(ShippingAddress address, SelectedLocationModel selected) {
+    if (selected.address != null) {
+      applyPincodeFromPlacemark(address, selected.address!);
+    }
+  }
+
+  static Future<void> fillPincodeFromCoordinates(ShippingAddress address, double latitude, double longitude) async {
+    try {
+      final places = await placemarkFromCoordinates(latitude, longitude);
+      if (places.isEmpty) return;
+      applyPincodeFromPlacemark(address, places.first);
+    } catch (_) {}
   }
 
   static MailSettings? mailSettings;

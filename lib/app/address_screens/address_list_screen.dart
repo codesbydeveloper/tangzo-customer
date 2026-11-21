@@ -12,6 +12,7 @@ import 'package:customer/widget/place_picker/selected_location_model.dart';
 import 'package:customer/widget/translated_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -63,12 +64,18 @@ class AddressListScreen extends StatelessWidget {
                           addressModel.location = UserLocation(latitude: newLocalData.latitude, longitude: newLocalData.longitude);
                           String currentLocation = "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}";
                           addressModel.locality = currentLocation;
-                          if (placeMark.postalCode != null && placeMark.postalCode!.isNotEmpty) {
-                            addressModel.pincode = placeMark.postalCode;
-                          }
+                          Constant.applyPincodeFromPlacemark(addressModel, placeMark);
                         });
 
                         ShowToastDialog.closeLoader();
+                        if (!Constant.isValidIndianPincode(addressModel.pincode)) {
+                          ShowToastDialog.showToast("Could not detect pincode. Please add address manually and enter pincode.");
+                          controller.clearData();
+                          controller.localityEditingController.value.text = addressModel.locality ?? '';
+                          controller.location.value = addressModel.location ?? UserLocation();
+                          addAddressBottomSheet(context, controller);
+                          return;
+                        }
                         Get.back(result: addressModel);
                       } catch (e) {
                         await placemarkFromCoordinates(19.228825, 72.854118).then((valuePlaceMaker) {
@@ -77,12 +84,18 @@ class AddressListScreen extends StatelessWidget {
                           addressModel.location = UserLocation(latitude: 19.228825, longitude: 72.854118);
                           String currentLocation = "${placeMark.name}, ${placeMark.subLocality}, ${placeMark.locality}, ${placeMark.administrativeArea}, ${placeMark.postalCode}, ${placeMark.country}";
                           addressModel.locality = currentLocation;
-                          if (placeMark.postalCode != null && placeMark.postalCode!.isNotEmpty) {
-                            addressModel.pincode = placeMark.postalCode;
-                          }
+                          Constant.applyPincodeFromPlacemark(addressModel, placeMark);
                         });
                         ShowToastDialog.closeLoader();
 
+                        if (!Constant.isValidIndianPincode(addressModel.pincode)) {
+                          ShowToastDialog.showToast("Could not detect pincode. Please add address manually and enter pincode.");
+                          controller.clearData();
+                          controller.localityEditingController.value.text = addressModel.locality ?? '';
+                          controller.location.value = addressModel.location ?? UserLocation();
+                          addAddressBottomSheet(context, controller);
+                          return;
+                        }
                         Get.back(result: addressModel);
                       }
                     },
@@ -327,7 +340,7 @@ class AddressListScreen extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAliasWithSaveLayer,
         builder: (context) => FractionallySizedBox(
-              heightFactor: 0.6,
+              heightFactor: 0.7,
               child: StatefulBuilder(builder: (context1, setState) {
                 final themeChange = Provider.of<DarkThemeProvider>(context);
                 return Obx(
@@ -366,6 +379,15 @@ class AddressListScreen extends StatelessWidget {
                                     final address = firstPlace.address;
                                     controller.localityEditingController.value.text = address.toString();
                                     controller.location.value = UserLocation(latitude: lat, longitude: lng);
+                                    final tempAddress = ShippingAddress();
+                                    await Constant.fillPincodeFromCoordinates(tempAddress, lat, lng);
+                                    final pin = Constant.normalizePincode(tempAddress.pincode) ??
+                                        Constant.extractPincodeFromText(address.toString());
+                                    if (pin != null) {
+                                      controller.pincodeEditingController.value.text = pin;
+                                      controller.shippingModel.value.pincode = pin;
+                                    }
+                                    setState(() {});
                                   }
                                 } else {
                                   Get.to(LocationPickerScreen())!.then((value) async {
@@ -374,6 +396,21 @@ class AddressListScreen extends StatelessWidget {
 
                                       controller.localityEditingController.value.text = Constant.formatAddress(selectedLocation: selectedLocationModel);
                                       controller.location.value = UserLocation(latitude: selectedLocationModel.latLng!.latitude, longitude: selectedLocationModel.latLng!.longitude);
+                                      final tempAddress = ShippingAddress();
+                                      Constant.applyPincodeFromSelectedLocation(tempAddress, selectedLocationModel);
+                                      if (!Constant.isValidIndianPincode(tempAddress.pincode) && selectedLocationModel.latLng != null) {
+                                        await Constant.fillPincodeFromCoordinates(
+                                          tempAddress,
+                                          selectedLocationModel.latLng!.latitude,
+                                          selectedLocationModel.latLng!.longitude,
+                                        );
+                                      }
+                                      final pin = Constant.normalizePincode(tempAddress.pincode);
+                                      if (pin != null) {
+                                        controller.pincodeEditingController.value.text = pin;
+                                        controller.shippingModel.value.pincode = pin;
+                                      }
+                                      setState(() {});
                                     }
                                   });
                                 }
@@ -504,6 +541,16 @@ class AddressListScreen extends StatelessWidget {
                                   hintText: 'Apartment/Road/Area',
                                 ),
                                 TextFieldWidget(
+                                  title: 'Pincode',
+                                  controller: controller.pincodeEditingController.value,
+                                  hintText: '6-digit pincode',
+                                  textInputType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(6),
+                                  ],
+                                ),
+                                TextFieldWidget(
                                   title: 'Nearby landmark',
                                   controller: controller.landmarkEditingController.value,
                                   hintText: 'Nearby landmark (Optional)',
@@ -526,12 +573,15 @@ class AddressListScreen extends StatelessWidget {
                           color: AppThemeData.primary300,
                           fontSizes: 16,
                           onPress: () async {
+                            final pincode = Constant.normalizePincode(controller.pincodeEditingController.value.text);
                             if (controller.location.value.latitude == null || controller.location.value.longitude == null) {
                               ShowToastDialog.showToast("Please select Location");
                             } else if (controller.houseBuildingTextEditingController.value.text.isEmpty) {
                               ShowToastDialog.showToast("Please Enter Flat / House / Flore / Building");
                             } else if (controller.localityEditingController.value.text.isEmpty) {
                               ShowToastDialog.showToast("Please Enter Area / Sector / locality");
+                            } else if (pincode == null) {
+                              ShowToastDialog.showToast("Please enter a valid 6-digit pincode");
                             } else {
                               controller.isLoading.value = true;
                               ShowToastDialog.showLoader("Please wait");
@@ -541,6 +591,7 @@ class AddressListScreen extends StatelessWidget {
                                 controller.shippingModel.value.address = controller.houseBuildingTextEditingController.value.text;
                                 controller.shippingModel.value.locality = controller.localityEditingController.value.text;
                                 controller.shippingModel.value.landmark = controller.landmarkEditingController.value.text;
+                                controller.shippingModel.value.pincode = pincode;
 
                                 controller.shippingAddressList.removeAt(index);
                                 controller.shippingAddressList.insert(index, controller.shippingModel.value);
@@ -551,6 +602,7 @@ class AddressListScreen extends StatelessWidget {
                                 controller.shippingModel.value.address = controller.houseBuildingTextEditingController.value.text;
                                 controller.shippingModel.value.locality = controller.localityEditingController.value.text;
                                 controller.shippingModel.value.landmark = controller.landmarkEditingController.value.text;
+                                controller.shippingModel.value.pincode = pincode;
                                 controller.shippingModel.value.isDefault = controller.shippingAddressList.isEmpty ? true : false;
                                 controller.shippingAddressList.add(controller.shippingModel.value);
                               }

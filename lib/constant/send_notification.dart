@@ -62,8 +62,16 @@ class SendNotification {
                 },
               },
               'apns': {
+                'headers': {
+                  'apns-priority': '10',
+                  'apns-push-type': 'alert',
+                },
                 'payload': {
-                  'aps': {'sound': 'default'},
+                  'aps': {
+                    'sound': 'order_bell.caf',
+                    'content-available': 1,
+                    'interruption-level': 'time-sensitive',
+                  },
                 },
               },
             }

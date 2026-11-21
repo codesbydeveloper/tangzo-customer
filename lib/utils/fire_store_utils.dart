@@ -352,7 +352,7 @@ class FireStoreUtils {
         debugPrint('FireStoreUtils.get Currency Parse error $e');
       }
     });
-    return giftCardModelList;
+    return filterActiveVendors(giftCardModelList);
   }
 
   static Future<bool?> setWalletTransaction(
@@ -992,7 +992,7 @@ class FireStoreUtils {
     } catch (e) {
       log('getNearestRestaurantsOnce: $e');
     }
-    return vendorList;
+    return filterActiveVendors(vendorList);
   }
 
   static bool _vendorPassesSubscription(VendorModel vendorModel) {
@@ -1010,6 +1010,92 @@ class FireStoreUtils {
           vendorModel.subscriptionPlan?.expiryDay == "-1";
     }
     return true;
+  }
+
+  /// In-memory cache of vendor owner (`users/{author}.active`).
+  static final Map<String, bool> _authorActiveCache = <String, bool>{};
+
+  /// Returns true when the restaurant owner account is enabled in admin.
+  /// Prefer denormalized [VendorModel.active]; fall back to users/{author}.active.
+  static Future<bool> isVendorOwnerActive(VendorModel vendor) async {
+    if (vendor.active == false) return false;
+    if (vendor.active == true) return true;
+    final authorId = vendor.author?.toString() ?? '';
+    if (authorId.isEmpty) return false;
+    if (_authorActiveCache.containsKey(authorId)) {
+      return _authorActiveCache[authorId] == true;
+    }
+    try {
+      final doc =
+          await fireStore.collection(CollectionName.users).doc(authorId).get();
+      final active = doc.exists && doc.data()?['active'] == true;
+      _authorActiveCache[authorId] = active;
+      return active;
+    } catch (e) {
+      log('isVendorOwnerActive: $e');
+      return false;
+    }
+  }
+
+  /// Keeps only restaurants whose vendor owner is active.
+  static Future<List<VendorModel>> filterActiveVendors(
+      List<VendorModel> vendors) async {
+    if (vendors.isEmpty) return vendors;
+
+    final List<VendorModel> kept = [];
+    final List<VendorModel> needLookup = [];
+    for (final vendor in vendors) {
+      if (vendor.active == false) continue;
+      if (vendor.active == true) {
+        kept.add(vendor);
+      } else {
+        needLookup.add(vendor);
+      }
+    }
+
+    if (needLookup.isEmpty) return kept;
+
+    final authorIds = needLookup
+        .map((v) => v.author?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+    final missing =
+        authorIds.where((id) => !_authorActiveCache.containsKey(id)).toList();
+
+    for (var i = 0; i < missing.length; i += 10) {
+      final end = (i + 10 < missing.length) ? i + 10 : missing.length;
+      final chunk = missing.sublist(i, end);
+      try {
+        final snap = await fireStore
+            .collection(CollectionName.users)
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+        final found = <String>{};
+        for (final doc in snap.docs) {
+          _authorActiveCache[doc.id] = doc.data()['active'] == true;
+          found.add(doc.id);
+        }
+        for (final id in chunk) {
+          if (!found.contains(id)) {
+            _authorActiveCache[id] = false;
+          }
+        }
+      } catch (e) {
+        log('filterActiveVendors batch: $e');
+        for (final id in chunk) {
+          _authorActiveCache[id] = false;
+        }
+      }
+    }
+
+    for (final vendor in needLookup) {
+      final authorId = vendor.author?.toString() ?? '';
+      if (authorId.isNotEmpty && _authorActiveCache[authorId] == true) {
+        kept.add(vendor);
+      }
+    }
+    return kept;
   }
 
   static StreamSubscription? _nearestRestaurantGeoSub;
@@ -1054,8 +1140,9 @@ class FireStoreUtils {
             vendorList.add(vendorModel);
           }
         }
+        final activeVendors = await filterActiveVendors(vendorList);
         if (!(getNearestVendorController?.isClosed ?? true)) {
-          getNearestVendorController!.sink.add(List<VendorModel>.from(vendorList));
+          getNearestVendorController!.sink.add(List<VendorModel>.from(activeVendors));
         }
       });
 
@@ -1131,7 +1218,8 @@ class FireStoreUtils {
             vendorList.add(vendorModel);
           }
         }
-        getNearestVendorByCategoryController!.sink.add(vendorList);
+        final activeVendors = await filterActiveVendors(vendorList);
+        getNearestVendorByCategoryController!.sink.add(activeVendors);
       });
 
       yield* getNearestVendorByCategoryController!.stream;

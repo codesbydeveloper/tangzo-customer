@@ -16,6 +16,9 @@ class VendorModel {
   G? g;
   bool? hidephotos;
   bool? reststatus;
+  /// Owner account enabled in admin (`users.active` denormalized onto vendors).
+  /// When false, restaurant must not appear in customer lists.
+  bool? active;
   Filters? filters;
   AdminCommission? adminCommission;
   String? photo;
@@ -66,6 +69,7 @@ class VendorModel {
       this.g,
       this.hidephotos,
       this.reststatus,
+      this.active,
       this.filters,
       this.reviewsCount,
       this.photo,
@@ -118,6 +122,7 @@ class VendorModel {
     g = json['g'] != null ? G.fromJson(json['g']) : null;
     hidephotos = json['hidephotos'];
     reststatus = json['reststatus'];
+    active = json['active'];
     filters = json['filters'] != null ? Filters.fromJson(json['filters']) : null;
     reviewsCount = json['reviewsCount'] ?? 0.0;
     photo = json['photo'];
@@ -182,6 +187,9 @@ class VendorModel {
     }
     data['hidephotos'] = hidephotos;
     data['reststatus'] = reststatus;
+    if (active != null) {
+      data['active'] = active;
+    }
     if (filters != null) {
       data['filters'] = filters!.toJson();
     }

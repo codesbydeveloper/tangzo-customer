@@ -43,7 +43,7 @@ class FavouriteController extends GetxController {
       for (var element in favouriteList) {
         await FireStoreUtils.getVendorById(element.restaurantId.toString()).then(
           (value) async {
-            if (value != null) {
+            if (value != null && await FireStoreUtils.isVendorOwnerActive(value)) {
               if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) && value.subscriptionPlan != null) {
                 if (value.subscriptionTotalOrders == "-1") {
                   favouriteVendorData.add(value);

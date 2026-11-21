@@ -25,7 +25,7 @@ class PaymentListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX(
-        init: WalletController(),
+        init: Get.put(WalletController(), permanent: true),
         builder: (controller) {
           return Scaffold(
             appBar: AppBar(

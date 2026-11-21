@@ -22,7 +22,7 @@ class WalletScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeChange = Provider.of<DarkThemeProvider>(context);
     return GetX(
-        init: WalletController(),
+        init: Get.put(WalletController(), permanent: true),
         builder: (controller) {
           return Scaffold(
             backgroundColor: themeChange.getThem() ? AppThemeData.surfaceDark : AppThemeData.surface,
@@ -151,7 +151,9 @@ class WalletScreen extends StatelessWidget {
                                               color: AppThemeData.warning300,
                                               textColor: AppThemeData.grey900,
                                               onPress: () {
-                                                Get.to(const PaymentListScreen());
+                                                Get.to(const PaymentListScreen())?.then((_) {
+                                                  controller.refreshWallet(showLoader: false);
+                                                });
                                               },
                                             ),
                                           )
@@ -163,19 +165,33 @@ class WalletScreen extends StatelessWidget {
                               ],
                             ),
                             Expanded(
-                              child: controller.walletTransactionList.isEmpty
-                                  ? Constant.showEmptyView(message: "Transaction not found")
-                                  : Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      child: ListView.builder(
-                                        padding: EdgeInsets.zero,
-                                        itemCount: controller.walletTransactionList.length,
-                                        itemBuilder: (context, index) {
-                                          WalletTransactionModel walletTractionModel = controller.walletTransactionList[index];
-                                          return transactionCard(controller, themeChange, walletTractionModel);
-                                        },
+                              child: RefreshIndicator(
+                                onRefresh: () => controller.refreshWallet(showLoader: false),
+                                child: controller.walletTransactionList.isEmpty
+                                    ? ListView(
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context).size.height * 0.25,
+                                            child: Center(
+                                              child: Constant.showEmptyView(message: "Transaction not found"),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                        child: ListView.builder(
+                                          physics: const AlwaysScrollableScrollPhysics(),
+                                          padding: EdgeInsets.zero,
+                                          itemCount: controller.walletTransactionList.length,
+                                          itemBuilder: (context, index) {
+                                            WalletTransactionModel walletTractionModel = controller.walletTransactionList[index];
+                                            return transactionCard(controller, themeChange, walletTractionModel);
+                                          },
+                                        ),
                                       ),
-                                    ),
+                              ),
                             ),
                           ],
                         ),

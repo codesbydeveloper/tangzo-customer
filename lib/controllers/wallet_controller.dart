@@ -8,6 +8,7 @@ import 'package:customer/app/wallet_screen/wallet_screen.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controllers/cashfree_service_controller.dart';
+import 'package:customer/controllers/dash_board_controller.dart';
 import 'package:customer/controllers/instamojo_service_controller.dart';
 import 'package:customer/controllers/mtnmomo_controller.dart';
 import 'package:customer/controllers/paymongo_controller.dart';
@@ -56,7 +57,7 @@ import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class WalletController extends GetxController {
+class WalletController extends GetxController with WidgetsBindingObserver {
   RxBool isLoading = true.obs;
   RxBool isLoadingPayment = true.obs;
 
@@ -67,12 +68,72 @@ class WalletController extends GetxController {
   Rx<UserModel> userModel = UserModel().obs;
   RxString selectedPaymentMethod = "".obs;
 
+  Worker? _walletTabWorker;
+
   @override
   void onInit() {
-    // TODO: implement onInit
+    WidgetsBinding.instance.addObserver(this);
     getPaymentSettings();
     getWalletTransaction();
+    _bindWalletTabVisits();
     super.onInit();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Dashboard may register after wallet controller on first frame.
+    _bindWalletTabVisits();
+  }
+
+  @override
+  void onClose() {
+    _walletTabWorker?.dispose();
+    _walletTabWorker = null;
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshIfWalletVisible();
+    }
+  }
+
+  void _bindWalletTabVisits() {
+    if (!Get.isRegistered<DashBoardController>()) return;
+    final dash = Get.find<DashBoardController>();
+    _walletTabWorker?.dispose();
+    _walletTabWorker = ever<int>(dash.selectedIndex, (index) {
+      if (dash.isWalletTab(index)) {
+        refreshWallet(showLoader: false);
+      }
+    });
+  }
+
+  void _refreshIfWalletVisible() {
+    if (!Get.isRegistered<DashBoardController>()) {
+      refreshWallet(showLoader: false);
+      return;
+    }
+    final dash = Get.find<DashBoardController>();
+    if (dash.isWalletTab(dash.selectedIndex.value)) {
+      refreshWallet(showLoader: false);
+    }
+  }
+
+  /// Re-fetch balance + transactions (wallet tab stays mounted in IndexedStack).
+  Future<void> refreshWallet({bool showLoader = false}) async {
+    if (showLoader) {
+      isLoading.value = true;
+    }
+    await getWalletTransaction();
+  }
+
+  /// Call whenever user opens/visits the wallet screen (including re-tapping the tab).
+  Future<void> onWalletScreenVisited() async {
+    await refreshWallet(showLoader: false);
   }
 
   Rx<PayFastModel> payFastModel = PayFastModel().obs;
@@ -140,7 +201,7 @@ class WalletController extends GetxController {
       await FireStoreUtils.getWalletTransaction().then(
         (value) {
           if (value != null) {
-            walletTransactionList.value = value;
+            walletTransactionList.assignAll(value);
           }
         },
       );
@@ -148,6 +209,7 @@ class WalletController extends GetxController {
         (value) {
           if (value != null) {
             userModel.value = value;
+            Constant.userModel = value;
           }
         },
       );
