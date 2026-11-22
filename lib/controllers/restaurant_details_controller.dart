@@ -126,29 +126,18 @@ class RestaurantDetailsController extends GetxController {
     }
 
     final vendorId = vendorModel.value.id.toString();
+    // Always refresh when opening restaurant so newly published items are not
+    // stuck behind a stale Redis/disk menu cache (restaurant shows 2, customer 1).
     final value = await FireStoreUtils.getProductByVendorId(
       vendorId,
       menuVersion: vendorModel.value.menuVersion,
-      forceRefresh: forceRefresh,
+      forceRefresh: forceRefresh || !_productsLoaded,
     );
 
-    if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) &&
-        vendorModel.value.subscriptionPlan != null) {
-      if (vendorModel.value.subscriptionPlan?.itemLimit == '-1') {
-        allProductList.value = value;
-        productList.value = value;
-      } else {
-        int selectedProduct = value.length <
-                int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0')
-            ? (value.isEmpty ? 0 : (value.length))
-            : int.parse(vendorModel.value.subscriptionPlan?.itemLimit ?? '0');
-        allProductList.value = value.sublist(0, selectedProduct);
-        productList.value = value.sublist(0, selectedProduct);
-      }
-    } else {
-      allProductList.value = value;
-      productList.value = value;
-    }
+    // Show every published product. itemLimit is enforced when adding products
+    // in the restaurant app — hiding already-published items confuses owners.
+    allProductList.value = value;
+    productList.value = value;
 
     await _loadCategoriesForProducts();
     _productsLoaded = true;
@@ -171,8 +160,6 @@ class RestaurantDetailsController extends GetxController {
         .where((id) => id.isNotEmpty)
         .toSet();
 
-    if (uniqueIds.isEmpty) return;
-
     // Prefer session category cache (single published-categories fetch).
     final allCats = await FirestoreReadCache.getAllPublishedCategories();
     final byId = {for (final c in allCats) if (c.id != null) c.id!: c};
@@ -187,8 +174,24 @@ class RestaurantDetailsController extends GetxController {
       final single = await FireStoreUtils.getVendorCategoryById(id);
       if (single != null) {
         resolved.add(single);
+        continue;
+      }
+      // Keep products visible even if category doc is missing/unpublished.
+      resolved.add(VendorCategoryModel(id: id, title: "Menu"));
+    }
+
+    final hasOrphans = productList.any(
+      (p) => p.categoryID == null || p.categoryID!.trim().isEmpty,
+    );
+    if (hasOrphans) {
+      resolved.add(VendorCategoryModel(id: '__uncategorized__', title: "Menu"));
+      for (final p in productList) {
+        if (p.categoryID == null || p.categoryID!.trim().isEmpty) {
+          p.categoryID = '__uncategorized__';
+        }
       }
     }
+
     vendorCategoryList.assignAll(resolved);
   }
 

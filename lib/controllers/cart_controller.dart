@@ -731,7 +731,7 @@ class CartController extends GetxController {
     Map<String, dynamic> specialDiscountMap = {'special_discount': specialDiscountAmount.value, 'special_discount_label': specialDiscount.value, 'specialType': specialType.value};
 
     OrderModel orderModel = OrderModel();
-    orderModel.id = Constant.getUuid();
+    orderModel.id = Constant.getOrderId();
     orderModel.address = selectedAddress.value;
     orderModel.authorID = FireStoreUtils.getCurrentUid();
     orderModel.author = userModel.value;

@@ -361,6 +361,12 @@ class Constant {
     return const Uuid().v4();
   }
 
+  /// Numeric-only order / booking document id (no letters).
+  static String getOrderId() {
+    final rng = math.Random();
+    return '${DateTime.now().millisecondsSinceEpoch}${rng.nextInt(900) + 100}';
+  }
+
   static Widget loader() {
     return Center(
       child: CircularProgressIndicator(color: AppThemeData.primary300),

@@ -119,20 +119,8 @@ class SearchScreenController extends GetxController {
             vendorId,
             menuVersion: vendor.menuVersion,
           );
-          if ((Constant.isSubscriptionModelApplied == true || Constant.adminCommission?.isEnabled == true) &&
-              vendor.subscriptionPlan != null) {
-            if (vendor.subscriptionPlan?.itemLimit == '-1') {
-              productList.addAll(value);
-            } else {
-              int selectedProduct = value.length <
-                      int.parse(vendor.subscriptionPlan?.itemLimit ?? '0')
-                  ? (value.isEmpty ? 0 : (value.length))
-                  : int.parse(vendor.subscriptionPlan?.itemLimit ?? '0');
-              productList.addAll(value.sublist(0, selectedProduct));
-            }
-          } else {
-            productList.addAll(value);
-          }
+          // Show all published products (itemLimit is restaurant add-time only).
+          productList.addAll(value);
           _loadedVendorIds.add(vendorId);
         }));
         _filterProducts(text);

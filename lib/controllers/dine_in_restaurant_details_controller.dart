@@ -60,7 +60,7 @@ class DineInRestaurantDetailsController extends GetxController {
       return;
     } else {
       DineInBookingModel dineInBookingModel = DineInBookingModel(
-          id: Constant.getUuid(),
+          id: Constant.getOrderId(),
           author: Constant.userModel,
           authorID: FireStoreUtils.getCurrentUid(),
           createdAt: Timestamp.now(),
