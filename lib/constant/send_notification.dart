@@ -55,9 +55,9 @@ class SendNotification {
               'android': {
                 'priority': 'high',
                 'notification': {
-                  'channel_id': 'tangzo_order_alerts',
-                  'sound': 'default',
-                  'default_sound': true,
+                  'channel_id': 'tangzo_order_alerts_20s',
+                  'sound': 'order_bell',
+                  'default_sound': false,
                   'notification_priority': 'PRIORITY_MAX',
                 },
               },
