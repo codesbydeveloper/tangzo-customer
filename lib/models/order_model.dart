@@ -22,6 +22,10 @@ class OrderModel {
   List<TaxModel>? packagingTax;
   List<TaxModel>? platformTax;
   String? paymentMethod;
+  /// e.g. PAID / COD — set after gateway verification for online payments.
+  String? paymentStatus;
+  /// Gateway order / payment reference (e.g. Cashfree order_id).
+  String? paymentTransactionId;
   List<CartProductModel>? products;
   String? adminCommissionType;
   VendorModel? vendor;
@@ -59,6 +63,8 @@ class OrderModel {
       this.triggerDelivery,
       this.taxSetting,
       this.paymentMethod,
+      this.paymentStatus,
+      this.paymentTransactionId,
       this.products,
       this.adminCommissionType,
       this.vendor,
@@ -103,6 +109,8 @@ class OrderModel {
     createdAt = json['createdAt'];
     triggerDelivery = json['triggerDelevery'] ?? Timestamp.now();
     paymentMethod = json['payment_method'];
+    paymentStatus = json['paymentStatus']?.toString();
+    paymentTransactionId = json['paymentTransactionId']?.toString();
     if (json['products'] != null) {
       products = <CartProductModel>[];
       json['products'].forEach((v) {
@@ -173,6 +181,8 @@ class OrderModel {
     data['createdAt'] = createdAt;
     data['triggerDelivery'] = triggerDelivery;
     data['payment_method'] = paymentMethod;
+    data['paymentStatus'] = paymentStatus;
+    data['paymentTransactionId'] = paymentTransactionId;
     if (products != null) {
       data['products'] = products!.map((v) => v.toJson()).toList();
     }

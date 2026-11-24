@@ -743,6 +743,20 @@ class CartController extends GetxController {
     orderModel.discount = couponAmount.value;
     orderModel.couponId = selectedCouponModel.value.id;
     orderModel.paymentMethod = selectedPaymentMethod.value;
+    // Online Cashfree: never mark paid without a verified gateway order id.
+    if (selectedPaymentMethod.value == PaymentGateway.cashfree.name) {
+      if (verifiedCashfreeOrderId == null || verifiedCashfreeOrderId!.isEmpty) {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast("Payment not verified. Order was not placed.");
+        return;
+      }
+      orderModel.paymentStatus = "PAID";
+      orderModel.paymentTransactionId = verifiedCashfreeOrderId;
+    } else if (selectedPaymentMethod.value == PaymentGateway.cod.name) {
+      orderModel.paymentStatus = "COD";
+    } else if (selectedPaymentMethod.value == PaymentGateway.wallet.name) {
+      orderModel.paymentStatus = "PAID";
+    }
     orderModel.products = cartItem;
     orderModel.specialDiscount = specialDiscountMap;
     orderModel.couponCode = selectedCouponModel.value.code;
@@ -1620,24 +1634,35 @@ class CartController extends GetxController {
     }
   }
 
+  /// Last Cashfree order_id that passed Get Order == PAID (used when placing Tangzo order).
+  String? verifiedCashfreeOrderId;
+
   Future<void> cashFreeMakePayment({required BuildContext context, required String amount, required String paymentDesc}) async {
     ShowToastDialog.showLoader("Please wait");
+    verifiedCashfreeOrderId = null;
     final started = await CashfreeService().startCheckoutPayment(
       cashfree: cashfreeModel.value,
       userModel: userModel.value,
       amount: double.parse(double.parse(amount).toStringAsFixed(2)),
       paymentDesc: paymentDesc,
-      onSuccess: (orderId) {
+      onVerifying: () {
+        ShowToastDialog.showLoader("Verifying payment...");
+      },
+      onSuccess: (orderId) async {
+        // onSuccess is only invoked after Cashfree Get Order reports PAID.
+        verifiedCashfreeOrderId = orderId;
         ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Payment Successful!!");
-        placeOrder();
+        await placeOrder();
       },
       onError: (message) {
+        verifiedCashfreeOrderId = null;
         ShowToastDialog.closeLoader();
         ShowToastDialog.showToast(message);
       },
     );
     if (started) {
+      // Checkout UI is open; close create-order loader. Verify step shows its own loader via toast path.
       ShowToastDialog.closeLoader();
     }
   }

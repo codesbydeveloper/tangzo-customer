@@ -14,6 +14,22 @@ import 'package:http/http.dart' as http;
 class CashfreeService {
   final CFPaymentGatewayService _gateway = CFPaymentGatewayService();
 
+  String _ordersBaseUrl(Cashfree cashfree) {
+    return cashfree.isSandbox == true
+        ? "https://sandbox.cashfree.com/pg/orders"
+        : "https://api.cashfree.com/pg/orders";
+  }
+
+  Map<String, String> _authHeaders(Cashfree cashfree) {
+    return {
+      "x-client-id": cashfree.clientId ?? "",
+      "x-client-secret": cashfree.clientSecret ?? "",
+      "x-api-version": "2025-01-01",
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    };
+  }
+
   Future<Map<String, String>?> createOrder({
     required Cashfree cashfree,
     required UserModel userModel,
@@ -21,7 +37,7 @@ class CashfreeService {
     required String paymentDesc,
   }) async {
     try {
-      final baseUrl = cashfree.isSandbox == true ? "https://sandbox.cashfree.com/pg/orders" : "https://api.cashfree.com/pg/orders";
+      final baseUrl = _ordersBaseUrl(cashfree);
 
       String phone = (userModel.phoneNumber ?? "").replaceAll(RegExp(r'[^0-9]'), '');
       if (phone.isEmpty) phone = "9999999999";
@@ -34,13 +50,7 @@ class CashfreeService {
 
       final response = await http.post(
         Uri.parse(baseUrl),
-        headers: {
-          "x-client-id": cashfree.clientId ?? "",
-          "x-client-secret": cashfree.clientSecret ?? "",
-          "x-api-version": "2025-01-01",
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
+        headers: _authHeaders(cashfree),
         body: jsonEncode({
           "order_id": orderId,
           "order_amount": double.parse(amount.toStringAsFixed(2)),
@@ -71,8 +81,44 @@ class CashfreeService {
     }
   }
 
-  /// Opens Cashfree Web Checkout with all methods (UPI, card, net banking, wallet, etc.).
-  /// UPI apps open only after the user selects UPI inside checkout.
+  /// Confirms money actually captured. SDK success callback alone is NOT enough.
+  /// Returns true only when Cashfree reports order_status == PAID.
+  Future<bool> verifyOrderPaid({
+    required Cashfree cashfree,
+    required String orderId,
+    int maxAttempts = 6,
+  }) async {
+    if (orderId.trim().isEmpty) return false;
+    final url = "${_ordersBaseUrl(cashfree)}/${Uri.encodeComponent(orderId.trim())}";
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final response = await http.get(Uri.parse(url), headers: _authHeaders(cashfree));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final status = (data["order_status"] ?? "").toString().toUpperCase();
+          print("Cashfree verify attempt ${attempt + 1}: order=$orderId status=$status");
+          if (status == "PAID") return true;
+          // Terminal failure states — stop early.
+          if (status == "EXPIRED" ||
+              status == "TERMINATED" ||
+              status == "CANCELLED" ||
+              status == "FAILED") {
+            return false;
+          }
+        } else {
+          print("Cashfree verify HTTP ${response.statusCode}: ${response.body}");
+        }
+      } catch (e) {
+        print("Cashfree verifyOrderPaid error: $e");
+      }
+      // ACTIVE / PENDING may settle shortly after SDK callback.
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    return false;
+  }
+
+  /// Opens Cashfree Web Checkout. Calls [onSuccess] only after Get Order == PAID.
   Future<bool> startCheckoutPayment({
     required Cashfree cashfree,
     required UserModel userModel,
@@ -80,6 +126,7 @@ class CashfreeService {
     required String paymentDesc,
     required void Function(String orderId) onSuccess,
     required void Function(String message) onError,
+    void Function()? onVerifying,
   }) async {
     try {
       if ((cashfree.clientId ?? "").isEmpty || (cashfree.clientSecret ?? "").isEmpty) {
@@ -100,7 +147,20 @@ class CashfreeService {
       }
 
       _gateway.setCallback(
-        (String orderId) => onSuccess(orderId),
+        (String orderId) {
+          // SDK callback ≠ paid. Verify with Cashfree before fulfilling.
+          Future<void>(() async {
+            onVerifying?.call();
+            final paid = await verifyOrderPaid(cashfree: cashfree, orderId: orderId);
+            if (paid) {
+              onSuccess(orderId);
+            } else {
+              onError(
+                "Payment not confirmed by Cashfree. If money was deducted it will reflect after bank confirmation — please do not retry immediately.",
+              );
+            }
+          });
+        },
         (CFErrorResponse error, String orderId) => onError(error.getMessage() ?? "Payment failed"),
       );
 

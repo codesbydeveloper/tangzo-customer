@@ -923,6 +923,9 @@ class WalletController extends GetxController with WidgetsBindingObserver {
       userModel: userModel.value,
       amount: double.parse(double.parse(amount).toStringAsFixed(2)),
       paymentDesc: paymentDesc,
+      onVerifying: () {
+        ShowToastDialog.showLoader("Verifying payment...");
+      },
       onSuccess: (orderId) {
         ShowToastDialog.closeLoader();
         ShowToastDialog.showToast("Payment Successful!!");
