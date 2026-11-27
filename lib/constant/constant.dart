@@ -449,9 +449,14 @@ class Constant {
   }
 
   static Future<void> makePhoneCall(String phoneNumber) async {
+    final cleaned = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '').trim();
+    if (cleaned.isEmpty) {
+      ShowToastDialog.showToast("Phone number not available");
+      return;
+    }
     final Uri launchUri = Uri(
       scheme: 'tel',
-      path: phoneNumber,
+      path: cleaned,
     );
     await launchUrl(launchUri);
   }

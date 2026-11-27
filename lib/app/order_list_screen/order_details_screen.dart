@@ -452,13 +452,15 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                   ],
                                                                 )
                                                               : (controller.orderModel.value.driver != null ||
+                                                                      controller.orderModel.value.hasDeliveryPartnerToCall ||
                                                                       (controller.orderModel.value.isShiprocketPartner &&
                                                                           (controller.orderModel.value.shiprocket?.rider?.name ?? '').isNotEmpty))
                                                                   ? Row(
                                                                       children: [
                                                                         ClipOval(
                                                                           child: NetworkImageWidget(
-                                                                            imageUrl: controller.orderModel.value.author!.profilePictureURL.toString(),
+                                                                            imageUrl: controller.orderModel.value.driver?.profilePictureURL ??
+                                                                                controller.orderModel.value.author!.profilePictureURL.toString(),
                                                                             fit: BoxFit.cover,
                                                                             height: Responsive.height(5, context),
                                                                             width: Responsive.width(10, context),
@@ -472,11 +474,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                                             children: [
                                                                               TranslatedText(
-                                                                                controller.orderModel.value.isShiprocketPartner
-                                                                                    ? (controller.orderModel.value.shiprocket?.rider?.name ??
-                                                        controller.orderModel.value.driver?.fullName() ??
-                                                        'Delivery partner')
-                                                                                    : controller.orderModel.value.driver!.fullName().toString(),
+                                                                                controller.orderModel.value.deliveryPartnerDisplayName,
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
                                                                                   color: themeChange.getThem() ? AppThemeData.grey50 : AppThemeData.grey900,
@@ -490,7 +488,9 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                     ? (controller.orderModel.value.shiprocket?.currentStatus ??
                                                         controller.orderModel.value.shiprocket?.status ??
                                                         'Delivery partner')
-                                                                                    : controller.orderModel.value.driver!.email.toString(),
+                                                                                    : (controller.orderModel.value.driver?.email ??
+                                                        controller.orderModel.value.deliveryPartnerCallPhone ??
+                                                        ''),
                                                                                 textAlign: TextAlign.start,
                                                                                 style: TextStyle(
                                                                                   color: themeChange.getThem() ? AppThemeData.success400 : AppThemeData.success400,
@@ -502,14 +502,12 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                             ],
                                                                           ),
                                                                         ),
+                                                                        if (controller.orderModel.value.hasDeliveryPartnerToCall)
                                                                         InkWell(
                                                                           onTap: () {
-                                                                            final phone = (controller.orderModel.value.shiprocket?.rider?.phone ??
-                                                                    controller.orderModel.value.driver?.phoneNumber ??
-                                                                    '')
-                                                                .toString();
-                                                            if (phone.isEmpty) return;
-                                                            Constant.makePhoneCall(phone);
+                                                                            final phone = controller.orderModel.value.deliveryPartnerCallPhone ?? '';
+                                                                            if (phone.isEmpty) return;
+                                                                            Constant.makePhoneCall(phone);
                                                                           },
                                                                           child: Container(
                                                                             width: 42,
@@ -1626,8 +1624,8 @@ class _ShiprocketDeliveryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sr = order.shiprocket;
-    final riderName = sr?.rider?.name ?? order.driver?.fullName() ?? 'Delivery partner';
-    final riderPhone = sr?.rider?.phone ?? order.driver?.phoneNumber ?? '';
+    final riderName = order.deliveryPartnerDisplayName;
+    final riderPhone = order.deliveryPartnerCallPhone ?? '';
     final dropOtp = sr?.dropOtp ?? '';
     final trackUrl = sr?.trackingUrl;
     final statusLabel = sr?.currentStatus ?? sr?.status ?? 'Searching';

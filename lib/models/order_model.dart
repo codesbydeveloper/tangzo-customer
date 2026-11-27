@@ -97,6 +97,34 @@ class OrderModel {
     return p == 'shiprocket' || p == 'shiprocket_pending' || p.startsWith('shiprocket');
   }
 
+  /// Dialable phone for Tangzo / Shiprocket rider (customer → driver call).
+  String? get deliveryPartnerCallPhone {
+    final srPhone = shiprocket?.rider?.phone?.trim();
+    if (srPhone != null && srPhone.isNotEmpty) return srPhone;
+    final d = driver;
+    if (d == null) return null;
+    final phone = (d.phoneNumber ?? '').trim();
+    if (phone.isEmpty) return null;
+    if (phone.startsWith('+')) return phone;
+    final cc = (d.countryCode ?? '').trim();
+    if (cc.isEmpty) return phone;
+    return '$cc$phone';
+  }
+
+  String get deliveryPartnerDisplayName {
+    final srName = shiprocket?.rider?.name?.trim();
+    if (srName != null && srName.isNotEmpty) return srName;
+    final name = driver?.fullName().trim() ?? '';
+    if (name.isNotEmpty) return name;
+    if (isShiprocketPartner) return 'Shiprocket Rider';
+    return 'Delivery Partner';
+  }
+
+  bool get hasDeliveryPartnerToCall {
+    final phone = deliveryPartnerCallPhone;
+    return phone != null && phone.isNotEmpty;
+  }
+
   OrderModel.fromJson(Map<String, dynamic> json) {
     address = json['address'] != null ? ShippingAddress.fromJson(json['address']) : null;
     status = json['status'];
